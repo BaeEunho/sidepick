@@ -16,6 +16,8 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
 }
 
 .container {

@@ -14,6 +14,8 @@ body {
     overflow-x: hidden;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
 }
 
 /* Color Variables */
@@ -488,6 +490,10 @@ body {
     .container {
         padding: 0 15px;
     }
+    
+    .screen {
+        padding: 10px;
+    }
 
     .intro-text h2 {
         font-size: 2rem;
@@ -496,13 +502,25 @@ body {
     .intro-text .subtitle {
         font-size: 1.1rem;
     }
+    
+    .features {
+        margin-bottom: 2rem;
+    }
+    
+    .intro-text h2 {
+        margin-bottom: 1rem;
+    }
+    
+    .intro-text .subtitle {
+        margin-bottom: 2rem;
+    }
 
     .question-text {
         font-size: 1.5rem;
     }
 
     .question-content {
-        padding: 2rem 1.5rem;
+        padding: 1.5rem 1rem;
     }
 
     .result-content {
@@ -561,9 +579,11 @@ body {
     }
 }
 
-/* Smooth transitions */
+/* Smooth transitions - 모바일 최적화 */
 .screen {
-    transition: all 0.5s cubic-bezier(0.4, 0.0, 0.2, 1);
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
 }
 
 /* Focus styles for accessibility */

@@ -115,8 +115,8 @@ class ResultPage {
             indicator.style.background = '';
             indicator.classList.remove('left-side');
             
-            // 애니메이션 효과
-            setTimeout(() => {
+            // 애니메이션 효과 (모바일 최적화)
+            const applyStyles = () => {
                 if (isRightSide) {
                     // 오른쪽 성향 - 오른쪽부터 색칠
                     indicator.style.right = '0';
@@ -131,7 +131,15 @@ class ResultPage {
                 }
                 indicator.style.width = `${percentage}%`;
                 indicator.style.opacity = '1';
-            }, 500);
+                indicator.style.display = 'block';
+            };
+            
+            // 모바일에서는 즉시 표시, 데스크톱에서는 애니메이션
+            if (window.innerWidth <= 768) {
+                applyStyles();
+            } else {
+                setTimeout(applyStyles, 500);
+            }
         });
     }
 
