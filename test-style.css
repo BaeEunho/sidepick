@@ -155,7 +155,7 @@ body {
 
 /* Question Screen */
 #question-screen {
-    background: var(--gray-50);
+    background: transparent;
 }
 
 .progress-section {
@@ -295,7 +295,7 @@ body {
 
 /* Result Screen */
 #result-screen {
-    background: var(--gray-50);
+    background: transparent;
 }
 
 .result-content {
@@ -452,7 +452,7 @@ body {
 
 /* Loading Screen */
 #loading-screen {
-    background: var(--gray-50);
+    background: transparent;
 }
 
 .loading-content {

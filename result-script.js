@@ -117,26 +117,53 @@ class ResultPage {
             
             // 애니메이션 효과 (모바일 최적화)
             const applyStyles = () => {
+                // 강제로 모든 스타일 초기화
+                indicator.style.cssText = '';
+                indicator.className = 'scale-indicator';
+                
                 if (isRightSide) {
                     // 오른쪽 성향 - 오른쪽부터 색칠
-                    indicator.style.right = '0';
-                    indicator.style.left = 'auto';
-                    indicator.style.background = 'linear-gradient(135deg, #667eea, #764ba2)';
+                    indicator.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        left: auto;
+                        height: 100%;
+                        width: ${percentage}%;
+                        background: linear-gradient(135deg, #667eea, #764ba2);
+                        border-radius: 4px;
+                        opacity: 1;
+                        display: block;
+                        transition: none;
+                    `;
                 } else {
                     // 왼쪽 성향 - 왼쪽부터 색칠
-                    indicator.style.left = '0';
-                    indicator.style.right = 'auto';
-                    indicator.style.background = 'linear-gradient(135deg, #f093fb, #f5576c)';
+                    indicator.style.cssText = `
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: auto;
+                        height: 100%;
+                        width: ${percentage}%;
+                        background: linear-gradient(135deg, #f093fb, #f5576c);
+                        border-radius: 4px;
+                        opacity: 1;
+                        display: block;
+                        transition: none;
+                    `;
                     indicator.classList.add('left-side');
                 }
-                indicator.style.width = `${percentage}%`;
-                indicator.style.opacity = '1';
-                indicator.style.display = 'block';
+                
+                // 확실히 표시되도록 강제
+                indicator.setAttribute('data-percentage', percentage);
+                indicator.setAttribute('data-side', isRightSide ? 'right' : 'left');
             };
             
             // 모바일에서는 즉시 표시, 데스크톱에서는 애니메이션
             if (window.innerWidth <= 768) {
                 applyStyles();
+                // 추가 보험 - 100ms 후 다시 한번 적용
+                setTimeout(applyStyles, 100);
             } else {
                 setTimeout(applyStyles, 500);
             }
