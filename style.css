@@ -664,35 +664,52 @@ section {
     margin: 0;
 }
 
-/* Sticky CTA */
+/* Sticky CTA - 화면에 고정되어 따라다니는 버튼 */
 .sticky-cta {
     position: fixed !important;
     bottom: 20px !important;
     left: 50% !important;
     transform: translateX(-50%) !important;
-    z-index: 99999 !important;
+    z-index: 999999 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
     width: auto !important;
     height: auto !important;
-    max-width: none !important;
-    max-height: none !important;
+    background: none !important;
+    border: none !important;
 }
 
+.sticky-cta a,
 .sticky-cta .cta-btn {
     display: inline-block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 20px rgba(255, 107, 71, 0.8) !important;
-    background: linear-gradient(135deg, #ff6b47 0%, #ff8a65 100%) !important;
+    position: relative !important;
+    background: #ff6b47 !important;
     color: white !important;
-    font-weight: 600 !important;
+    font-weight: bold !important;
     text-decoration: none !important;
-    padding: 16px 32px !important;
+    padding: 18px 35px !important;
     border-radius: 50px !important;
-    font-size: 1.1rem !important;
+    font-size: 16px !important;
+    box-shadow: 0 8px 30px rgba(255, 107, 71, 0.8) !important;
+    border: 3px solid white !important;
+    cursor: pointer !important;
+    font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
+    line-height: 1.2 !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    min-width: 200px !important;
+}
+
+.sticky-cta a:hover,
+.sticky-cta .cta-btn:hover {
+    background: #e55a3b !important;
+    transform: translateY(-2px) !important;
 }
 
 
