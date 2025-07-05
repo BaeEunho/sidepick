@@ -667,40 +667,34 @@ section {
 /* Sticky CTA */
 .sticky-cta {
     position: fixed !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    width: 100% !important;
-    z-index: 9999 !important;
+    bottom: 20px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    z-index: 99999 !important;
     display: block !important;
     visibility: visible !important;
     opacity: 1 !important;
     pointer-events: auto !important;
-    text-align: center !important;
-    padding: 15px 20px !important;
-    background: rgba(255, 255, 255, 0.95) !important;
-    backdrop-filter: blur(10px) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.1) !important;
-    transform: none !important;
+    width: auto !important;
+    height: auto !important;
+    max-width: none !important;
+    max-height: none !important;
 }
 
 .sticky-cta .cta-btn {
     display: inline-block !important;
     visibility: visible !important;
     opacity: 1 !important;
-    box-shadow: 0 4px 20px rgba(255, 107, 71, 0.5);
+    box-shadow: 0 4px 20px rgba(255, 107, 71, 0.8) !important;
+    background: linear-gradient(135deg, #ff6b47 0%, #ff8a65 100%) !important;
+    color: white !important;
+    font-weight: 600 !important;
+    text-decoration: none !important;
+    padding: 16px 32px !important;
+    border-radius: 50px !important;
+    font-size: 1.1rem !important;
 }
 
-@keyframes slideUpFade {
-    from {
-        transform: translateX(-50%) translateY(100px);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-}
 
 /* Responsive Design */
 @media (max-width: 768px) {
