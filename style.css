@@ -671,8 +671,15 @@ section {
     left: 50%;
     transform: translateX(-50%);
     z-index: 1000;
-    display: block;
+    display: none;
     animation: slideUpFade 0.5s ease-out;
+}
+
+/* 모바일에서만 표시 */
+@media (max-width: 768px) {
+    .sticky-cta {
+        display: block;
+    }
 }
 
 @keyframes slideUpFade {

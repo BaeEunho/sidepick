@@ -226,6 +226,14 @@ body {
     position: absolute;
     top: 0;
     opacity: 0;
+    width: 0;
+}
+
+/* 모바일에서 그래프 즉시 표시 */
+@media (max-width: 768px) {
+    .scale-indicator {
+        transition: none;
+    }
 }
 
 .scale-indicator::after {
