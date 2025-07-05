@@ -11,10 +11,6 @@ body {
     color: #2c3e50;
     background-color: #ffffff;
     overflow-x: hidden;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    -webkit-transform: translateZ(0);
-    -webkit-backface-visibility: hidden;
 }
 
 .container {
@@ -664,52 +660,26 @@ section {
     margin: 0;
 }
 
-/* Sticky CTA - 화면에 고정되어 따라다니는 버튼 */
+/* Sticky CTA */
 .sticky-cta {
-    position: fixed !important;
-    bottom: 20px !important;
-    left: 50% !important;
-    transform: translateX(-50%) !important;
-    z-index: 999999 !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    pointer-events: auto !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: auto !important;
-    height: auto !important;
-    background: none !important;
-    border: none !important;
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    display: block;
+    animation: slideUpFade 0.5s ease-out;
 }
 
-.sticky-cta a,
-.sticky-cta .cta-btn {
-    display: inline-block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    position: relative !important;
-    background: #ff6b47 !important;
-    color: white !important;
-    font-weight: bold !important;
-    text-decoration: none !important;
-    padding: 18px 35px !important;
-    border-radius: 50px !important;
-    font-size: 16px !important;
-    box-shadow: 0 8px 30px rgba(255, 107, 71, 0.8) !important;
-    border: 3px solid white !important;
-    cursor: pointer !important;
-    font-family: -apple-system, BlinkMacSystemFont, sans-serif !important;
-    line-height: 1.2 !important;
-    text-align: center !important;
-    white-space: nowrap !important;
-    min-width: 200px !important;
-}
-
-.sticky-cta a:hover,
-.sticky-cta .cta-btn:hover {
-    background: #e55a3b !important;
-    transform: translateY(-2px) !important;
+@keyframes slideUpFade {
+    from {
+        transform: translateX(-50%) translateY(100px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
 }
 
 
