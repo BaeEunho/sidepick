@@ -12,6 +12,8 @@ body {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 /* Color Variables */
@@ -34,11 +36,9 @@ body {
 
 /* Screen Management */
 .screen {
-    position: fixed;
-    top: 0;
-    left: 0;
+    position: relative;
     width: 100%;
-    height: 100vh;
+    min-height: 100vh;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -46,6 +46,8 @@ body {
     visibility: hidden;
     transition: all 0.5s ease;
     z-index: 1;
+    padding: 20px;
+    box-sizing: border-box;
 }
 
 .screen.active {

@@ -13,6 +13,9 @@ body {
     min-height: 100vh;
     color: #333;
     line-height: 1.6;
+    overflow-x: hidden;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .container {
