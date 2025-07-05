@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NBFJXK8L');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>프로필 작성 - SidePick</title>
+    <meta name="description" content="매칭을 위한 프로필을 작성해주세요">
+    <link rel="stylesheet" href="profile-style.css">
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1><a href="index.html">SidePick</a></h1>
+            </div>
+            <div class="progress-info">
+                <span class="step">2/3 단계</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="main">
+        <div class="container">
+            <!-- 헤더 섹션 -->
+            <section class="intro-section">
+                <h1 class="main-title">매칭을 위한 프로필을 작성해주세요</h1>
+                <p class="sub-title">상대방이 당신을 더 잘 알 수 있도록 솔직하게 작성해주세요</p>
+                
+                <!-- 성향 요약 카드 -->
+                <div class="personality-summary" id="personality-summary">
+                    <div class="personality-badge">
+                        <span class="personality-code" id="user-personality-code">MPOS</span>
+                        <span class="personality-name" id="user-personality-name">시장 다원주의자</span>
+                    </div>
+                    <p class="personality-desc" id="user-personality-desc">경제적 자유와 사회적 다양성을 추구하는 성향</p>
+                </div>
+            </section>
+
+            <!-- 프로필 작성 폼 -->
+            <form id="profile-form" class="profile-form">
+                
+                <!-- 기본 정보 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">📋 기본 정보</h2>
+                    <div class="form-grid">
+                        <!-- 성별 -->
+                        <div class="form-group">
+                            <label class="form-label required">성별</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="gender" value="male" required>
+                                    <span class="radio-text">남성</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="gender" value="female" required>
+                                    <span class="radio-text">여성</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- 나이 -->
+                        <div class="form-group">
+                            <label class="form-label required">나이</label>
+                            <input type="number" name="age" class="form-input" placeholder="25" min="20" max="50" required>
+                            <div class="form-helper">만 나이를 입력해주세요</div>
+                        </div>
+
+                        <!-- 거주 지역 -->
+                        <div class="form-group">
+                            <label class="form-label required">거주 지역</label>
+                            <select name="location" class="form-select" required>
+                                <option value="">지역을 선택해주세요</option>
+                                <option value="서울">서울</option>
+                                <option value="경기">경기</option>
+                                <option value="인천">인천</option>
+                                <option value="부산">부산</option>
+                                <option value="대구">대구</option>
+                                <option value="광주">광주</option>
+                                <option value="대전">대전</option>
+                                <option value="울산">울산</option>
+                                <option value="강원">강원</option>
+                                <option value="충북">충북</option>
+                                <option value="충남">충남</option>
+                                <option value="전북">전북</option>
+                                <option value="전남">전남</option>
+                                <option value="경북">경북</option>
+                                <option value="경남">경남</option>
+                                <option value="제주">제주</option>
+                            </select>
+                        </div>
+
+                    </div>
+                </section>
+
+                <!-- 자기소개 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">📝 자기소개</h2>
+                    <div class="form-group">
+                        <label class="form-label required">자기소개</label>
+                        <textarea name="introduction" class="form-textarea" 
+                                placeholder="자신을 소개하는 글을 자유롭게 작성해주세요. (최소 50자, 최대 500자)" 
+                                minlength="50" maxlength="500" required></textarea>
+                        <div class="form-helper">
+                            취미, 관심사, 가치관, 일상 등을 포함해서 작성하면 더 좋은 매칭이 가능해요.
+                            <span class="char-count">0/500</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 매칭 선호도 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">🎯 매칭 선호도</h2>
+                    <div class="form-grid">
+                        <!-- 선호하는 나이 범위 -->
+                        <div class="form-group full-width">
+                            <label class="form-label required">선호하는 나이 범위</label>
+                            <div class="age-range-group">
+                                <input type="number" name="minAge" class="form-input" placeholder="23" min="20" max="50" required>
+                                <span class="range-separator">~</span>
+                                <input type="number" name="maxAge" class="form-input" placeholder="30" min="20" max="50" required>
+                                <span class="age-unit">세</span>
+                            </div>
+                            <div class="form-helper">원하는 상대방의 나이 범위를 설정해주세요</div>
+                        </div>
+
+                        <!-- 선호하는 거주 지역 -->
+                        <div class="form-group full-width">
+                            <label class="form-label required">선호하는 거주 지역</label>
+                            <div class="checkbox-grid" id="preferred-locations">
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="서울">
+                                    <span class="checkbox-text">서울</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="경기">
+                                    <span class="checkbox-text">경기</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="인천">
+                                    <span class="checkbox-text">인천</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="부산">
+                                    <span class="checkbox-text">부산</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="대구">
+                                    <span class="checkbox-text">대구</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="광주">
+                                    <span class="checkbox-text">광주</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="대전">
+                                    <span class="checkbox-text">대전</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="울산">
+                                    <span class="checkbox-text">울산</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="강원">
+                                    <span class="checkbox-text">강원</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="충북">
+                                    <span class="checkbox-text">충북</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="충남">
+                                    <span class="checkbox-text">충남</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="전북">
+                                    <span class="checkbox-text">전북</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="전남">
+                                    <span class="checkbox-text">전남</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="경북">
+                                    <span class="checkbox-text">경북</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="경남">
+                                    <span class="checkbox-text">경남</span>
+                                </label>
+                                <label class="checkbox-option">
+                                    <input type="checkbox" name="preferredLocation" value="제주">
+                                    <span class="checkbox-text">제주</span>
+                                </label>
+                                <label class="checkbox-option special">
+                                    <input type="checkbox" name="preferredLocation" value="지역 상관없음" id="location-any">
+                                    <span class="checkbox-text">지역 상관없음</span>
+                                </label>
+                            </div>
+                            <div class="form-helper">여러 개 선택 가능</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 관계 목적 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">🤝 관계 목적</h2>
+                    <div class="form-group">
+                        <label class="form-label required">어떤 관계를 원하시나요?</label>
+                        <div class="radio-group vertical">
+                            <label class="radio-option">
+                                <input type="radio" name="relationshipGoal" value="romance" required>
+                                <span class="radio-text">연애를 목적으로 한 만남</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="relationshipGoal" value="friendship" required>
+                                <span class="radio-text">친구로서 깊은 대화를 나눌 수 있는 관계</span>
+                            </label>
+                            <label class="radio-option">
+                                <input type="radio" name="relationshipGoal" value="open" required>
+                                <span class="radio-text">일단 만나보고 결정하고 싶어요</span>
+                            </label>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 연락처 정보 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">📱 연락처 정보</h2>
+                    <div class="form-grid">
+                        <!-- 실명 -->
+                        <div class="form-group">
+                            <label class="form-label required">실명 (매칭 성사 시에만 공개)</label>
+                            <input type="text" name="realName" class="form-input" placeholder="홍길동" required>
+                            <div class="form-helper">안전한 매칭을 위해 실명을 입력해주세요. 매칭이 성사되기 전까지는 공개되지 않습니다.</div>
+                        </div>
+
+                        <!-- 휴대폰 번호 -->
+                        <div class="form-group">
+                            <label class="form-label required">휴대폰 번호</label>
+                            <input type="tel" name="phoneNumber" class="form-input" placeholder="010-1234-5678" required>
+                            <div class="form-helper">본인 인증 및 매칭 알림을 위해 필요합니다.</div>
+                        </div>
+
+                        <!-- 별명 -->
+                        <div class="form-group">
+                            <label class="form-label required">별명 (닉네임)</label>
+                            <input type="text" name="nickname" class="form-input" placeholder="길동이" required>
+                            <div class="form-helper">프로필에 표시될 별명을 입력해주세요.</div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 프로필 사진 업로드 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">📸 프로필 사진</h2>
+                    <div class="form-group">
+                        <label class="form-label required">프로필 사진 (최소 1장, 최대 3장)</label>
+                        <div class="photo-upload-area" id="photo-upload-area">
+                            <div class="upload-placeholder">
+                                <div class="upload-icon">📷</div>
+                                <p>사진을 클릭하거나 드래그해서 업로드</p>
+                                <input type="file" id="photo-input" accept="image/*" multiple style="display: none;">
+                            </div>
+                            <div class="photo-preview-grid" id="photo-preview-grid"></div>
+                        </div>
+                        <div class="form-helper">얼굴이 잘 보이는 최근 사진을 업로드해주세요. 첫 번째 사진이 대표 사진이 됩니다.</div>
+                    </div>
+                </section>
+
+                <!-- 결제 안내 섹션 -->
+                <section class="form-section payment-section">
+                    <h2 class="section-title">💳 서비스 이용료</h2>
+                    <div class="pricing-card">
+                        <div class="pricing-header">
+                            <h3>매칭 서비스</h3>
+                            <div class="price">6,900원</div>
+                        </div>
+                        <div class="pricing-features">
+                            <div class="feature-item">✅ 성향 유사도 85% 이상인 3명 추천</div>
+                            <div class="feature-item">✅ 상대방 거절 시 남은 후보 중 재선택 가능</div>
+                            <div class="feature-item">✅ 3명 모두 거절 시 리매칭 1회 무료</div>
+                            <div class="feature-item">✅ 익명 오픈채팅방에서 안전한 대화</div>
+                        </div>
+                        <div class="payment-info">
+                            <h4>계좌이체로 결제</h4>
+                            <div class="account-info">
+                                <div class="account-row">
+                                    <span class="label">은행:</span>
+                                    <span class="value">신한은행</span>
+                                </div>
+                                <div class="account-row">
+                                    <span class="label">계좌번호:</span>
+                                    <span class="value">110-386-140132</span>
+                                    <button type="button" class="copy-btn" onclick="copyAccountNumber()">복사</button>
+                                </div>
+                                <div class="account-row">
+                                    <span class="label">예금주:</span>
+                                    <span class="value">배은호</span>
+                                </div>
+                            </div>
+                            <div class="payment-note">
+                                입금자명을 휴대폰 번호 뒷자리 4자리로 해주세요 (예: 1234)
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-footer">
+                        프로필 작성 완료 후 계좌이체로 결제하시면 입금 확인 후 24시간 내에 매칭 결과를 받아보실 수 있습니다.
+                    </div>
+                </section>
+
+                <!-- 이용약관 동의 섹션 -->
+                <section class="form-section">
+                    <h2 class="section-title">✅ 이용약관 동의</h2>
+                    <div class="agreement-group">
+                        <label class="agreement-item">
+                            <input type="checkbox" name="agreement" value="terms" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="agreement-text">SidePick 이용약관</span>
+                            <a href="terms.html" target="_blank" class="agreement-link">[보기]</a>
+                        </label>
+                        <label class="agreement-item">
+                            <input type="checkbox" name="agreement" value="privacy" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="agreement-text">개인정보 처리방침</span>
+                            <a href="privacy.html" target="_blank" class="agreement-link">[보기]</a>
+                        </label>
+                        <label class="agreement-item">
+                            <input type="checkbox" name="agreement" value="matching" required>
+                            <span class="checkbox-custom"></span>
+                            <span class="agreement-text">매칭 서비스 이용약관</span>
+                            <a href="matching-terms.html" target="_blank" class="agreement-link">[보기]</a>
+                        </label>
+                        <label class="agreement-item optional">
+                            <input type="checkbox" name="agreement" value="marketing">
+                            <span class="checkbox-custom"></span>
+                            <span class="agreement-text">마케팅 정보 수신 동의 (선택)</span>
+                        </label>
+                    </div>
+                </section>
+
+                <!-- 제출 버튼 -->
+                <section class="form-section">
+                    <div class="submit-buttons">
+                        <button type="submit" class="btn-primary" id="submit-profile">프로필 작성 완료 및 결제하기</button>
+                    </div>
+                </section>
+
+            </form>
+        </div>
+    </main>
+
+    <!-- JavaScript -->
+    <script src="result-data.js"></script>
+    <script src="profile-script.js"></script>
+</body>
+</html>

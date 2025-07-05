@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NBFJXK8L');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>모든 성향 결과 테스트 - SidePick</title>
+    <style>
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .personality-card {
+            background: white;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s;
+        }
+        .personality-card:hover {
+            transform: translateY(-2px);
+        }
+        .personality-code {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+        .personality-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .personality-desc {
+            color: #666;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+        .test-link {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+        .test-link:hover {
+            background: #5a6fd8;
+        }
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+        }
+        .back-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <a href="index.html" class="back-link">← 메인으로 돌아가기</a>
+            <a href="test.html" class="test-link">테스트 해보기</a>
+        </div>
+        
+        <h1>16가지 정치 성향 결과 테스트</h1>
+        <p style="text-align: center; color: #666; margin-bottom: 30px;">
+            각 성향별로 결과 페이지가 어떻게 다르게 표시되는지 확인해보세요.<br>
+            실제 테스트를 해보고 싶다면 위의 "테스트 해보기" 버튼을 클릭하세요.
+        </p>
+        
+        <div class="personality-grid" id="personality-grid">
+            <!-- JavaScript로 동적 생성 -->
+        </div>
+    </div>
+
+    <script src="result-data.js"></script>
+    <script>
+        // 16가지 성향 카드 생성
+        const personalityGrid = document.getElementById('personality-grid');
+        
+        Object.values(personalityResults).forEach(personality => {
+            const card = document.createElement('div');
+            card.className = 'personality-card';
+            
+            card.innerHTML = `
+                <div class="personality-code">${personality.code}</div>
+                <div class="personality-name">${personality.name}</div>
+                <div class="personality-desc">${personality.description.substring(0, 100)}...</div>
+                <a href="result.html?result=${personality.code}" class="test-link">결과 보기</a>
+            `;
+            
+            personalityGrid.appendChild(card);
+        });
+    </script>
+</body>
+</html>

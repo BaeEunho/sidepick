@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NBFJXK8L');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SidePick 정치 성향 테스트</title>
+    <link rel="stylesheet" href="test-style.css">
+</head>
+<body>
+    <!-- 테스트 시작 화면 -->
+    <div id="intro-screen" class="screen active">
+        <div class="container">
+            <div class="intro-content">
+                <div class="logo">
+                    <h1>SidePick</h1>
+                    <div class="logo-subtitle">정치 성향 테스트</div>
+                </div>
+                
+                <div class="intro-text">
+                    <h2>당신의 정치 성향을<br>분석해드려요</h2>
+                    <p class="subtitle">60개의 질문을 통해 당신과<br>가치관이 맞는 사람을 찾을 수 있습니다</p>
+                    
+                    <div class="features">
+                        <div class="feature-item">
+                            <span class="icon">💬</span>
+                            <span>정치 용어 없이 일상적인 질문들로 구성되어 있어요</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="icon">🎯</span>
+                            <span>솔직하게 답변할수록 더 정확한 결과를 얻을 수 있습니다</span>
+                        </div>
+                        <div class="feature-item">
+                            <span class="icon">⏱️</span>
+                            <span>소요 시간: 약 5-10분</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="start-test-btn" class="start-btn">테스트 시작하기</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 질문 화면 -->
+    <div id="question-screen" class="screen">
+        <div class="container">
+            <!-- 상단 진행률 -->
+            <div class="progress-section">
+                <div class="progress-info">
+                    <span id="current-question">1</span> / <span id="total-questions">60</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+            </div>
+
+            <!-- 질문 영역 -->
+            <div class="question-content">
+                <h2 id="question-text" class="question-text">
+                    회사가 어려울 때 정부가 지원하는 것이 필요하다고 생각해요
+                </h2>
+
+                <!-- 답변 옵션 -->
+                <div class="answer-options">
+                    <button class="answer-btn" data-value="1">
+                        <span class="answer-text">매우 반대해요</span>
+                        <span class="answer-value">1</span>
+                    </button>
+                    <button class="answer-btn" data-value="2">
+                        <span class="answer-text">반대해요</span>
+                        <span class="answer-value">2</span>
+                    </button>
+                    <button class="answer-btn neutral" data-value="3">
+                        <span class="answer-text">보통이에요</span>
+                        <span class="answer-value">3</span>
+                    </button>
+                    <button class="answer-btn" data-value="4">
+                        <span class="answer-text">찬성해요</span>
+                        <span class="answer-value">4</span>
+                    </button>
+                    <button class="answer-btn" data-value="5">
+                        <span class="answer-text">매우 찬성해요</span>
+                        <span class="answer-value">5</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- 하단 네비게이션 -->
+            <div class="navigation">
+                <button id="prev-btn" class="nav-btn secondary" disabled>이전</button>
+                <button id="next-btn" class="nav-btn primary" disabled>다음</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="result-screen" class="screen">
+        <div class="container">
+            <div class="result-content">
+                <div class="result-header">
+                    <h2>당신의 정치 성향은</h2>
+                    <div id="result-type" class="result-type">시장개방형</div>
+                    <div id="result-code" class="result-code">MPOS</div>
+                </div>
+
+                <div id="result-description" class="result-description">
+                    <p>당신은 시장 경제를 지지하면서도 사회적 진보를 추구하는 성향을 가지고 있습니다. 
+                    자유로운 경제 활동을 중요하게 생각하지만, 동시에 사회적 다양성과 개방성을 지지합니다.</p>
+                </div>
+
+                <!-- 점수 차트 -->
+                <div class="score-chart">
+                    <h3>상세 점수</h3>
+                    <div class="chart-container">
+                        <div class="chart-item">
+                            <div class="chart-label">
+                                <span class="label-left">정부개입</span>
+                                <span class="label-right">시장경제</span>
+                            </div>
+                            <div class="chart-bar">
+                                <div id="economic-bar" class="chart-fill" style="width: 70%; margin-left: 50%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-label">
+                                <span class="label-left">보수사회</span>
+                                <span class="label-right">진보사회</span>
+                            </div>
+                            <div class="chart-bar">
+                                <div id="social-bar" class="chart-fill" style="width: 60%; margin-left: 50%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-label">
+                                <span class="label-left">전통문화</span>
+                                <span class="label-right">개방문화</span>
+                            </div>
+                            <div class="chart-bar">
+                                <div id="culture-bar" class="chart-fill" style="width: 80%; margin-left: 50%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-label">
+                                <span class="label-left">전문가주도</span>
+                                <span class="label-right">시민참여</span>
+                            </div>
+                            <div class="chart-bar">
+                                <div id="participation-bar" class="chart-fill" style="width: 65%; margin-left: 50%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA 버튼들 -->
+                <div class="result-actions">
+                    <button id="get-matching-btn" class="cta-btn primary large">
+                        매칭 받기 (6,900원)
+                    </button>
+                    <button id="save-result-btn" class="cta-btn secondary">
+                        결과만 저장하기
+                    </button>
+                    <button id="share-result-btn" class="cta-btn tertiary">
+                        결과 공유하기
+                    </button>
+                </div>
+
+                <!-- 다시 테스트하기 -->
+                <div class="restart-section">
+                    <button id="restart-test-btn" class="restart-btn">
+                        다시 테스트하기
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 로딩 화면 -->
+    <div id="loading-screen" class="screen">
+        <div class="container">
+            <div class="loading-content">
+                <div class="loading-spinner"></div>
+                <h2>결과를 분석하고 있어요...</h2>
+                <p>잠시만 기다려주세요</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript 파일들 -->
+    <script src="questions.js"></script>
+    <script src="results.js"></script>
+    <script src="result-data.js"></script>
+    <script src="test-script.js"></script>
+</body>
+</html>
