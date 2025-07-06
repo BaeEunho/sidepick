@@ -377,13 +377,17 @@ class ResultPage {
             }
         });
 
-        modalContent.querySelector('#close-btn').addEventListener('click', () => {
-            document.body.removeChild(modal);
-        });
+        const closeModal = () => {
+            if (document.body.contains(modal)) {
+                document.body.removeChild(modal);
+            }
+        };
+
+        modalContent.querySelector('#close-btn').addEventListener('click', closeModal);
 
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
-                document.body.removeChild(modal);
+                closeModal();
             }
         });
     }
@@ -459,7 +463,7 @@ function clearStorageAndRedirect(url) {
 
 // 친구 테스트 링크 복사
 function copyTestLink() {
-    const testUrl = `${window.location.origin}${window.location.pathname.replace('result.html', 'test.html')}`;
+    const testUrl = `${window.location.origin}${window.location.pathname.replace('result.html', 'index.html')}`;
     const shareText = `🧭 SidePick에서 나의 정치 성향을 알아봤어요!\n\n당신도 테스트해보세요: ${testUrl}`;
     
     if (navigator.clipboard && navigator.clipboard.writeText) {
