@@ -297,8 +297,11 @@ class ResultPage {
 
         if (navigator.share) {
             navigator.share(shareData).catch(err => {
-                console.log('공유 실패:', err);
-                this.fallbackShare(shareData);
+                console.log('공유 에러:', err);
+                // 사용자가 공유를 취소한 경우(AbortError)는 아무것도 하지 않음
+                if (err.name !== 'AbortError') {
+                    this.fallbackShare(shareData);
+                }
             });
         } else {
             this.fallbackShare(shareData);
