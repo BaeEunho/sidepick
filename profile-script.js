@@ -482,6 +482,9 @@ class ProfileForm {
             submitButton.disabled = true;
             submitButton.textContent = '제출 중...';
 
+            // 결제 중 팝업 표시
+            showPaymentProcessingPopup();
+
             console.log('폼 데이터 수집 시작');
             const formData = this.collectFormData();
             console.log('폼 데이터 수집 완료:', formData);
@@ -503,6 +506,7 @@ class ProfileForm {
         } catch (error) {
             console.error('프로필 등록 오류:', error);
             this.showNotification('프로필 등록 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
+            hidePaymentProcessingPopup();
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = originalText;
@@ -1650,6 +1654,72 @@ function copyAccountNumber() {
     } else {
         profileForm.fallbackCopy(accountNumber);
         profileForm.showNotification('계좌번호가 복사되었습니다!');
+    }
+}
+
+// 결제 중 팝업 표시 함수들
+function showPaymentProcessingPopup() {
+    // 기존 팝업 제거
+    hidePaymentProcessingPopup();
+    
+    // 팝업 생성
+    const popup = document.createElement('div');
+    popup.id = 'payment-processing-popup';
+    popup.className = 'payment-processing-popup';
+    popup.innerHTML = `
+        <div class="popup-overlay"></div>
+        <div class="popup-content">
+            <div class="popup-header">
+                <h3>결제 처리 중</h3>
+            </div>
+            <div class="popup-body">
+                <div class="loading-spinner"></div>
+                <p>결제 정보를 처리하고 있습니다.</p>
+                <p class="info-text">잠시만 기다려주세요...</p>
+                <p class="loading-message" id="loading-message">데이터를 저장하고 있습니다.</p>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(popup);
+    
+    // 로딩 메시지 변경
+    startLoadingMessages();
+}
+
+// 결제 중 팝업 숨김
+function hidePaymentProcessingPopup() {
+    const popup = document.getElementById('payment-processing-popup');
+    if (popup) {
+        popup.remove();
+    }
+    
+    // 로딩 메시지 인터벌 정리
+    if (window.loadingInterval) {
+        clearInterval(window.loadingInterval);
+        window.loadingInterval = null;
+    }
+}
+
+// 로딩 메시지 변경
+function startLoadingMessages() {
+    const messages = [
+        "데이터를 저장하고 있습니다.",
+        "프로필 정보를 처리하고 있습니다.",
+        "서버와 연결하고 있습니다.",
+        "거의 완료되었습니다."
+    ];
+    
+    let currentIndex = 0;
+    const loadingElement = document.getElementById('loading-message');
+    
+    if (loadingElement) {
+        window.loadingInterval = setInterval(() => {
+            currentIndex = (currentIndex + 1) % messages.length;
+            if (loadingElement) {
+                loadingElement.textContent = messages[currentIndex];
+            }
+        }, 1500);
     }
 }
 
