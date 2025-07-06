@@ -114,6 +114,24 @@ class ResultPage {
             indicator.style.right = '';
             indicator.style.background = '';
             indicator.classList.remove('left-side');
+
+            // 레이블 볼드 처리 (강한 성향 쪽을 볼드로)
+            const axisScale = scaleBar.parentElement;
+            const leftLabel = axisScale.querySelector('.scale-left');
+            const rightLabel = axisScale.querySelector('.scale-right');
+            
+            if (leftLabel && rightLabel) {
+                // 기존 볼드 제거
+                leftLabel.style.fontWeight = '';
+                rightLabel.style.fontWeight = '';
+                
+                // 강한 성향 쪽을 볼드로
+                if (isRightSide) {
+                    rightLabel.style.fontWeight = 'bold';
+                } else {
+                    leftLabel.style.fontWeight = 'bold';
+                }
+            }
             
             // 애니메이션 효과 (모바일 최적화)
             const applyStyles = () => {

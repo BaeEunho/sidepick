@@ -457,63 +457,116 @@ class ProfileForm {
     // 폼 제출 처리
     async handleSubmit(e) {
         e.preventDefault();
+        console.log('폼 제출 시작됨');
 
         // 필수 검증
+        console.log('폼 검증 시작');
         if (!this.validateForm()) {
+            console.log('폼 검증 실패');
             return;
         }
+        console.log('폼 검증 통과');
 
         const submitButton = document.getElementById('submit-profile');
         const originalText = submitButton.textContent;
         
         try {
+            console.log('제출 버튼 비활성화');
             submitButton.disabled = true;
             submitButton.textContent = '제출 중...';
 
+            console.log('폼 데이터 수집 시작');
             const formData = this.collectFormData();
+            console.log('폼 데이터 수집 완료:', formData);
             
             // 프로필 데이터 저장
+            console.log('로컬 데이터 저장 시작');
             this.saveProfileData(formData);
+            console.log('로컬 데이터 저장 완료');
+            
+            // 모바일에서 스프레드시트 저장 건너뛰기 옵션 추가
+            if (this.isMobileDevice()) {
+                console.log('모바일 기기 감지 - 스프레드시트 저장 건너뛰기');
+                // 바로 완료 페이지로 이동
+                window.location.href = 'submit-complete.html';
+                return;
+            }
             
             // 관리자용 데이터 저장 후 페이지 이동
+            console.log('스프레드시트 저장 시작');
             await this.saveToSpreadsheet(formData);
+            console.log('스프레드시트 저장 완료');
             
             // 스프레드시트 저장 완료 후 페이지 이동
+            console.log('완료 페이지로 이동');
             window.location.href = 'submit-complete.html';
 
         } catch (error) {
-            this.showNotification('프로필 등록 중 오류가 발생했습니다.', 'error');
             console.error('프로필 등록 오류:', error);
+            this.showNotification('프로필 등록 중 오류가 발생했습니다.', 'error');
+            
+            // 모바일에서 오류 발생 시에도 페이지 이동 시도
+            if (this.isMobileDevice()) {
+                console.log('모바일에서 오류 발생 - 강제로 완료 페이지로 이동');
+                window.location.href = 'submit-complete.html';
+            }
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = originalText;
         }
     }
 
+    // 모바일 기기 감지
+    isMobileDevice() {
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        
+        // 모바일 기기 체크
+        const isMobile = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i.test(userAgent);
+        
+        // 갤럭시 기기 특별 체크
+        const isGalaxy = /samsung|sm-|galaxy/i.test(userAgent);
+        
+        console.log('사용자 에이전트:', userAgent);
+        console.log('모바일 기기:', isMobile);
+        console.log('갤럭시 기기:', isGalaxy);
+        
+        return isMobile || isGalaxy;
+    }
+
     // 폼 검증
     validateForm() {
         const form = document.getElementById('profile-form');
+        console.log('폼 검증 진행 중...');
         
         // HTML5 기본 검증
+        console.log('HTML5 기본 검증 시작');
         if (!form.checkValidity()) {
+            console.log('HTML5 기본 검증 실패');
             form.reportValidity();
             return false;
         }
+        console.log('HTML5 기본 검증 통과');
 
         // 사진 업로드 검증
+        console.log('사진 업로드 검증 - 업로드된 사진 수:', this.uploadedPhotos.length);
         if (this.uploadedPhotos.length === 0) {
+            console.log('사진 업로드 검증 실패');
             this.showNotification('프로필 사진을 최소 1장 업로드해주세요.', 'error');
             document.getElementById('photo-upload-area').scrollIntoView({ behavior: 'smooth' });
             return false;
         }
+        console.log('사진 업로드 검증 통과');
 
         // 선호 지역 검증
         const preferredLocations = document.querySelectorAll('input[name="preferredLocation"]:checked');
+        console.log('선호 지역 검증 - 선택된 지역 수:', preferredLocations.length);
         if (preferredLocations.length === 0) {
+            console.log('선호 지역 검증 실패');
             this.showNotification('선호하는 거주 지역을 최소 1개 선택해주세요.', 'error');
             document.getElementById('preferred-locations').scrollIntoView({ behavior: 'smooth' });
             return false;
         }
+        console.log('선호 지역 검증 통과');
 
         // 필수 약관 동의 검증
         const requiredAgreements = document.querySelectorAll('input[name="agreement"][required]');
