@@ -268,6 +268,15 @@ class ResultPage {
         if (shareResultBtn) {
             shareResultBtn.addEventListener('click', () => this.shareResult());
         }
+
+        // 친구도 테스트해보기 버튼
+        const copyTestLinkBtn = document.getElementById('copy-test-link-btn');
+        if (copyTestLinkBtn) {
+            copyTestLinkBtn.addEventListener('click', () => {
+                console.log('친구도 테스트해보기 버튼 클릭됨');
+                copyTestLink();
+            });
+        }
     }
 
     // 매칭 서비스 이동
@@ -463,22 +472,32 @@ function clearStorageAndRedirect(url) {
 
 // 친구 테스트 링크 복사
 function copyTestLink() {
+    console.log('copyTestLink 함수 호출됨');
+    
     const testUrl = `${window.location.origin}${window.location.pathname.replace('result.html', 'index.html')}`;
     const shareText = `🧭 SidePick에서 나의 정치 성향을 알아봤어요!\n\n당신도 테스트해보세요: ${testUrl}`;
     
+    console.log('생성된 URL:', testUrl);
+    console.log('공유 텍스트:', shareText);
+    console.log('navigator.clipboard 지원 여부:', navigator.clipboard && navigator.clipboard.writeText);
+    
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(shareText).then(() => {
-            showNotification('테스트 링크가 클립보드에 복사되었습니다!');
-        }).catch(() => {
+            console.log('클립보드 복사 성공');
+            showCopySuccessPopup();
+        }).catch((error) => {
+            console.log('클립보드 복사 실패:', error);
             fallbackCopyMethod(shareText);
         });
     } else {
+        console.log('fallbackCopyMethod 호출');
         fallbackCopyMethod(shareText);
     }
 }
 
 // 복사 대체 방법
 function fallbackCopyMethod(text) {
+    console.log('fallbackCopyMethod 실행');
     // 임시 텍스트 영역 생성
     const textArea = document.createElement('textarea');
     textArea.value = text;
@@ -488,22 +507,132 @@ function fallbackCopyMethod(text) {
     textArea.select();
     
     try {
-        document.execCommand('copy');
-        showNotification('테스트 링크가 클립보드에 복사되었습니다!');
+        const successful = document.execCommand('copy');
+        console.log('document.execCommand 결과:', successful);
+        showCopySuccessPopup();
     } catch (e) {
+        console.log('document.execCommand 오류:', e);
         showNotification('복사에 실패했습니다. 링크를 수동으로 복사해주세요.');
     }
     
     document.body.removeChild(textArea);
 }
 
+// 복사 성공 팝업 표시
+function showCopySuccessPopup() {
+    // 현재 스크롤 위치 가져오기
+    const scrollY = window.scrollY;
+    const scrollX = window.scrollX;
+    const viewportHeight = window.innerHeight;
+    const viewportWidth = window.innerWidth;
+
+    const popup = document.createElement('div');
+    popup.style.cssText = `
+        position: absolute;
+        top: ${scrollY}px;
+        left: ${scrollX}px;
+        width: ${viewportWidth}px;
+        height: ${viewportHeight}px;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        animation: fadeIn 0.3s ease-out;
+    `;
+
+    const popupContent = document.createElement('div');
+    popupContent.style.cssText = `
+        background: white;
+        padding: 2rem;
+        border-radius: 20px;
+        text-align: center;
+        max-width: 400px;
+        width: 90%;
+        margin: 1rem;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        animation: slideUp 0.3s ease-out;
+        position: relative;
+    `;
+
+    popupContent.innerHTML = `
+        <div style="font-size: 3rem; margin-bottom: 1rem;">✅</div>
+        <h3 style="margin-bottom: 1rem; color: #28a745; font-size: 1.2rem;">복사 완료!</h3>
+        <p style="margin-bottom: 1.5rem; color: #666; line-height: 1.5;">
+            친구들에게 공유할 테스트 링크가<br>
+            클립보드에 복사되었습니다!
+        </p>
+        <button id="popup-close-btn" style="
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            border-radius: 25px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        ">확인</button>
+    `;
+
+    // CSS 애니메이션 추가
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+
+    popup.appendChild(popupContent);
+    document.body.appendChild(popup);
+
+    // 닫기 기능
+    const closePopup = () => {
+        popup.style.animation = 'fadeOut 0.3s ease-out forwards';
+        setTimeout(() => {
+            if (document.body.contains(popup)) {
+                document.body.removeChild(popup);
+            }
+            if (document.head.contains(style)) {
+                document.head.removeChild(style);
+            }
+        }, 300);
+    };
+
+    // CSS에 fadeOut 애니메이션 추가
+    style.textContent += `
+        @keyframes fadeOut {
+            from { opacity: 1; }
+            to { opacity: 0; }
+        }
+    `;
+
+    // 이벤트 리스너
+    popupContent.querySelector('#popup-close-btn').addEventListener('click', closePopup);
+    popup.addEventListener('click', (e) => {
+        if (e.target === popup) {
+            closePopup();
+        }
+    });
+
+    // 자동으로 3초 후 닫기
+    setTimeout(closePopup, 3000);
+}
+
 // 알림 표시 함수 (기존 함수 재사용)
 function showNotification(message) {
+    console.log('showNotification 호출:', message);
     const notification = document.createElement('div');
     notification.style.cssText = `
         position: fixed;
         top: 20px;
-        right: 20px;
+        left: 50%;
+        transform: translateX(-50%);
         background: #28a745;
         color: white;
         padding: 1rem 1.5rem;
@@ -511,9 +640,13 @@ function showNotification(message) {
         z-index: 10000;
         font-weight: 500;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        text-align: center;
+        max-width: 90%;
+        font-size: 14px;
     `;
     notification.textContent = message;
     document.body.appendChild(notification);
+    console.log('알림 DOM 추가됨');
 
     setTimeout(() => {
         notification.style.opacity = '0';
