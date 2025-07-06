@@ -69,20 +69,13 @@ class ProfileForm {
 
     // 이벤트 리스너 설정
     setupEventListeners() {
-        // 폼 제출
-        document.getElementById('profile-form').addEventListener('submit', (e) => this.handleSubmit(e));
-        
-        // 모바일에서 버튼 클릭 문제 해결을 위한 추가 이벤트 리스너
-        const submitButton = document.getElementById('submit-profile');
-        if (submitButton) {
-            // 클릭 이벤트 직접 처리 (폼 제출 차단하고 수동 처리)
-            submitButton.addEventListener('click', (e) => {
-                console.log('버튼 클릭 이벤트 발생');
-                // 폼의 기본 제출을 막고 수동으로 처리
-                if (e.target.form) {
-                    e.preventDefault();
-                    this.handleSubmit(e);
-                }
+        // 폼 제출 이벤트만 사용 (클릭 이벤트 제거)
+        const form = document.getElementById('profile-form');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                console.log('폼 제출 이벤트 발생');
+                e.preventDefault(); // 기본 폼 제출 방지
+                this.handleSubmit(e);
             });
         }
         
@@ -498,14 +491,6 @@ class ProfileForm {
             this.saveProfileData(formData);
             console.log('로컬 데이터 저장 완료');
             
-            // 모바일에서 스프레드시트 저장 건너뛰기 옵션 추가
-            if (this.isMobileDevice()) {
-                console.log('모바일 기기 감지 - 스프레드시트 저장 건너뛰기');
-                // 바로 완료 페이지로 이동
-                window.location.href = 'submit-complete.html';
-                return;
-            }
-            
             // 관리자용 데이터 저장 후 페이지 이동
             console.log('스프레드시트 저장 시작');
             await this.saveToSpreadsheet(formData);
@@ -517,13 +502,7 @@ class ProfileForm {
 
         } catch (error) {
             console.error('프로필 등록 오류:', error);
-            this.showNotification('프로필 등록 중 오류가 발생했습니다.', 'error');
-            
-            // 모바일에서 오류 발생 시에도 페이지 이동 시도
-            if (this.isMobileDevice()) {
-                console.log('모바일에서 오류 발생 - 강제로 완료 페이지로 이동');
-                window.location.href = 'submit-complete.html';
-            }
+            this.showNotification('프로필 등록 중 오류가 발생했습니다. 다시 시도해주세요.', 'error');
         } finally {
             submitButton.disabled = false;
             submitButton.textContent = originalText;
