@@ -75,19 +75,14 @@ class ProfileForm {
         // 모바일에서 버튼 클릭 문제 해결을 위한 추가 이벤트 리스너
         const submitButton = document.getElementById('submit-profile');
         if (submitButton) {
-            // 클릭 이벤트 직접 처리
+            // 클릭 이벤트 직접 처리 (폼 제출 차단하고 수동 처리)
             submitButton.addEventListener('click', (e) => {
                 console.log('버튼 클릭 이벤트 발생');
-                e.preventDefault();
-                this.handleSubmit(e);
-            });
-            
-            // 터치 이벤트 처리 (모바일 전용)
-            submitButton.addEventListener('touchend', (e) => {
-                console.log('버튼 터치엔드 이벤트 발생');
-                e.preventDefault();
-                e.stopPropagation();
-                this.handleSubmit(e);
+                // 폼의 기본 제출을 막고 수동으로 처리
+                if (e.target.form) {
+                    e.preventDefault();
+                    this.handleSubmit(e);
+                }
             });
         }
         
