@@ -537,6 +537,17 @@ body {
     cursor: pointer;
     transition: all 0.3s ease;
     min-width: 200px;
+    /* 모바일 터치 이벤트 개선 */
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    touch-action: manipulation;
+    /* 클릭 지연 제거 */
+    -webkit-tap-highlight-color: rgba(0,0,0,0);
+    outline: none;
 }
 
 .btn-primary {
@@ -545,9 +556,16 @@ body {
     box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.btn-primary:hover:not(:disabled) {
+.btn-primary:hover:not(:disabled),
+.btn-primary:active:not(:disabled) {
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
+}
+
+/* 모바일 터치 피드백 */
+.btn-primary:active {
+    transform: translateY(0px);
+    box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
 }
 
 .btn-primary:disabled {
