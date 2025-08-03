@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로그인 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth-styles.css">
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    <script src="kakao-auth.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 로그인 섹션 -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>로그인</h1>
+                <p class="auth-subtitle">나와 통하는 사람을 만날 시간</p>
+
+                <!-- 카카오 로그인 버튼 -->
+                <button type="button" class="kakao-login-btn" onclick="kakaoLogin()">
+                    <svg viewBox="0 0 300 45" style="height: 45px;">
+                        <rect width="300" height="45" rx="12" fill="#FEE500"/>
+                        <text x="150" y="28" font-family="Arial, sans-serif" font-size="16" font-weight="500" text-anchor="middle" fill="#000000">
+                            카카오 로그인
+                        </text>
+                        <path d="M 40 13 c -6.627 0 -12 4.373 -12 9.764 c 0 3.413 2.156 6.416 5.413 8.157 l -1.357 4.977 a 0.396 0.396 0 0 0 0.608 0.433 l 5.344 -3.524 c 0.641 0.089 1.304 0.137 1.992 0.137 c 6.627 0 12 -4.373 12 -9.764 S 46.627 13 40 13" fill="#000000" opacity="0.9"/>
+                    </svg>
+                </button>
+
+                <div class="divider">
+                    <span>또는</span>
+                </div>
+
+                <form class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>로그인 상태 유지</span>
+                        </label>
+                        <a href="#" class="forgot-link">비밀번호 찾기</a>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn">로그인</button>
+                </form>
+
+
+                <div class="auth-footer">
+                    <p>아직 회원이 아니신가요? <a href="signup.html">회원가입</a></p>
+                    <p class="login-benefit">로그인 후 정치 성향 테스트와 매칭 서비스를 이용하실 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            // 데모용 로그인 처리
+            const email = document.getElementById('email').value;
+            
+            // 데모용 사용자 프로필 (실제로는 서버에서 가져와야 함)
+            const demoProfile = {
+                name: '홍길동',
+                email: email,
+                phone: '010-1234-5678',
+                birthdate: '1995-01-01',
+                gender: 'male'
+            };
+            
+            // 로그인 상태 저장
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userProfile', JSON.stringify(demoProfile));
+            sessionStorage.setItem('userGender', demoProfile.gender);
+            
+            // 테스트 완료 여부 확인 (데모에서는 랜덤)
+            const hasTest = Math.random() > 0.5;
+            if (hasTest) {
+                // 테스트 완료한 사용자 (데모용)
+                sessionStorage.setItem('hasCompletedTest', 'true');
+                sessionStorage.setItem('userType', JSON.stringify({
+                    code: 'MPOS',
+                    title: '시장 다원주의자',
+                    orientation: 'progressive'
+                }));
+                alert('로그인되었습니다.');
+                window.location.href = 'index.html';
+            } else {
+                alert('로그인되었습니다. 정치 성향 테스트를 진행해주세요.');
+                window.location.href = 'political-test.html';
+            }
+        }
+    </script>
+</body>
+</html>

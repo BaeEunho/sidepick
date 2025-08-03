@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auth Flow Test - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth-check.js"></script>
+    <style>
+        .test-container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            margin-bottom: 15px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .test-btn {
+            padding: 10px 20px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .test-btn:hover {
+            background: #4338CA;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        .error {
+            color: red;
+        }
+        .success {
+            color: green;
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>Authentication Flow Test</h1>
+        
+        <div class="test-section">
+            <h2>1. Current User State</h2>
+            <div id="userStateDisplay" class="status"></div>
+            <div class="button-group">
+                <button class="test-btn" onclick="checkUserState()">Check User State</button>
+                <button class="test-btn" onclick="clearSession()">Clear Session</button>
+            </div>
+        </div>
+
+        <div class="test-section">
+            <h2>2. Login Simulation</h2>
+            <div class="button-group">
+                <button class="test-btn" onclick="simulateLogin()">Simulate Login</button>
+                <button class="test-btn" onclick="simulateLoginWithTest()">Login + Test Complete</button>
+            </div>
+            <div id="loginStatus" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>3. Page Access Test</h2>
+            <div class="button-group">
+                <button class="test-btn" onclick="testPageAccess('authenticated')">Test Authenticated Access</button>
+                <button class="test-btn" onclick="testPageAccess('verified')">Test Verified Access</button>
+            </div>
+            <div id="accessStatus" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>4. Session Storage Contents</h2>
+            <button class="test-btn" onclick="displaySessionStorage()">Show Session Storage</button>
+            <div id="storageDisplay" class="status"></div>
+        </div>
+
+        <div class="test-section">
+            <h2>5. Navigation Links</h2>
+            <div class="button-group">
+                <a href="index.html" class="test-btn" style="text-decoration: none; display: inline-block;">Home</a>
+                <a href="signup.html" class="test-btn" style="text-decoration: none; display: inline-block;">Sign Up</a>
+                <a href="login.html" class="test-btn" style="text-decoration: none; display: inline-block;">Login</a>
+                <a href="political-test.html" class="test-btn" style="text-decoration: none; display: inline-block;">Political Test</a>
+                <a href="meeting-schedule.html" class="test-btn" style="text-decoration: none; display: inline-block;">Meeting Schedule</a>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkUserState() {
+            try {
+                const state = AuthManager.getUserState();
+                document.getElementById('userStateDisplay').innerHTML = `
+                    <strong>User State:</strong> ${state.type}<br>
+                    <strong>Is Logged In:</strong> ${state.isLoggedIn}<br>
+                    ${state.profile ? `<strong>Profile:</strong> ${JSON.stringify(state.profile, null, 2)}` : ''}
+                    ${state.politicalType ? `<br><strong>Political Type:</strong> ${state.politicalType}` : ''}
+                `;
+            } catch (error) {
+                document.getElementById('userStateDisplay').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        function clearSession() {
+            sessionStorage.clear();
+            document.getElementById('userStateDisplay').innerHTML = '<span class="success">Session cleared!</span>';
+        }
+
+        function simulateLogin() {
+            try {
+                const profile = {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    phone: '010-1234-5678',
+                    birthdate: '1990-01-01',
+                    gender: 'male'
+                };
+                
+                AuthManager.login('test@example.com', profile);
+                document.getElementById('loginStatus').innerHTML = '<span class="success">Login simulated successfully!</span>';
+                checkUserState();
+            } catch (error) {
+                document.getElementById('loginStatus').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        function simulateLoginWithTest() {
+            try {
+                simulateLogin();
+                
+                const typeData = {
+                    code: 'MPOS',
+                    title: '시장 다원주의자',
+                    orientation: 'progressive'
+                };
+                
+                AuthManager.setTestComplete(typeData);
+                document.getElementById('loginStatus').innerHTML = '<span class="success">Login + Test simulated successfully!</span>';
+                checkUserState();
+            } catch (error) {
+                document.getElementById('loginStatus').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        function testPageAccess(requiredState) {
+            try {
+                const result = AuthManager.checkPageAccess(requiredState);
+                document.getElementById('accessStatus').innerHTML = `
+                    <strong>Access Test for "${requiredState}":</strong> ${result ? 'Allowed' : 'Denied'}
+                `;
+            } catch (error) {
+                document.getElementById('accessStatus').innerHTML = `<span class="error">Error: ${error.message}</span>`;
+            }
+        }
+
+        function displaySessionStorage() {
+            const storage = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                try {
+                    storage[key] = JSON.parse(sessionStorage.getItem(key));
+                } catch {
+                    storage[key] = sessionStorage.getItem(key);
+                }
+            }
+            document.getElementById('storageDisplay').innerHTML = `<pre>${JSON.stringify(storage, null, 2)}</pre>`;
+        }
+
+        // Run initial check
+        checkUserState();
+    </script>
+</body>
+</html>

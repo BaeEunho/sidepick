@@ -1,0 +1,2519 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>사이드픽 - 정치 성향으로 만나는 특별한 인연</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+        }
+        
+        input, textarea, button, a, .btn {
+            -webkit-user-select: auto;
+            -moz-user-select: auto;
+            -ms-user-select: auto;
+            user-select: auto;
+            -webkit-touch-callout: default;
+        }
+        
+        /* 버튼에 대한 더블클릭 방지만 적용 */
+        button, .btn {
+            touch-action: manipulation;
+        }
+
+        :root {
+            --primary-blue: #2C3E50;
+            --secondary-blue: #3498DB;
+            --light-blue: #E8F4F8;
+            --gray-dark: #34495E;
+            --gray-medium: #7F8C8D;
+            --gray-light: #ECF0F1;
+            --coral: #FF6B6B;
+            --orange: #FFA07A;
+            --white: #FFFFFF;
+            --black: #2C3E50;
+        }
+
+        body {
+            font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            color: var(--gray-dark);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* 헤더 */
+        header {
+            background: var(--white);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            position: fixed;
+            width: 100%;
+            top: 0;
+            z-index: 1000;
+        }
+
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-menu a {
+            text-decoration: none;
+            color: var(--gray-dark);
+            font-weight: 500;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: var(--secondary-blue);
+        }
+
+        .auth-buttons {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn-login, .btn-signup {
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-login {
+            color: var(--primary-blue);
+            border: 1px solid var(--primary-blue);
+        }
+
+        .btn-login:hover {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .btn-signup {
+            background: var(--coral);
+            color: var(--white);
+        }
+
+        .btn-signup:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
+        }
+
+        .user-welcome {
+            color: var(--gray-dark);
+            font-weight: 500;
+            margin-right: 1rem;
+        }
+
+        .btn-mypage {
+            padding: 0.5rem 1.5rem;
+            border-radius: 5px;
+            text-decoration: none;
+            font-weight: 500;
+            background: var(--secondary-blue);
+            color: var(--white);
+            transition: all 0.3s;
+        }
+
+        .btn-mypage:hover {
+            background: #2980B9;
+        }
+
+        .btn-logout-simple {
+            padding: 0.5rem 1.5rem;
+            border: 1px solid var(--gray-dark);
+            background: transparent;
+            color: var(--gray-dark);
+            border-radius: 5px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-logout-simple:hover {
+            background: var(--gray-dark);
+            color: var(--white);
+        }
+
+        /* 히어로 섹션 */
+        .hero {
+            background: linear-gradient(135deg, var(--light-blue) 0%, rgba(255,255,255,0.9) 100%);
+            padding: 120px 0 80px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+            line-height: 1.3;
+        }
+
+        .hero-subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-medium);
+            margin-bottom: 2rem;
+            line-height: 1.8;
+        }
+
+        .hero-insight {
+            background: rgba(255,255,255,0.8);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .hero-insight p {
+            font-size: 1rem;
+            color: var(--gray-medium);
+            margin-bottom: 1rem;
+            line-height: 1.7;
+        }
+
+        .hero-purpose {
+            color: var(--primary-blue) !important;
+            font-size: 1.2rem !important;
+            margin: 1.5rem 0 !important;
+        }
+
+        .hero-promise {
+            font-size: 1.3rem !important;
+            color: var(--coral) !important;
+            font-weight: 600;
+            margin-bottom: 0 !important;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .cta-main {
+            width: 230px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            background: var(--coral);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border-radius: 50px;
+            text-decoration: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-block;
+        }
+
+        .cta-main:hover {
+            background: #FF5252;
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(255,107,107,0.3);
+        }
+
+        .cta-sub {
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .cta-sub:hover {
+            text-decoration: underline;
+        }
+
+        /* 공감 경험 섹션 */
+        .experience-section {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .section-subtitle {
+            text-align: center;
+            font-size: 1.3rem;
+            color: var(--gray-medium);
+            margin-bottom: 3rem;
+            font-style: italic;
+        }
+
+        .experience-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .experience-card {
+            text-align: center;
+            padding: 2rem;
+            background: var(--light-blue);
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .experience-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .experience-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .experience-card p {
+            color: var(--gray-dark);
+            line-height: 1.6;
+        }
+
+        .issue-tags {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .issue-tag {
+            display: inline-block;
+            padding: 0.5rem 1.5rem;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            border-radius: 25px;
+            font-weight: 500;
+        }
+
+        /* 왜 정치 성향인가 */
+        .why-political {
+            padding: 80px 0;
+            background: var(--gray-light);
+        }
+
+        .why-content {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+            text-align: center;
+        }
+
+        .why-content p {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            line-height: 1.8;
+            margin-bottom: 2rem;
+        }
+
+        .highlight-text {
+            font-size: 1.3rem !important;
+            color: var(--primary-blue) !important;
+            font-weight: 600;
+            padding: 1.5rem;
+            background: var(--white);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .target-users {
+            max-width: 600px;
+            margin: 0 auto;
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+        }
+
+        .target-users h3 {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .target-users ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .target-users li {
+            padding-left: 2rem;
+            margin-bottom: 1rem;
+            position: relative;
+            color: var(--gray-dark);
+            line-height: 1.6;
+        }
+
+        .target-users li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--coral);
+            font-weight: 700;
+            font-size: 1.2rem;
+        }
+
+        /* 어떻게 분석하나요 */
+        .how-analyze {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .analyze-intro {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--gray-medium);
+            margin-bottom: 3rem;
+            line-height: 1.8;
+        }
+
+        .analyze-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .analyze-item {
+            text-align: center;
+            padding: 2rem;
+            background: var(--gray-light);
+            border-radius: 15px;
+            transition: all 0.3s;
+        }
+
+        .analyze-item:hover {
+            background: var(--light-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .analyze-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .analyze-item h3 {
+            font-size: 1.2rem;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .analyze-item p {
+            color: var(--gray-dark);
+            font-size: 0.9rem;
+        }
+
+        .example-questions {
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .example-questions h3 {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 2rem;
+        }
+
+        .question-card {
+            background: var(--light-blue);
+            padding: 2rem;
+            border-radius: 15px;
+            margin-bottom: 1rem;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        }
+
+        .question-card p {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            font-style: italic;
+        }
+
+        /* 성향 테스트 소개 */
+        .personality-test {
+            padding: 80px 0;
+            background: var(--gray-light);
+        }
+
+        .section-title {
+            text-align: center;
+            font-size: 2.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 3rem;
+        }
+
+        .personality-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .personality-item {
+            background: var(--gray-light);
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+            transition: all 0.3s;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .personality-item:hover {
+            background: var(--light-blue);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        /* Desktop에서만 hover tooltip 표시 */
+        @media (hover: hover) and (min-width: 769px) {
+            .personality-item:hover .personality-tooltip {
+                opacity: 1;
+                visibility: visible;
+            }
+        }
+
+        .personality-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--primary-blue);
+            color: var(--white);
+            padding: 0.8rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s;
+            z-index: 10;
+            max-width: 250px;
+            white-space: normal;
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .personality-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            border: 6px solid transparent;
+            border-top-color: var(--primary-blue);
+        }
+
+        .personality-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .personality-code {
+            font-size: 0.75rem;
+            color: var(--gray-medium);
+            margin-top: 0.25rem;
+            font-weight: 600;
+        }
+
+        .test-description {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--gray-medium);
+            margin-bottom: 2rem;
+        }
+
+        /* 하단 고정 CTA */
+        .fixed-cta {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 999;
+            display: none;
+        }
+
+        .fixed-cta .cta-main {
+            margin: 0;
+            box-shadow: 0 10px 30px rgba(255,107,107,0.4);
+        }
+
+
+        /* 모임 진행 방식 */
+        .process {
+            padding: 80px 0;
+            background: var(--white);
+        }
+
+        .meeting-basic-info {
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            margin-bottom: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .basic-info-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+        }
+
+        .info-icon {
+            font-size: 1.5rem;
+        }
+
+        .meeting-timeline {
+            max-width: 800px;
+            margin: 0 auto 3rem;
+        }
+
+        .timeline-item {
+            background: var(--gray-light);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .timeline-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .timeline-number {
+            background: var(--coral);
+            color: var(--white);
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 700;
+        }
+
+        .timeline-header h3 {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            flex: 1;
+        }
+
+        .duration {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            font-weight: 400;
+        }
+
+        .timeline-content ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .timeline-content li {
+            padding-left: 1.5rem;
+            margin-bottom: 0.8rem;
+            position: relative;
+            color: var(--gray-dark);
+            line-height: 1.6;
+        }
+
+        .timeline-content li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--coral);
+            font-size: 1.2rem;
+        }
+
+        .example {
+            color: var(--gray-medium);
+            font-size: 0.9rem;
+            font-style: italic;
+        }
+
+        .host-role {
+            background: var(--light-blue);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .host-role h3 {
+            font-size: 1.3rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .host-role ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .host-role li {
+            padding-left: 1.5rem;
+            margin-bottom: 0.8rem;
+            position: relative;
+            color: var(--gray-dark);
+        }
+
+        .host-role li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--coral);
+            font-weight: 700;
+        }
+
+        /* 예정 모임 */
+        .upcoming-meetings {
+            padding: 80px 0;
+            background: var(--gray-light);
+        }
+
+        .meeting-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .meeting-card {
+            background: var(--white);
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s;
+        }
+
+        .meeting-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.12);
+        }
+
+        .meeting-header {
+            padding: 2rem;
+            color: var(--white);
+        }
+
+        .conservative {
+            background: linear-gradient(135deg, #2C3E50 0%, #34495E 100%);
+        }
+
+        .progressive {
+            background: linear-gradient(135deg, #3498DB 0%, #2980B9 100%);
+        }
+
+        .meeting-title {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .meeting-date {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .meeting-body {
+            padding: 2rem;
+        }
+
+        .meeting-info {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-row span:first-child {
+            color: var(--gray-medium);
+        }
+
+        .info-row span:last-child {
+            font-weight: 600;
+            color: var(--gray-dark);
+        }
+
+        .attendance-status {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .gender-status {
+            flex: 1;
+            background: var(--gray-light);
+            padding: 1rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .status-label {
+            font-size: 0.9rem;
+            color: var(--gray-medium);
+            margin-bottom: 0.5rem;
+        }
+
+        .status-count {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--primary-blue);
+        }
+
+        .btn-apply {
+            width: 100%;
+            padding: 1rem;
+            background: var(--coral);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-apply:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+        }
+
+        .view-all {
+            text-align: center;
+        }
+
+        .view-all a {
+            color: var(--secondary-blue);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .view-all a:hover {
+            text-decoration: underline;
+        }
+
+        .notification-section {
+            background: var(--light-blue);
+            padding: 3rem;
+            border-radius: 20px;
+            text-align: center;
+            margin-top: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .notification-section h3 {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 1rem;
+        }
+
+        .notification-section p {
+            font-size: 1.1rem;
+            color: var(--gray-dark);
+            margin-bottom: 2rem;
+            line-height: 1.6;
+        }
+
+        .btn-notification {
+            background: var(--secondary-blue);
+            color: var(--white);
+            padding: 1rem 2.5rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-notification:hover {
+            background: #2980B9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(52,152,219,0.3);
+        }
+
+        /* 성향 설명 모달 */
+        .personality-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 9999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .personality-modal-content {
+            background: var(--white);
+            padding: 2rem;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+
+        .personality-modal-close {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--gray-medium);
+            background: none;
+            border: none;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: all 0.3s;
+        }
+
+        .personality-modal-close:hover {
+            background: var(--gray-light);
+        }
+
+        .personality-modal-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .personality-modal-title {
+            font-size: 1.5rem;
+            color: var(--primary-blue);
+            margin-bottom: 0.5rem;
+        }
+
+        .personality-modal-code {
+            font-size: 1rem;
+            color: var(--gray-medium);
+            margin-bottom: 1rem;
+        }
+
+        .personality-modal-description {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--gray-dark);
+        }
+
+        /* FAQ */
+        .faq {
+            padding: 80px 0;
+            background: var(--gray-light);
+        }
+
+        .faq-list {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--white);
+            margin-bottom: 1rem;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        .faq-question {
+            padding: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-blue);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.3s;
+        }
+
+        .faq-question:hover {
+            background: var(--light-blue);
+        }
+
+        .faq-question::after {
+            content: '+';
+            font-size: 1.5rem;
+            color: var(--coral);
+        }
+
+        .faq-item.active .faq-question::after {
+            content: '−';
+        }
+
+        .faq-answer {
+            padding: 0 1.5rem;
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+
+        .faq-item.active .faq-answer {
+            padding: 0 1.5rem 1.5rem;
+            max-height: 200px;
+        }
+
+        /* 최종 CTA */
+        .final-cta {
+            padding: 100px 0;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            text-align: center;
+            color: var(--white);
+        }
+
+        .final-cta h2 {
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+        }
+
+
+        /* 로그인 시 헤더 스타일 */
+        .quick-meeting-link {
+            background: var(--coral);
+            color: var(--white) !important;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            font-weight: 600;
+            margin-left: 1rem;
+        }
+
+        .quick-meeting-link:hover {
+            background: #FF5252;
+        }
+
+        /* 모바일 햄버거 메뉴 */
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mobile-menu-btn span {
+            display: block;
+            width: 25px;
+            height: 3px;
+            background: var(--gray-dark);
+            border-radius: 2px;
+            transition: all 0.3s;
+        }
+
+        .mobile-menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1998;
+        }
+
+        .mobile-menu {
+            position: fixed;
+            top: 0;
+            right: -300px;
+            width: 280px;
+            height: 100%;
+            background: var(--white);
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+            z-index: 1999;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .mobile-menu.active {
+            right: 0;
+        }
+
+        .mobile-menu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .close-menu-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.5rem;
+            color: var(--gray-dark);
+        }
+
+        .mobile-menu-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .mobile-menu-list li {
+            border-bottom: 1px solid var(--gray-light);
+        }
+
+        .mobile-menu-list a {
+            display: block;
+            padding: 1rem 1.5rem;
+            color: var(--gray-dark);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        /* 모바일에서는 호버 효과 제거 */
+        @media (hover: hover) {
+            .mobile-menu-list a:hover {
+                background: var(--coral);
+                color: var(--white);
+            }
+        }
+
+        .mobile-menu-list a.highlight {
+            font-weight: 600;
+        }
+
+        .mobile-menu-auth {
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .mobile-login-btn,
+        .mobile-signup-btn {
+            display: block;
+            text-align: center;
+            padding: 0.8rem;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+
+        .mobile-login-btn {
+            background: var(--gray-light);
+            color: var(--gray-dark);
+        }
+
+        .mobile-signup-btn {
+            background: var(--primary-blue);
+            color: var(--white);
+        }
+
+        .mobile-user-info {
+            text-align: center;
+            padding: 1rem;
+            background: var(--gray-light);
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .mobile-user-info span {
+            display: block;
+            font-weight: 600;
+            color: var(--gray-dark);
+            margin-bottom: 0.5rem;
+        }
+
+        .mobile-test-btn,
+        .mobile-mypage-btn {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            background: var(--coral);
+            color: var(--white);
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .mobile-logout-btn {
+            width: 100%;
+            padding: 0.8rem;
+            background: var(--gray-light);
+            color: var(--gray-dark);
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .mobile-logout-btn:hover {
+            background: var(--gray-300);
+        }
+
+        /* 푸터 */
+        footer {
+            background: var(--gray-dark);
+            color: var(--white);
+            padding: 3rem 0;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h3 {
+            margin-bottom: 1rem;
+        }
+
+        .footer-section a {
+            color: #BDC3C7;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 0.5rem;
+            transition: color 0.3s;
+        }
+
+        .footer-section a:hover {
+            color: var(--white);
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #4A5F7A;
+            color: #BDC3C7;
+        }
+
+        /* 모바일용 성향 탭 */
+        .personality-tabs {
+            display: none;
+        }
+
+        .tab-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .tab-button {
+            padding: 0.8rem 1.5rem;
+            background: var(--white);
+            border: 2px solid var(--gray-light);
+            border-radius: 25px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .tab-button.active {
+            background: var(--secondary-blue);
+            color: var(--white);
+            border-color: var(--secondary-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .mobile-personality-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+
+            .auth-buttons {
+                display: none;
+            }
+
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .hero-insight {
+                padding: 1.5rem;
+            }
+
+            /* 모바일에서 기존 그리드 숨기고 탭 표시 */
+            .personality-grid {
+                display: none !important;
+            }
+
+            .personality-tabs {
+                display: block;
+            }
+
+            .personality-grid,
+            .feature-grid,
+            .process-steps,
+            .meeting-cards,
+            .experience-grid,
+            .analyze-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .process-step::after {
+                display: none;
+            }
+
+            .cta-group {
+                flex-direction: column;
+            }
+
+            .process-info {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .issue-tags {
+                justify-content: center;
+            }
+
+            .section-title {
+                font-size: 2rem;
+            }
+
+            .section-subtitle {
+                font-size: 1.1rem;
+            }
+        }
+    </style>
+    <script src="auth-check.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header>
+        <nav class="container">
+            <div class="logo">사이드픽</div>
+            <div class="nav-menu">
+                <a href="#why-political">서비스 소개</a>
+                <a href="#test">성향 테스트</a>
+                <a href="#process">진행 방식</a>
+                <a href="#meetings">모임 일정</a>
+                <a href="#faq">FAQ</a>
+            </div>
+            <div class="auth-buttons" id="authButtons">
+                <a href="login.html" class="btn-login">로그인</a>
+                <a href="signup.html" class="btn-signup">회원가입</a>
+            </div>
+            <!-- 모바일 햄버거 메뉴 버튼 -->
+            <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- 히어로 섹션 -->
+    <section class="hero">
+        <div class="container">
+            <h1>외모도 성격도 다 좋은데,<br>왜 자꾸 말이 안 통할까요?</h1>
+            <p class="hero-subtitle">연애할 때도, 친구를 사귈 때도 마찬가지입니다.<br>
+            처음엔 잘 통하는 것 같은데, 어느 순간 미묘한 온도차를 느끼게 되죠.</p>
+            <div class="hero-insight">
+                <p>뉴스를 보며 내뱉는 한마디, 사회 이슈에 대한 반응, 일상 속 작은 선택들...<br>
+                이 모든 것들이 결국 우리의 가치관을 드러냅니다.</p>
+                <p class="hero-purpose"><strong>우리는 정치 얘기를 하자는 게 아닙니다.<br>
+                그저 삶의 방향이 비슷한 사람을 만나고 싶을 뿐이에요.</strong></p>
+                <p class="hero-promise">SidePick은 당신과 같은 편을 찾아드립니다.</p>
+            </div>
+            <div class="cta-group">
+                <a href="#meetings" class="cta-sub">다음 모임 일정 보기</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- 공감 경험 섹션 -->
+    <section class="experience-section">
+        <div class="container">
+            <h2 class="section-title">이런 경험, 혹시 있으시죠?</h2>
+            <p class="section-subtitle">"처음엔 정말 잘 맞는다고 생각했는데..."</p>
+            
+            <div class="experience-grid">
+                <div class="experience-card">
+                    <div class="experience-icon">💬</div>
+                    <p>카페에서 나누는 일상 대화는 즐거웠지만,<br>
+                    뉴스 이야기가 나오자 갑자기 어색해지더라</p>
+                </div>
+                <div class="experience-card">
+                    <div class="experience-icon">📱</div>
+                    <p>SNS 게시물을 보고<br>
+                    "아, 이 사람은 나와 완전 다르구나" 싶었던 순간</p>
+                </div>
+                <div class="experience-card">
+                    <div class="experience-icon">🔄</div>
+                    <p>사회 이슈에 대한 생각이 너무 달라서<br>
+                    대화가 평행선만 달리는 느낌</p>
+                </div>
+            </div>
+
+            <div class="issue-tags">
+                <span class="issue-tag">젠더 이슈</span>
+                <span class="issue-tag">복지 정책</span>
+                <span class="issue-tag">환경 문제</span>
+                <span class="issue-tag">전통과 변화</span>
+                <span class="issue-tag">개인 vs 공동체</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- 왜 정치 성향인가 -->
+    <section id="why-political" class="why-political">
+        <div class="container">
+            <h2 class="section-title">왜 정치 성향일까요?</h2>
+            <p class="section-subtitle">단순한 취미나 MBTI를 넘어선, 진짜 중요한 것</p>
+            
+            <div class="why-content">
+                <p>기존 소개팅 앱들은 나이, 직업, 취미만 매칭해줍니다.<br>
+                하지만 정말 중요한 건 함께 살아갈 때 마주하게 될<br>
+                크고 작은 선택의 순간들에서 비슷한 방향을 바라보는 것 아닐까요?</p>
+                
+                <p class="highlight-text">SidePick은 정치·사회·문화 성향을 과학적으로 분석해,<br>
+                당신과 근본적인 가치관이 통하는 사람을 찾아드립니다.</p>
+            </div>
+
+            <div class="target-users">
+                <h3>이런 분들을 위한 서비스예요</h3>
+                <ul>
+                    <li>표면적인 대화를 넘어 깊이 있는 관계를 원하는 분</li>
+                    <li>가치관 차이로 인한 갈등을 줄이고 싶은 분</li>
+                    <li>장기적 관계에서 정말 중요한 게 무엇인지 아는 분</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 어떻게 분석하나요 -->
+    <section class="how-analyze">
+        <div class="container">
+            <h2 class="section-title">어떻게 분석하나요?</h2>
+            <p class="section-subtitle">60개 질문으로 당신의 성향을 정확히 측정</p>
+            
+            <div class="analyze-intro">
+                <p>정치 용어나 복잡한 이론 없이,<br>
+                일상적인 상황을 통해 자연스럽게 가치관을 파악합니다.</p>
+            </div>
+
+            <div class="analyze-grid">
+                <div class="analyze-item">
+                    <div class="analyze-icon">💰</div>
+                    <h3>경제관</h3>
+                    <p>시장 vs 정부개입, 복지 확대에 대한 태도</p>
+                </div>
+                <div class="analyze-item">
+                    <div class="analyze-icon">🤝</div>
+                    <h3>사회 이슈</h3>
+                    <p>젠더 평등, 다양성, 사회적 약자 보호</p>
+                </div>
+                <div class="analyze-item">
+                    <div class="analyze-icon">🎭</div>
+                    <h3>문화 가치관</h3>
+                    <p>전통 보존 vs 혁신, 개인주의 vs 집단주의</p>
+                </div>
+                <div class="analyze-item">
+                    <div class="analyze-icon">🌱</div>
+                    <h3>라이프스타일</h3>
+                    <p>환경 보호, 일과 삶의 균형, 교육관</p>
+                </div>
+            </div>
+
+            <div class="example-questions">
+                <h3>예시 질문</h3>
+                <div class="question-card">
+                    <p>"부자에게 더 많은 세금을 부과하는 것은<br>
+                    공정하다고 생각하시나요?"</p>
+                </div>
+                <div class="question-card">
+                    <p>"중요한 정책은 국민투표로 결정하는 것이<br>
+                    좋다고 생각하시나요?"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 성향 테스트 소개 -->
+    <section id="test" class="personality-test">
+        <div class="container">
+            <h2 class="section-title">16가지 정치 성향 분석</h2>
+            <div class="personality-grid">
+                <div class="personality-item" onclick="showPersonalityModal('MPOS')">
+                    <div class="personality-icon">🌈</div>
+                    <div>시장 다원주의자</div>
+                    <div class="personality-code">MPOS</div>
+                    <div class="personality-tooltip">자유 시장 경제를 지지하면서도 사회적 다양성을 적극 옹호하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MPON')">
+                    <div class="personality-icon">💻</div>
+                    <div>테크노 자유주의자</div>
+                    <div class="personality-code">MPON</div>
+                    <div class="personality-tooltip">기술 혁신과 전문가 주도의 효율적 사회를 추구하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MPTS')">
+                    <div class="personality-icon">🤝</div>
+                    <div>참여 자유주의자</div>
+                    <div class="personality-code">MPTS</div>
+                    <div class="personality-tooltip">경제적 자유와 시민의 적극적 정치 참여를 모두 중시하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MPTN')">
+                    <div class="personality-icon">🎓</div>
+                    <div>엘리트 자유주의자</div>
+                    <div class="personality-code">MPTN</div>
+                    <div class="personality-tooltip">실용주의와 전문가 통치를 통한 사회 개혁을 추구하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MCOS')">
+                    <div class="personality-icon">🏛️</div>
+                    <div>문화 보수주의자</div>
+                    <div class="personality-code">MCOS</div>
+                    <div class="personality-tooltip">시장 경제와 전통적 가치를 모두 중시하는 온건 보수 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MCON')">
+                    <div class="personality-icon">⚖️</div>
+                    <div>온건 보수주의자</div>
+                    <div class="personality-code">MCON</div>
+                    <div class="personality-tooltip">강한 법치와 질서 속에서 시장 경제가 작동해야 한다고 믿는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MCTS')">
+                    <div class="personality-icon">🌱</div>
+                    <div>풀뿌리 보수주의자</div>
+                    <div class="personality-code">MCTS</div>
+                    <div class="personality-tooltip">지역 공동체의 자율성과 전통을 존중하는 보수 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('MCTN')">
+                    <div class="personality-icon">👑</div>
+                    <div>전통 보수주의자</div>
+                    <div class="personality-code">MCTN</div>
+                    <div class="personality-tooltip">전통적 권위와 엘리트 리더십을 중시하는 귀족적 보수 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GPOS')">
+                    <div class="personality-icon">✊</div>
+                    <div>참여 사회민주주의자</div>
+                    <div class="personality-code">GPOS</div>
+                    <div class="personality-tooltip">보편적 복지와 개인의 자유를 모두 중시하는 사회민주주의 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GPON')">
+                    <div class="personality-icon">🔬</div>
+                    <div>전문가 사회민주주의자</div>
+                    <div class="personality-code">GPON</div>
+                    <div class="personality-tooltip">과학기술을 통한 사회 문제 해결과 복지 국가를 추구하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GPTS')">
+                    <div class="personality-icon">👥</div>
+                    <div>민중 진보주의자</div>
+                    <div class="personality-code">GPTS</div>
+                    <div class="personality-tooltip">서민과 노동자의 권익을 우선시하는 풀뿌리 진보 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GPTN')">
+                    <div class="personality-icon">📊</div>
+                    <div>계획 진보주의자</div>
+                    <div class="personality-code">GPTN</div>
+                    <div class="personality-tooltip">체계적 계획과 전문가 주도로 평등 사회를 건설하려는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GCOS')">
+                    <div class="personality-icon">🏢</div>
+                    <div>온건 국가주의자</div>
+                    <div class="personality-code">GCOS</div>
+                    <div class="personality-tooltip">강한 정부와 전통적 가치의 균형을 추구하는 중도 보수 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GCON')">
+                    <div class="personality-icon">🛡️</div>
+                    <div>권위 보수주의자</div>
+                    <div class="personality-code">GCON</div>
+                    <div class="personality-tooltip">강력한 질서와 위계를 통해 사회 안정을 추구하는 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GCTS')">
+                    <div class="personality-icon">🇰🇷</div>
+                    <div>민족 보수주의자</div>
+                    <div class="personality-code">GCTS</div>
+                    <div class="personality-tooltip">우리 문화와 전통을 자랑스럽게 여기는 자주적 보수 성향</div>
+                </div>
+                <div class="personality-item" onclick="showPersonalityModal('GCTN')">
+                    <div class="personality-icon">📜</div>
+                    <div>위계 보수주의자</div>
+                    <div class="personality-code">GCTN</div>
+                    <div class="personality-tooltip">전통적 위계와 체계를 통한 사회 질서를 중시하는 성향</div>
+                </div>
+            </div>
+            
+            <p class="test-description" style="margin-top: 2rem;">
+                <small>각 성향을 클릭하면 자세한 설명을 볼 수 있습니다.</small>
+            </p>
+            
+            <!-- 모바일용 탭 형식 -->
+            <div class="personality-tabs">
+                <div class="tab-buttons">
+                    <button class="tab-button active" onclick="showTab('progressive')">진보 성향</button>
+                    <button class="tab-button" onclick="showTab('conservative')">보수 성향</button>
+                </div>
+                
+                <div id="progressive-tab" class="tab-content active">
+                    <div class="mobile-personality-grid">
+                        <div class="personality-item" onclick="showPersonalityModal('MPOS')">
+                            <div class="personality-icon">🌈</div>
+                            <div>시장 다원주의자</div>
+                            <div class="personality-code">MPOS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MPON')">
+                            <div class="personality-icon">💻</div>
+                            <div>테크노 자유주의자</div>
+                            <div class="personality-code">MPON</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MPTS')">
+                            <div class="personality-icon">🤝</div>
+                            <div>참여 자유주의자</div>
+                            <div class="personality-code">MPTS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MPTN')">
+                            <div class="personality-icon">🎓</div>
+                            <div>엘리트 자유주의자</div>
+                            <div class="personality-code">MPTN</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GPOS')">
+                            <div class="personality-icon">✊</div>
+                            <div>참여 사회민주주의자</div>
+                            <div class="personality-code">GPOS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GPON')">
+                            <div class="personality-icon">🔬</div>
+                            <div>전문가 사회민주주의자</div>
+                            <div class="personality-code">GPON</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GPTS')">
+                            <div class="personality-icon">👥</div>
+                            <div>민중 진보주의자</div>
+                            <div class="personality-code">GPTS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GPTN')">
+                            <div class="personality-icon">📊</div>
+                            <div>계획 진보주의자</div>
+                            <div class="personality-code">GPTN</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div id="conservative-tab" class="tab-content">
+                    <div class="mobile-personality-grid">
+                        <div class="personality-item" onclick="showPersonalityModal('MCOS')">
+                            <div class="personality-icon">🏛️</div>
+                            <div>문화 보수주의자</div>
+                            <div class="personality-code">MCOS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MCON')">
+                            <div class="personality-icon">⚖️</div>
+                            <div>온건 보수주의자</div>
+                            <div class="personality-code">MCON</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MCTS')">
+                            <div class="personality-icon">🌱</div>
+                            <div>풀뿌리 보수주의자</div>
+                            <div class="personality-code">MCTS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('MCTN')">
+                            <div class="personality-icon">👑</div>
+                            <div>전통 보수주의자</div>
+                            <div class="personality-code">MCTN</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GCOS')">
+                            <div class="personality-icon">🏢</div>
+                            <div>온건 국가주의자</div>
+                            <div class="personality-code">GCOS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GCON')">
+                            <div class="personality-icon">🛡️</div>
+                            <div>권위 보수주의자</div>
+                            <div class="personality-code">GCON</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GCTS')">
+                            <div class="personality-icon">🇰🇷</div>
+                            <div>민족 보수주의자</div>
+                            <div class="personality-code">GCTS</div>
+                        </div>
+                        <div class="personality-item" onclick="showPersonalityModal('GCTN')">
+                            <div class="personality-icon">📜</div>
+                            <div>위계 보수주의자</div>
+                            <div class="personality-code">GCTN</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="test-description">5-10분 만에 완료되는 진단으로 나의 정치적 가치관을 찾아보세요</p>
+        </div>
+    </section>
+
+
+    <!-- 모임 진행 방식 -->
+    <section id="process" class="process">
+        <div class="container">
+            <h2 class="section-title">모임 진행 방식</h2>
+            
+            <div class="meeting-basic-info">
+                <div class="basic-info-item">
+                    <span class="info-icon">👥</span>
+                    <span>남성 4명, 여성 4명 (총 8명)</span>
+                </div>
+                <div class="basic-info-item">
+                    <span class="info-icon">⏰</span>
+                    <span>2-2.5시간</span>
+                </div>
+                <div class="basic-info-item">
+                    <span class="info-icon">💰</span>
+                    <span>45,000원 (음료, 간식 포함)</span>
+                </div>
+            </div>
+
+            <div class="meeting-timeline">
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-number">1부</div>
+                        <h3>아이스브레이킹 <span class="duration">30분</span></h3>
+                    </div>
+                    <div class="timeline-content">
+                        <ul>
+                            <li>자기소개 + "요즘 관심 있는 사회 이슈 한 가지"</li>
+                            <li>가벼운 정치 관련 밸런스 게임<br>
+                                <span class="example">예: "복지 vs 성장", "환경 vs 경제"</span></li>
+                            <li>분위기 파악 및 긴장 완화</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-number">2부</div>
+                        <h3>그룹 토크 <span class="duration">40분</span></h3>
+                    </div>
+                    <div class="timeline-content">
+                        <ul>
+                            <li>호스트가 제시하는 가벼운 정치/사회 주제로 토론</li>
+                            <li>주제 예시: "요즘 뉴스 중 가장 관심 있었던 것", "이상적인 사회 모습"</li>
+                            <li>각자의 가치관과 소통 방식 관찰 기회</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-number">3부</div>
+                        <h3>지목 질문 시간 <span class="duration">50분</span></h3>
+                    </div>
+                    <div class="timeline-content">
+                        <ul>
+                            <li>호스트가 "○○님이 △△님에게 질문해주세요" 방식으로 진행</li>
+                            <li>각자 마음에 드는 이성에게 개인적인 질문 가능</li>
+                            <li>예시: "취미가 뭐예요?", "주말엔 뭐해요?", "이상형은?"</li>
+                            <li>자연스럽게 관심 있는 사람과 더 많이 대화하게 됨</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="timeline-item">
+                    <div class="timeline-header">
+                        <div class="timeline-number">4부</div>
+                        <h3>마음 확인 & 마무리 <span class="duration">20분</span></h3>
+                    </div>
+                    <div class="timeline-content">
+                        <ul>
+                            <li>종이에 매칭 희망자 적기: 각자 가장 마음에 드는 한 사람 이름 적기</li>
+                            <li>호스트가 수거 후 서로 선택한 경우 "매치 성공" 알림</li>
+                            <li>매치된 커플은 연락처 교환</li>
+                            <li>매치 안 된 경우도 개별적으로 연락처 교환 가능</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="host-role">
+                <h3>호스트 역할</h3>
+                <ul>
+                    <li>정치 토론이 너무 격해지지 않도록 조절</li>
+                    <li>지목 질문이 자연스럽게 진행되도록 분위기 조성</li>
+                    <li>시간 관리 및 매칭 결과 발표</li>
+                    <li>전체적인 분위기 메이커</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 예정 모임 -->
+    <section id="meetings" class="upcoming-meetings">
+        <div class="container">
+            <h2 class="section-title">모집 중인 소개팅</h2>
+            <div class="meeting-cards">
+                <div class="meeting-card">
+                    <div class="meeting-header conservative">
+                        <h3 class="meeting-title">보수 성향 소개팅</h3>
+                        <p class="meeting-date">8월 9일 (토) 오후 3시</p>
+                    </div>
+                    <div class="meeting-body">
+                        <div class="meeting-info">
+                            <div class="info-row">
+                                <span>장소</span>
+                                <span>강남역 파티룸</span>
+                            </div>
+                            <div class="info-row">
+                                <span>연령대</span>
+                                <span>20대-30대</span>
+                            </div>
+                        </div>
+                        <div class="attendance-status">
+                            <div class="gender-status">
+                                <div class="status-label">남성</div>
+                                <div class="status-count" id="conservative-male">0/4</div>
+                            </div>
+                            <div class="gender-status">
+                                <div class="status-label">여성</div>
+                                <div class="status-count" id="conservative-female">0/4</div>
+                            </div>
+                        </div>
+                        <button class="btn-apply" onclick="handleMeetingApply('conservative')">참가 신청하기</button>
+                    </div>
+                </div>
+                <div class="meeting-card">
+                    <div class="meeting-header progressive">
+                        <h3 class="meeting-title">진보 성향 소개팅</h3>
+                        <p class="meeting-date">8월 23일 (토) 오후 3시</p>
+                    </div>
+                    <div class="meeting-body">
+                        <div class="meeting-info">
+                            <div class="info-row">
+                                <span>장소</span>
+                                <span>강남역 파티룸</span>
+                            </div>
+                            <div class="info-row">
+                                <span>연령대</span>
+                                <span>20대-30대</span>
+                            </div>
+                        </div>
+                        <div class="attendance-status">
+                            <div class="gender-status">
+                                <div class="status-label">남성</div>
+                                <div class="status-count" id="progressive-male">0/4</div>
+                            </div>
+                            <div class="gender-status">
+                                <div class="status-label">여성</div>
+                                <div class="status-count" id="progressive-female">0/4</div>
+                            </div>
+                        </div>
+                        <button class="btn-apply" onclick="handleMeetingApply('progressive')">참가 신청하기</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="notification-section">
+                <h3>일정이 안 맞으신가요?</h3>
+                <p>회원가입 후 성향 테스트를 완료하시면<br>맞는 모임이 열릴 때 알림을 보내드립니다.</p>
+                <button class="btn-notification" onclick="location.href='signup.html'">다음 일정 알림 받기</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- FAQ -->
+    <section id="faq" class="faq">
+        <div class="container">
+            <h2 class="section-title">자주 묻는 질문</h2>
+            <div class="faq-list">
+                <div class="faq-item">
+                    <div class="faq-question">성향이 다르면 정말 만날 수 없나요?</div>
+                    <div class="faq-answer">
+                        <p>네, 같은 성향끼리만 매칭됩니다. 이는 참가자들이 편안하게 대화를 나누고 공감대를 형성할 수 있도록 하기 위함입니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">모임 분위기는 어떤가요?</div>
+                    <div class="faq-answer">
+                        <p>정치 토론보다는 자연스러운 대화 중심입니다. 아이스브레이킹과 가벼운 게임을 통해 편안한 분위기를 만들어갑니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">환불 정책은?</div>
+                    <div class="faq-answer">
+                        <p>모임 3일 전까지 100% 환불 가능합니다. 이후에는 환불이 어려우니 신중하게 신청해주세요.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">연령대는 어떻게 되나요?</div>
+                    <div class="faq-answer">
+                        <p>주로 20대 후반-30대 초반입니다. 비슷한 연령대끼리 모임을 구성하여 공감대 형성이 쉽도록 합니다.</p>
+                    </div>
+                </div>
+                <div class="faq-item">
+                    <div class="faq-question">다음 모임 알림을 받으려면?</div>
+                    <div class="faq-answer">
+                        <p>회원가입 후 성향 테스트를 완료하시면 맞는 모임만 알림받을 수 있습니다. 이메일로 알림을 보내드립니다.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 최종 CTA -->
+    <section class="final-cta">
+        <div class="container">
+            <h2>나와 통하는 사람을 만날 시간</h2>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향으로 만나는<br>특별한 인연</p>
+                </div>
+                <div class="footer-section">
+                    <h3>서비스</h3>
+                    <a href="political-test.html">성향 테스트</a>
+                    <a href="#meetings">모임 일정</a>
+                    <a href="#faq">자주 묻는 질문</a>
+                </div>
+                <div class="footer-section">
+                    <h3>고객센터</h3>
+                    <p>평일 10:00 - 18:00</p>
+                    <a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a>
+                </div>
+                <div class="footer-section">
+                    <h3>정책</h3>
+                    <a href="terms.html">이용약관</a>
+                    <a href="privacy.html">개인정보처리방침</a>
+                    <a href="refund.html">환불정책</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 하단 고정 CTA -->
+    <div class="fixed-cta" id="fixedCta">
+        <a href="political-test.html" class="cta-main">내 정치 성향 알아보기</a>
+    </div>
+
+    <!-- 모바일 메뉴 -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay" onclick="closeMobileMenu()"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <div class="logo">사이드픽</div>
+            <button class="close-menu-btn" onclick="closeMobileMenu()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+        </div>
+        <ul class="mobile-menu-list">
+            <li><a href="#intro" onclick="scrollToSection(event, 'intro')">서비스 소개</a></li>
+            <li><a href="#test" onclick="scrollToSection(event, 'test')">성향 테스트</a></li>
+            <li><a href="#process" onclick="scrollToSection(event, 'process')">모임 진행</a></li>
+            <li><a href="#meetings" onclick="scrollToSection(event, 'meetings')" class="highlight">소개팅 일정 확인</a></li>
+            <li><a href="#faq" onclick="scrollToSection(event, 'faq')">FAQ</a></li>
+        </ul>
+        <div class="mobile-menu-auth" id="mobileMenuAuth">
+            <a href="login.html" class="mobile-login-btn">로그인</a>
+            <a href="signup.html" class="mobile-signup-btn">회원가입</a>
+        </div>
+    </div>
+
+    <script src="auth-check.js"></script>
+    <script>
+        // FAQ 토글
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const item = question.parentElement;
+                item.classList.toggle('active');
+            });
+        });
+
+        // 부드러운 스크롤
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // 스크롤 시 헤더 그림자
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            
+            if (window.scrollY > 10) {
+                header.style.boxShadow = '0 2px 20px rgba(0,0,0,0.1)';
+            } else {
+                header.style.boxShadow = '0 2px 10px rgba(0,0,0,0.05)';
+            }
+        });
+        
+        // 페이지 로드 시 하단 고정 CTA 표시
+        window.addEventListener('DOMContentLoaded', () => {
+            const fixedCta = document.getElementById('fixedCta');
+            if (fixedCta) {
+                fixedCta.style.display = 'block';
+            }
+        });
+        
+        // 모바일 성향 탭 전환
+        function showTab(orientation) {
+            // 모든 탭 버튼과 컨텐츠 숨기기
+            const buttons = document.querySelectorAll('.tab-button');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            buttons.forEach(btn => btn.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            // 선택된 탭 활성화
+            if (orientation === 'progressive') {
+                buttons[0].classList.add('active');
+                document.getElementById('progressive-tab').classList.add('active');
+            } else {
+                buttons[1].classList.add('active');
+                document.getElementById('conservative-tab').classList.add('active');
+            }
+        }
+
+        // 참가자 수 업데이트 함수 (확정된 인원만 표시)
+        function updateMeetingCounts() {
+            const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
+            
+            // 기본값 설정
+            if (!confirmedCounts.conservative) confirmedCounts.conservative = { male: 0, female: 0 };
+            if (!confirmedCounts.progressive) confirmedCounts.progressive = { male: 0, female: 0 };
+            
+            // 보수 성향 카운트 업데이트
+            const conservativeMale = document.getElementById('conservative-male');
+            const conservativeFemale = document.getElementById('conservative-female');
+            if (conservativeMale) {
+                conservativeMale.textContent = `${confirmedCounts.conservative.male}/4`;
+            }
+            if (conservativeFemale) {
+                conservativeFemale.textContent = `${confirmedCounts.conservative.female}/4`;
+            }
+            
+            // 진보 성향 카운트 업데이트
+            const progressiveMale = document.getElementById('progressive-male');
+            const progressiveFemale = document.getElementById('progressive-female');
+            if (progressiveMale) {
+                progressiveMale.textContent = `${confirmedCounts.progressive.male}/4`;
+            }
+            if (progressiveFemale) {
+                progressiveFemale.textContent = `${confirmedCounts.progressive.female}/4`;
+            }
+        }
+
+        // 페이지 로드 시 참가자 수 업데이트 및 버튼 상태 업데이트
+        document.addEventListener('DOMContentLoaded', () => {
+            updateMeetingCounts();
+            updateMeetingButtons();
+        });
+
+        // sessionStorage 변경 감지 (같은 탭에서)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'meetingCounts' || e.key === 'appliedMeetings') {
+                updateMeetingCounts();
+                updateMeetingButtons();
+            }
+        });
+
+        // 페이지가 다시 활성화될 때 업데이트 (탭 전환 시)
+        window.addEventListener('pageshow', () => {
+            updateMeetingCounts();
+            updateMeetingButtons();
+        });
+
+        // 모바일 메뉴 함수들
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const body = document.body;
+            
+            menu.classList.toggle('active');
+            if (menu.classList.contains('active')) {
+                overlay.style.display = 'block';
+                body.style.overflow = 'hidden';
+            } else {
+                overlay.style.display = 'none';
+                body.style.overflow = 'auto';
+            }
+        }
+
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            const overlay = document.getElementById('mobileMenuOverlay');
+            const body = document.body;
+            
+            menu.classList.remove('active');
+            overlay.style.display = 'none';
+            body.style.overflow = 'auto';
+        }
+        
+        // 모바일 메뉴에서 스크롤 처리
+        function scrollToSection(event, sectionId) {
+            event.preventDefault();
+            closeMobileMenu();
+            
+            const section = document.getElementById(sectionId);
+            if (section) {
+                const headerHeight = 70;
+                const sectionTop = section.offsetTop - headerHeight;
+                window.scrollTo({
+                    top: sectionTop,
+                    behavior: 'smooth'
+                });
+            }
+        }
+
+        // 성향 설명 데이터
+        const personalityDescriptions = {
+            'MPOS': {
+                name: '시장 다원주의자',
+                icon: '🌈',
+                description: '자유 시장 경제를 지지하면서도 사회적 다양성을 적극 옹호하는 성향'
+            },
+            'MPON': {
+                name: '테크노 자유주의자',
+                icon: '💻',
+                description: '기술 혁신과 전문가 주도의 효율적 사회를 추구하는 성향'
+            },
+            'MPTS': {
+                name: '참여 자유주의자',
+                icon: '🤝',
+                description: '경제적 자유와 시민의 적극적 정치 참여를 모두 중시하는 성향'
+            },
+            'MPTN': {
+                name: '엘리트 자유주의자',
+                icon: '🎓',
+                description: '시장경제의 효율성을 신뢰하면서도 전문가의 체계적 접근을 통해 사회를 개선해야 한다고 믿는 성향'
+            },
+            'MCOS': {
+                name: '문화 보수주의자',
+                icon: '🏛️',
+                description: '경제적으로는 자유 시장을 신뢰하지만 사회적으로는 보수적 가치를 중시하는 성향'
+            },
+            'MCON': {
+                name: '온건 보수주의자',
+                icon: '⚖️',
+                description: '시장경제의 장점을 인정하면서도 급진적 변화보다는 안정적이고 점진적인 발전을 추구하는 성향'
+            },
+            'MCTS': {
+                name: '풀뿌리 보수주의자',
+                icon: '🌱',
+                description: '보수적 가치를 지지하면서도 시민들이 직접 참여하는 민주주의를 중시하는 성향'
+            },
+            'MCTN': {
+                name: '전통 보수주의자',
+                icon: '👑',
+                description: '시장경제를 지지하면서도 전통적 가치와 위계질서를 중요하게 생각하는 성향'
+            },
+            'GPOS': {
+                name: '참여 사회민주주의자',
+                icon: '✊',
+                description: '복지국가를 추구하면서도 시민의 적극적 참여를 중시하고, 개방적 문화를 받아들이는 성향'
+            },
+            'GPON': {
+                name: '전문가 사회민주주의자',
+                icon: '🔬',
+                description: '복지국가를 추구하면서도 전문가의 권위와 과학적 방법론을 중시하는 성향'
+            },
+            'GPTS': {
+                name: '민중 진보주의자',
+                icon: '👥',
+                description: '서민과 노동자의 권익을 우선시하는 풀뿌리 진보 성향'
+            },
+            'GPTN': {
+                name: '계획 진보주의자',
+                icon: '📊',
+                description: '체계적 계획과 전문가 주도로 평등 사회를 건설하려는 성향'
+            },
+            'GCOS': {
+                name: '온건 국가주의자',
+                icon: '🏢',
+                description: '강한 정부와 전통적 가치의 균형을 추구하는 중도 보수 성향'
+            },
+            'GCON': {
+                name: '권위 보수주의자',
+                icon: '🛡️',
+                description: '강력한 질서와 위계를 통해 사회 안정을 추구하는 성향'
+            },
+            'GCTS': {
+                name: '민족 보수주의자',
+                icon: '🇰🇷',
+                description: '우리 문화와 전통을 자랑스럽게 여기는 자주적 보수 성향'
+            },
+            'GCTN': {
+                name: '위계 보수주의자',
+                icon: '📜',
+                description: '전통적 위계와 체계를 통한 사회 질서를 중시하는 성향'
+            }
+        };
+
+        // 성향 클릭 시 모달 표시
+        function showPersonalityModal(code) {
+            const data = personalityDescriptions[code];
+            if (!data) return;
+
+            document.getElementById('modalIcon').textContent = data.icon;
+            document.getElementById('modalTitle').textContent = data.name;
+            document.getElementById('modalCode').textContent = code;
+            document.getElementById('modalDescription').textContent = data.description;
+
+            const modal = document.getElementById('personalityModal');
+            modal.style.display = 'flex';
+        }
+
+        // 모달 닫기
+        function closePersonalityModal() {
+            document.getElementById('personalityModal').style.display = 'none';
+        }
+
+        // DOM 로드 후 모달 이벤트 리스너 추가
+        document.addEventListener('DOMContentLoaded', function() {
+            // 모달 외부 클릭 시 닫기
+            const modal = document.getElementById('personalityModal');
+            if (modal) {
+                modal.addEventListener('click', function(e) {
+                    if (e.target === this) {
+                        closePersonalityModal();
+                    }
+                });
+            }
+        });
+
+        // 미팅 신청 처리 함수
+        function handleMeetingApply(orientation) {
+            const userState = AuthManager.getUserState();
+            
+            // 로그인 확인
+            if (userState.type === 'anonymous') {
+                // 로그인하지 않은 경우 회원가입 페이지로
+                alert('소개팅 신청을 위해서는 회원가입이 필요합니다.');
+                location.href = 'signup.html';
+                return;
+            }
+            
+            // 정치 성향 테스트 완료 확인
+            if (userState.type === 'authenticated') {
+                // 로그인은 했지만 테스트 안 한 경우
+                alert('먼저 정치 성향 테스트를 완료해주세요.');
+                location.href = 'political-test.html?logged_in=true';
+                return;
+            }
+            
+            // verified 상태인 경우 성향 확인
+            if (userState.type === 'verified') {
+                const userType = userState.politicalType;
+                const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+                const userOrientation = progressiveCodes.includes(userType) ? 'progressive' : 'conservative';
+                
+                // 이미 신청한 모임인지 확인
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                if (appliedMeetings[orientation]) {
+                    const status = appliedMeetings[orientation].status;
+                    if (status === 'pending') {
+                        alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
+                    } else if (status === 'confirmed') {
+                        alert('이미 참가 확정된 소개팅입니다.');
+                    } else {
+                        alert('이미 신청하신 소개팅입니다.');
+                    }
+                    return;
+                }
+                
+                // 사용자 성향과 모임 성향이 일치하는지 확인
+                if (userOrientation !== orientation) {
+                    alert(`${userOrientation === 'progressive' ? '진보' : '보수'} 성향의 회원님은 ${userOrientation === 'progressive' ? '진보' : '보수'} 성향 모임에만 참여하실 수 있습니다.`);
+                    return;
+                }
+                
+                // 모든 조건을 만족하면 신청 페이지로 이동
+                location.href = `meeting-apply.html?orientation=${orientation}`;
+            }
+        }
+        
+        // 미팅 버튼 상태 업데이트 함수
+        async function updateMeetingButtons() {
+            try {
+                // 로그인 상태 확인
+                const userState = AuthManager.getUserState();
+                if (userState.type === 'anonymous') {
+                    return; // 로그인하지 않은 경우 기본 상태 유지
+                }
+                
+                // 서버에서 사용자 모임 정보 가져오기
+                const token = localStorage.getItem('authToken');
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : '';
+                    
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // 성향별로 모임 정보 정리
+                    const meetingsByOrientation = {
+                        progressive: null,
+                        conservative: null
+                    };
+                    
+                    if (data.meetings && data.meetings.length > 0) {
+                        data.meetings.forEach(meeting => {
+                            meetingsByOrientation[meeting.orientation] = {
+                                status: meeting.status,
+                                meetingId: meeting.id
+                            };
+                        });
+                    }
+                    
+                    // 버튼 업데이트
+                    updateButtonForMeeting('conservative', meetingsByOrientation.conservative);
+                    updateButtonForMeeting('progressive', meetingsByOrientation.progressive);
+                } else {
+                    // 서버 오류 시 로컬 데이터 폴백
+                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                    updateButtonForMeeting('conservative', appliedMeetings.conservative);
+                    updateButtonForMeeting('progressive', appliedMeetings.progressive);
+                }
+            } catch (error) {
+                console.error('모임 상태 조회 실패:', error);
+                // 오류 시 로컬 데이터 사용
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                updateButtonForMeeting('conservative', appliedMeetings.conservative);
+                updateButtonForMeeting('progressive', appliedMeetings.progressive);
+            }
+        }
+        
+        // 개별 미팅 버튼 업데이트
+        function updateButtonForMeeting(orientation, applicationData) {
+            const button = document.querySelector(`.meeting-card:has(.${orientation}) .btn-apply`);
+            if (!button) return;
+            
+            if (applicationData) {
+                const status = applicationData.status;
+                
+                if (status === 'pending') {
+                    button.textContent = '입금 대기중 - 취소하기';
+                    button.style.background = '#95a5a6';
+                    button.style.cursor = 'pointer';
+                    button.disabled = false;
+                    
+                    // 클릭 시 취소 처리
+                    button.onclick = function() {
+                        if (confirm('정말로 모임 신청을 취소하시겠습니까?\n\n⚠️ 취소 시 재신청이 필요합니다.')) {
+                            cancelMeetingFromIndex(applicationData.meetingId);
+                        }
+                    };
+                } else if (status === 'confirmed' || status === 'paid') {
+                    button.textContent = '참가 확정 - 취소하기';
+                    button.style.background = '#27ae60';
+                    button.style.cursor = 'pointer';
+                    button.disabled = false;
+                    
+                    // 클릭 시 취소 처리
+                    button.onclick = function() {
+                        if (confirm('정말로 모임 신청을 취소하시겠습니까?\n\n⚠️ 취소 시 재신청이 필요합니다.\n⚠️ 환불 규정을 확인해주세요.')) {
+                            cancelMeetingFromIndex(applicationData.meetingId);
+                        }
+                    };
+                } else if (status === 'cancelled') {
+                    button.textContent = '취소됨';
+                    button.style.background = '#e74c3c';
+                    button.style.cursor = 'not-allowed';
+                    button.disabled = true;
+                    
+                    button.onclick = function() {
+                        alert('취소된 소개팅입니다.');
+                    };
+                } else {
+                    // 기타 상태인 경우
+                    button.textContent = '이미 신청함';
+                    button.style.background = '#7f8c8d';
+                    button.style.cursor = 'not-allowed';
+                    button.disabled = true;
+                    
+                    button.onclick = function() {
+                        alert('이미 신청하신 소개팅입니다.');
+                    };
+                }
+            } else {
+                // 신청하지 않은 경우 기본 상태 유지
+                button.textContent = '참가 신청하기';
+                button.style.background = '';
+                button.style.cursor = '';
+                button.disabled = false;
+                button.onclick = function() {
+                    handleMeetingApply(orientation);
+                };
+            }
+        }
+        
+        // 참석 인원 업데이트 함수
+        async function updateAttendanceCount() {
+            try {
+                const response = await fetch('http://localhost:3000/api/meetings/attendance');
+                const data = await response.json();
+                
+                if (data.success && data.data) {
+                    let progressiveMale = 0;
+                    let progressiveFemale = 0;
+                    let conservativeMale = 0;
+                    let conservativeFemale = 0;
+                    
+                    // 데이터 집계
+                    Object.values(data.data).forEach(meeting => {
+                        if (meeting.orientation === 'progressive') {
+                            progressiveMale += meeting.male;
+                            progressiveFemale += meeting.female;
+                        } else if (meeting.orientation === 'conservative') {
+                            conservativeMale += meeting.male;
+                            conservativeFemale += meeting.female;
+                        }
+                    });
+                    
+                    // 화면 업데이트
+                    const progressiveMaleEl = document.getElementById('progressive-male');
+                    const progressiveFemaleEl = document.getElementById('progressive-female');
+                    const conservativeMaleEl = document.getElementById('conservative-male');
+                    const conservativeFemaleEl = document.getElementById('conservative-female');
+                    
+                    if (progressiveMaleEl) progressiveMaleEl.textContent = `${progressiveMale}/4`;
+                    if (progressiveFemaleEl) progressiveFemaleEl.textContent = `${progressiveFemale}/4`;
+                    if (conservativeMaleEl) conservativeMaleEl.textContent = `${conservativeMale}/4`;
+                    if (conservativeFemaleEl) conservativeFemaleEl.textContent = `${conservativeFemale}/4`;
+                }
+            } catch (error) {
+                console.error('참석 인원 조회 실패:', error);
+            }
+        }
+        
+        // 모임 신청 취소 함수
+        async function cancelMeetingFromIndex(meetingId) {
+            try {
+                const token = localStorage.getItem('authToken');
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : '';
+                    
+                const response = await fetch(`${API_URL}/api/meetings/cancel/${meetingId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    alert('모임 신청이 취소되었습니다.');
+                    
+                    // 버튼 상태 즉시 업데이트
+                    updateMeetingButtons();
+                } else {
+                    const error = await response.json();
+                    alert(error.message || '모임 취소 중 오류가 발생했습니다.');
+                }
+            } catch (error) {
+                console.error('모임 취소 오류:', error);
+                alert('모임 취소 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 페이지 로드 시 참석 인원 및 버튼 상태 업데이트
+        window.addEventListener('load', function() {
+            // 참석 인원 업데이트
+            updateAttendanceCount();
+            // 5초마다 자동 업데이트
+            setInterval(updateAttendanceCount, 5000);
+            
+            // 버튼 상태 업데이트
+            updateMeetingButtons();
+            // 5초마다 버튼 상태도 업데이트
+            setInterval(updateMeetingButtons, 5000);
+        });
+    </script>
+
+    <!-- 성향 설명 모달 -->
+    <div id="personalityModal" class="personality-modal">
+        <div class="personality-modal-content">
+            <button class="personality-modal-close" onclick="closePersonalityModal()">&times;</button>
+            <div class="personality-modal-icon" id="modalIcon"></div>
+            <h3 class="personality-modal-title" id="modalTitle"></h3>
+            <p class="personality-modal-code" id="modalCode"></p>
+            <p class="personality-modal-description" id="modalDescription"></p>
+        </div>
+    </div>
+</body>
+</html>

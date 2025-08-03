@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>예약 확인 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="booking-confirm-styles.css">
+    <script src="auth-check.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#intro">서비스 소개</a></li>
+                <li><a href="index.html#test">성향 테스트</a></li>
+                <li><a href="index.html#meeting">오프라인 소개팅</a></li>
+                <li><a href="index.html#faq">자주 묻는 질문</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="political-test.html?logged_in=true" class="nav-btn">성향 테스트 받기</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 예약 확인 섹션 -->
+    <section class="booking-confirm-section">
+        <div class="container">
+            <div class="booking-header">
+                <h1>예약 확인</h1>
+                <p>선택하신 소개팅 정보를 확인하고 참가자 정보를 입력해주세요</p>
+            </div>
+
+            <div class="booking-content">
+                <!-- 선택한 소개팅 정보 -->
+                <div class="selected-meeting-info">
+                    <h2>선택하신 소개팅</h2>
+                    <div class="meeting-detail-card">
+                        <div class="detail-row">
+                            <span class="label">소개팅명</span>
+                            <span class="value" id="meeting-title">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">날짜</span>
+                            <span class="value" id="meeting-date">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">시간</span>
+                            <span class="value" id="meeting-time">-</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="label">장소</span>
+                            <span class="value" id="meeting-location">-</span>
+                        </div>
+                        <div class="detail-row highlight">
+                            <span class="label">참가비</span>
+                            <span class="value price">45,000원</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 참가자 정보 입력 -->
+                <div class="participant-form-section">
+                    <h2>참가자 정보</h2>
+                    <p class="info-auto-fill">📢 프로필 정보가 자동으로 입력되었습니다. 수정이 필요한 경우 변경해주세요.</p>
+                    <form id="participant-form" class="participant-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="participant-name">이름</label>
+                                <input type="text" id="participant-name" name="name" readonly class="auto-filled">
+                                <span class="error-message" id="name-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="participant-phone">휴대폰 번호 <span class="required">*</span></label>
+                                <input type="tel" id="participant-phone" name="phone" required placeholder="010-0000-0000">
+                                <span class="error-message" id="phone-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="participant-email">이메일</label>
+                                <input type="email" id="participant-email" name="email" readonly class="auto-filled">
+                                <span class="error-message" id="email-error"></span>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="participant-birth">생년월일</label>
+                                <input type="date" id="participant-birth" name="birth" readonly class="auto-filled">
+                                <span class="form-hint">만 20세 이상 회원만 참가 가능합니다</span>
+                            </div>
+                        </div>
+
+                        <div class="user-type-info-box">
+                            <h3>내 정치 성향</h3>
+                            <div class="type-display">
+                                <span id="user-type-icon">-</span>
+                                <span id="user-type-name">-</span>
+                                <span id="user-gender">-</span>
+                            </div>
+                        </div>
+
+                        <!-- 환불 규정 동의 -->
+                        <div class="terms-section">
+                            <h3>환불 규정 확인</h3>
+                            <div class="terms-list">
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" name="terms" id="terms-refund" required>
+                                        <span>[필수] 환불 규정을 확인하였으며 이에 동의합니다</span>
+                                    </label>
+                                    <a href="refund.html" target="_blank" class="view-link">보기</a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 안내사항 -->
+                        <div class="notice-section">
+                            <h3>예약 전 안내사항</h3>
+                            <ul>
+                                <li>소개팅은 남녀 각 4명씩, 총 8명으로 진행됩니다</li>
+                                <li>편안한 분위기에서 대화를 나눌 수 있습니다</li>
+                                <li>소개팅 3일 전까지 취소 시 전액 환불됩니다</li>
+                                <li>당일 불참 시 환불이 불가합니다</li>
+                                <li>상대방을 존중하는 매너있는 대화를 부탁드립니다</li>
+                            </ul>
+                        </div>
+
+                        <!-- 버튼 -->
+                        <div class="button-group">
+                            <button type="button" class="btn-secondary" onclick="history.back()">이전으로</button>
+                            <button type="submit" class="btn-primary">결제 진행하기</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향 기반 오프라인 만남 서비스</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="political-test.html">성향 테스트</a></li>
+                        <li><a href="meeting-schedule.html">모임 일정</a></li>
+                        <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <ul>
+                        <li>평일 10:00 - 18:00</li>
+                        <li><a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>정책</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="booking-confirm-script.js"></script>
+</body>
+</html>

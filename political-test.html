@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>정치 성향 테스트 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="test-styles.css">
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+    <script src="political-test-script.js" defer></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <div class="test-progress">
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: 0%"></div>
+                </div>
+                <span class="progress-text">0%</span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 테스트 시작 화면 -->
+    <section id="test-intro" class="test-intro">
+        <div class="container">
+            <div class="login-check-box">
+                <h2>로그인이 필요한 서비스입니다</h2>
+                <p>정치 성향 테스트는 회원님께만 제공됩니다.</p>
+                <div class="login-actions">
+                    <a href="login.html" class="btn-login">로그인</a>
+                    <a href="signup.html" class="btn-signup">회원가입</a>
+                </div>
+            </div>
+
+            <div id="test-content" style="display: none;">
+                <h1>나의 정치 성향 알아보기</h1>
+                <p class="test-description">
+                    일상적인 상황과 가치관에 대한 질문을 통해<br>
+                    당신의 정치적 성향을 분석합니다
+                </p>
+                
+                <div class="test-info">
+                    <div class="info-item">
+                        <span class="info-icon">⏰</span>
+                        <span>약 5-10분 소요</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">📊</span>
+                        <span>16가지 성향 분류</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-icon">🔒</span>
+                        <span>익명 보장</span>
+                    </div>
+                </div>
+
+                <div class="test-notice">
+                    <h3>테스트 전 안내사항</h3>
+                    <ul>
+                        <li>정답이 없는 질문들입니다. 편하게 답변해주세요.</li>
+                        <li>첫 느낌대로 빠르게 선택하는 것이 정확합니다.</li>
+                        <li>모든 응답은 안전하게 보호됩니다.</li>
+                    </ul>
+                </div>
+
+                <button class="start-test-btn" onclick="startTest()">테스트 시작하기</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 테스트 질문 화면 -->
+    <section id="test-questions" class="test-questions" style="display: none;">
+        <div class="container">
+            <div class="question-container">
+                <p id="question-text" class="question-text">
+                    <!-- 질문이 여기에 표시됩니다 -->
+                </p>
+            </div>
+
+            <div class="answers-container">
+                <div class="scale-labels">
+                    <span class="scale-label-left">그렇다</span>
+                    <span class="scale-label-right">그렇지 않다</span>
+                </div>
+                <div class="answer-scale">
+                    <button class="answer-btn scale-1" onclick="selectAnswer(5)">
+                        <span class="answer-dot"></span>
+                    </button>
+                    <button class="answer-btn scale-2" onclick="selectAnswer(4)">
+                        <span class="answer-dot"></span>
+                    </button>
+                    <button class="answer-btn scale-3" onclick="selectAnswer(3)">
+                        <span class="answer-dot"></span>
+                    </button>
+                    <button class="answer-btn scale-4" onclick="selectAnswer(2)">
+                        <span class="answer-dot"></span>
+                    </button>
+                    <button class="answer-btn scale-5" onclick="selectAnswer(1)">
+                        <span class="answer-dot"></span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="navigation">
+                <button class="nav-btn prev-btn" onclick="previousQuestion()" disabled>이전</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- 결과 화면 -->
+    <section id="test-result" class="test-result" style="display: none;">
+        <div class="container">
+            <h1>당신의 정치 성향은</h1>
+            <div class="result-card">
+                <div class="result-type">
+                    <span class="type-icon">🌱</span>
+                    <h2 id="result-title">진보 개혁형</h2>
+                </div>
+                <p id="result-description" class="result-description">
+                    사회의 긍정적 변화를 추구하며, 다양성과 포용을 중시합니다.
+                    새로운 아이디어에 열려있고, 약자 보호에 관심이 많습니다.
+                </p>
+                
+                <div class="result-details">
+                    <h3>주요 특징</h3>
+                    <ul id="result-features">
+                        <li>변화와 혁신을 긍정적으로 봄</li>
+                        <li>사회적 약자 보호에 적극적</li>
+                        <li>환경 문제에 관심이 높음</li>
+                        <li>문화적 다양성을 존중</li>
+                    </ul>
+                </div>
+
+                <div class="matching-types">
+                    <h3>잘 맞는 성향</h3>
+                    <div class="type-badges">
+                        <span class="type-badge">사회 복지형</span>
+                        <span class="type-badge">환경 우선형</span>
+                        <span class="type-badge">글로벌 시민형</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="result-actions">
+                <button class="action-btn primary" onclick="goToMatching()">소개팅 일정 확인하기</button>
+                <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
+            </div>
+        </div>
+    </section>
+</body>
+</html>

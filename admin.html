@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이드픽 관리자</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="admin-styles.css">
+    <script src="api-client.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽 관리자</a>
+            </div>
+            <div class="nav-links">
+                <a href="index.html" class="nav-link">메인 페이지</a>
+                <button onclick="refreshData()" class="nav-link btn-refresh">새로고침</button>
+                <label class="auto-refresh-toggle">
+                    <input type="checkbox" id="auto-refresh" checked> 자동 새로고침
+                </label>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 메인 컨텐츠 -->
+    <main class="admin-container">
+        <!-- 자동 새로고침 상태 표시 -->
+        <div id="sync-status" class="sync-status">
+            <span class="sync-icon">🔄</span>
+            <span class="sync-text">데이터 동기화 중...</span>
+        </div>
+        
+        <!-- 통계 현황 -->
+        <section class="stats-section">
+            <h2>통계 현황 <span id="last-update" class="last-update"></span></h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <h3>전체 회원</h3>
+                    <p class="stat-number" id="total-users">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>테스트 완료</h3>
+                    <p class="stat-number" id="test-completed">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>모임 신청</h3>
+                    <p class="stat-number" id="meeting-applied">0</p>
+                </div>
+                <div class="stat-card">
+                    <h3>결제 완료</h3>
+                    <p class="stat-number" id="payment-completed">0</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 회원 목록 -->
+        <section class="users-section">
+            <h2>회원 목록</h2>
+            
+            <!-- 필터 -->
+            <div class="filter-controls">
+                <select id="filter-status" onchange="filterUsers()">
+                    <option value="all">전체</option>
+                    <option value="registered">가입만</option>
+                    <option value="tested">테스트 완료</option>
+                    <option value="applied">모임 신청</option>
+                    <option value="paid">결제 완료</option>
+                </select>
+                
+                <select id="filter-orientation" onchange="filterUsers()">
+                    <option value="all">전체 성향</option>
+                    <option value="progressive">진보</option>
+                    <option value="conservative">보수</option>
+                    <option value="none">미분류</option>
+                </select>
+                
+                <input type="search" id="search-input" placeholder="이름, 이메일 검색" onkeyup="searchUsers()">
+            </div>
+
+            <!-- 회원 테이블 -->
+            <div class="table-wrapper">
+                <table class="users-table">
+                    <thead>
+                        <tr>
+                            <th>가입일</th>
+                            <th>이름</th>
+                            <th>이메일</th>
+                            <th>전화번호</th>
+                            <th>성별</th>
+                            <th>나이</th>
+                            <th>정치성향</th>
+                            <th>마케팅</th>
+                            <th>모임신청</th>
+                            <th>결제현황</th>
+                            <th>상세</th>
+                        </tr>
+                    </thead>
+                    <tbody id="users-tbody">
+                        <!-- 회원 데이터가 여기에 추가됨 -->
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- 페이지네이션 -->
+            <div class="pagination" id="pagination">
+                <!-- 페이지 버튼이 여기에 추가됨 -->
+            </div>
+        </section>
+
+        <!-- 회원 상세 모달 -->
+        <div class="modal" id="user-detail-modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <h2>회원 상세 정보</h2>
+                
+                <div class="detail-grid">
+                    <!-- 기본 정보 -->
+                    <div class="detail-section">
+                        <h3>기본 정보</h3>
+                        <div class="detail-item">
+                            <label>이름:</label>
+                            <span id="detail-name"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>이메일:</label>
+                            <span id="detail-email"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>전화번호:</label>
+                            <span id="detail-phone"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>생년월일:</label>
+                            <span id="detail-birth"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>성별:</label>
+                            <span id="detail-gender"></span>
+                        </div>
+                        <div class="detail-item">
+                            <label>가입일:</label>
+                            <span id="detail-joined"></span>
+                        </div>
+                    </div>
+
+                    <!-- 정치 성향 -->
+                    <div class="detail-section">
+                        <h3>정치 성향</h3>
+                        <div id="political-detail">
+                            <!-- 정치 성향 정보가 여기에 추가됨 -->
+                        </div>
+                    </div>
+
+                    <!-- 모임 신청 내역 -->
+                    <div class="detail-section">
+                        <h3>모임 신청 내역</h3>
+                        <div id="meetings-detail">
+                            <!-- 모임 신청 정보가 여기에 추가됨 -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>

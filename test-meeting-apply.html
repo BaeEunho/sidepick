@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>모임 신청 테스트</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; }
+        button { margin: 5px; padding: 10px 20px; }
+        .log { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>모임 신청 테스트 페이지</h1>
+    
+    <div class="section">
+        <h2>1. 테스트 계정으로 로그인</h2>
+        <button onclick="testLogin()">테스트 로그인</button>
+        <div id="login-result" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. 정치 성향 저장</h2>
+        <button onclick="savePoliticalType()">정치 성향 저장 (MCON)</button>
+        <div id="political-result" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 모임 신청</h2>
+        <button onclick="applyMeeting()">모임 신청하기</button>
+        <div id="apply-result" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>4. 관리자 페이지 확인</h2>
+        <button onclick="checkAdmin()">관리자 데이터 확인</button>
+        <div id="admin-result" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>현재 상태</h2>
+        <button onclick="checkStatus()">상태 확인</button>
+        <div id="status-result" class="log"></div>
+    </div>
+
+    <script>
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            result.innerHTML = '로그인 중...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'clsrna3@naver.com',
+                        password: 'a3651257!@#'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('로그인 응답:', data);
+                
+                if (data.success) {
+                    // 토큰 저장
+                    localStorage.setItem('authToken', data.data.token);
+                    
+                    // 세션 정보 저장
+                    sessionStorage.setItem('isLoggedIn', 'true');
+                    sessionStorage.setItem('userEmail', data.data.user.email);
+                    sessionStorage.setItem('userProfile', JSON.stringify(data.data.user));
+                    sessionStorage.setItem('userGender', data.data.user.gender);
+                    
+                    result.innerHTML = '<span class="success">로그인 성공! 토큰: ' + data.data.token.substring(0, 20) + '...</span>';
+                } else {
+                    result.innerHTML = '<span class="error">로그인 실패: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">오류: ' + error.message + '</span>';
+            }
+        }
+        
+        async function savePoliticalType() {
+            const result = document.getElementById('political-result');
+            result.innerHTML = '정치 성향 저장 중...';
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                result.innerHTML = '<span class="error">먼저 로그인하세요!</span>';
+                return;
+            }
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/auth/save-political-type', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify({
+                        politicalType: 'MCON'
+                    })
+                });
+                
+                const data = await response.json();
+                console.log('정치 성향 저장 응답:', data);
+                
+                if (data.success) {
+                    sessionStorage.setItem('politicalType', 'MCON');
+                    result.innerHTML = '<span class="success">정치 성향 저장 성공!</span>';
+                } else {
+                    result.innerHTML = '<span class="error">저장 실패: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">오류: ' + error.message + '</span>';
+            }
+        }
+        
+        async function applyMeeting() {
+            const result = document.getElementById('apply-result');
+            result.innerHTML = '모임 신청 중...';
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                result.innerHTML = '<span class="error">먼저 로그인하세요!</span>';
+                return;
+            }
+            
+            try {
+                const requestData = {
+                    meetingId: 'test-meeting-' + Date.now(),
+                    orientation: 'conservative',
+                    meetingInfo: {
+                        title: '테스트 보수 모임',
+                        date: '8월 9일 (토)',
+                        location: '강남역 파티룸'
+                    },
+                    applicationData: {
+                        job: '개발자',
+                        intro: '테스트 자기소개',
+                        expect: '테스트 기대사항',
+                        payment: 'bank'
+                    }
+                };
+                
+                console.log('전송 데이터:', requestData);
+                
+                const response = await fetch('http://localhost:3000/api/meetings/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': 'Bearer ' + token
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const data = await response.json();
+                console.log('모임 신청 응답:', data);
+                
+                if (data.success) {
+                    result.innerHTML = '<span class="success">모임 신청 성공! Booking ID: ' + data.data.bookingId + '</span>';
+                } else {
+                    result.innerHTML = '<span class="error">신청 실패: ' + data.message + '</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">오류: ' + error.message + '</span>';
+            }
+        }
+        
+        async function checkAdmin() {
+            const result = document.getElementById('admin-result');
+            result.innerHTML = '관리자 데이터 확인 중...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/admin/users');
+                const data = await response.json();
+                console.log('관리자 API 응답:', data);
+                
+                if (data.success) {
+                    const users = data.data.users;
+                    let html = '<h3>전체 사용자: ' + users.length + '명</h3>';
+                    
+                    users.forEach(user => {
+                        html += '<div>이름: ' + user.name + ' (' + user.email + ')';
+                        html += '<br>모임 신청: ' + (user.meetings ? user.meetings.length : 0) + '건';
+                        
+                        if (user.meetings && user.meetings.length > 0) {
+                            html += '<ul>';
+                            user.meetings.forEach(meeting => {
+                                html += '<li>' + meeting.title + ' - ' + meeting.status + '</li>';
+                            });
+                            html += '</ul>';
+                        }
+                        html += '</div><hr>';
+                    });
+                    
+                    result.innerHTML = html;
+                } else {
+                    result.innerHTML = '<span class="error">데이터 조회 실패</span>';
+                }
+            } catch (error) {
+                result.innerHTML = '<span class="error">오류: ' + error.message + '</span>';
+            }
+        }
+        
+        function checkStatus() {
+            const result = document.getElementById('status-result');
+            const token = localStorage.getItem('authToken');
+            const email = sessionStorage.getItem('userEmail');
+            const politicalType = sessionStorage.getItem('politicalType');
+            const appliedMeetings = sessionStorage.getItem('appliedMeetings');
+            
+            result.innerHTML = `
+                <strong>로컬 상태:</strong><br>
+                토큰: ${token ? '있음 (' + token.substring(0, 20) + '...)' : '없음'}<br>
+                이메일: ${email || '없음'}<br>
+                정치 성향: ${politicalType || '없음'}<br>
+                모임 신청: ${appliedMeetings || '없음'}
+            `;
+        }
+    </script>
+</body>
+</html>

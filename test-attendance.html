@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>참석 인원 테스트</title>
+</head>
+<body>
+    <h1>참석 인원 API 테스트</h1>
+    <button onclick="testAPI()">API 테스트</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '로딩 중...';
+            
+            try {
+                const response = await fetch('http://localhost:3000/api/meetings/attendance');
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <h2>API 응답:</h2>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                    <h3>참석 인원 요약:</h3>
+                `;
+                
+                if (data.success && data.data) {
+                    for (const [key, value] of Object.entries(data.data)) {
+                        resultDiv.innerHTML += `
+                            <p><strong>${value.orientation}</strong>: 남자 ${value.male}명, 여자 ${value.female}명</p>
+                        `;
+                    }
+                } else {
+                    resultDiv.innerHTML += '<p>데이터 없음</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: red;">에러: ${error.message}</p>`;
+            }
+        }
+        
+        // 페이지 로드 시 자동 실행
+        window.onload = testAPI;
+    </script>
+</body>
+</html>

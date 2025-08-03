@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm:*)",
+      "Bash(grep:*)",
+      "Bash(sed:*)",
+      "Bash(for file in *.html)",
+      "Bash(do if ! grep -q \"auth-check.js\" \"$file\")",
+      "Bash(then echo \"$file\")",
+      "Bash(fi)",
+      "Bash(done)",
+      "Bash(find:*)",
+      "Bash(ls:*)",
+      "Bash(python3:*)",
+      "Bash(curl:*)",
+      "Bash(touch:*)",
+      "Bash(cp:*)",
+      "Bash(rg:*)",
+      "Bash(python:*)",
+      "Bash(pkill:*)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npm start)",
+      "Bash(chmod:*)",
+      "Bash(./start-server.sh:*)",
+      "Bash(npx pm2 restart:*)",
+      "Bash(pm2 restart:*)",
+      "Bash(kill:*)",
+      "Bash(true)",
+      "Bash(pm2 logs:*)",
+      "Bash(cat:*)",
+      "Bash(fuser:*)",
+      "Bash(ss:*)",
+      "Bash(npx pm2 list:*)",
+      "Bash(npx pm2 logs:*)"
+    ],
+    "deny": []
+  }
+}

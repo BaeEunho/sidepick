@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오 웹 로그인</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .login-button {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        .kakao-login {
+            background-color: #FEE500;
+            color: #000000;
+        }
+        .kakao-login:hover {
+            background-color: #FADA0A;
+        }
+        .info-button {
+            background-color: #6c757d;
+            color: white;
+        }
+        .info-button:hover {
+            background-color: #5a6268;
+        }
+        .logout-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        .logout-button:hover {
+            background-color: #c82333;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .status {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .status.success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.error {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        .status.info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>카카오 웹 로그인 테스트</h1>
+        
+        <div id="status" class="status info">
+            SDK 초기화 중...
+        </div>
+        
+        <button class="login-button kakao-login" onclick="kakaoLogin()">
+            카카오 계정으로 로그인
+        </button>
+        
+        <button class="login-button info-button" onclick="checkLoginStatus()">
+            로그인 상태 확인
+        </button>
+        
+        <button class="login-button info-button" onclick="getUserInfo()">
+            사용자 정보 가져오기
+        </button>
+        
+        <button class="login-button logout-button" onclick="kakaoLogout()">
+            로그아웃
+        </button>
+        
+        <div id="result"></div>
+    </div>
+
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    
+    <script>
+        const statusDiv = document.getElementById('status');
+        const resultDiv = document.getElementById('result');
+        
+        // Kakao SDK 초기화
+        window.addEventListener('DOMContentLoaded', function() {
+            try {
+                Kakao.init('086f0d034b50fde43316d686a0bf74ea');
+                
+                if (Kakao.isInitialized()) {
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✓ Kakao SDK 초기화 완료';
+                    console.log('Kakao SDK initialized');
+                    
+                    // 초기 로그인 상태 확인
+                    checkLoginStatus();
+                } else {
+                    throw new Error('SDK 초기화 실패');
+                }
+            } catch (error) {
+                statusDiv.className = 'status error';
+                statusDiv.textContent = '✗ 초기화 실패: ' + error.message;
+                console.error('Kakao 초기화 에러:', error);
+            }
+        });
+        
+        // 카카오 로그인
+        function kakaoLogin() {
+            if (!Kakao.isInitialized()) {
+                alert('Kakao SDK가 초기화되지 않았습니다.');
+                return;
+            }
+            
+            // 웹 환경에서 팝업 방식으로 로그인
+            Kakao.Auth.login({
+                success: function(authObj) {
+                    console.log('로그인 성공:', authObj);
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✓ 로그인 성공!';
+                    resultDiv.textContent = '인증 정보:\n' + JSON.stringify(authObj, null, 2);
+                    
+                    // 로그인 성공 후 사용자 정보 자동 조회
+                    getUserInfo();
+                },
+                fail: function(err) {
+                    console.error('로그인 실패:', err);
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '✗ 로그인 실패';
+                    resultDiv.textContent = '에러:\n' + JSON.stringify(err, null, 2);
+                },
+                // 팝업 옵션 명시적 설정
+                throughTalk: false,  // 카카오톡으로 로그인 비활성화
+                persistAccessToken: true,
+                persistRefreshToken: true
+            });
+        }
+        
+        // 로그인 상태 확인
+        function checkLoginStatus() {
+            const token = Kakao.Auth.getAccessToken();
+            
+            if (token) {
+                statusDiv.className = 'status success';
+                statusDiv.textContent = '✓ 로그인됨';
+                resultDiv.textContent = '현재 로그인 상태입니다.\n\n액세스 토큰:\n' + token;
+                
+                // 토큰 정보 확인
+                Kakao.Auth.getStatusInfo()
+                    .then(function(res) {
+                        resultDiv.textContent += '\n\n토큰 상태:\n' + JSON.stringify(res, null, 2);
+                    })
+                    .catch(function(err) {
+                        console.error('토큰 상태 확인 실패:', err);
+                    });
+            } else {
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'ℹ 로그인되지 않음';
+                resultDiv.textContent = '로그인이 필요합니다.';
+            }
+        }
+        
+        // 사용자 정보 가져오기
+        function getUserInfo() {
+            if (!Kakao.Auth.getAccessToken()) {
+                alert('로그인이 필요합니다.');
+                return;
+            }
+            
+            Kakao.API.request({
+                url: '/v2/user/me',
+                success: function(response) {
+                    console.log('사용자 정보:', response);
+                    statusDiv.className = 'status success';
+                    statusDiv.textContent = '✓ 사용자 정보 조회 성공';
+                    
+                    // 사용자 정보 정리
+                    const userInfo = {
+                        'ID': response.id,
+                        '닉네임': response.properties?.nickname || '없음',
+                        '프로필 이미지': response.properties?.profile_image || '없음',
+                        '이메일': response.kakao_account?.email || '없음',
+                        '성별': response.kakao_account?.gender || '없음',
+                        '생일': response.kakao_account?.birthday || '없음',
+                        '연령대': response.kakao_account?.age_range || '없음'
+                    };
+                    
+                    let formattedInfo = '=== 사용자 정보 ===\n\n';
+                    for (const [key, value] of Object.entries(userInfo)) {
+                        formattedInfo += `${key}: ${value}\n`;
+                    }
+                    
+                    formattedInfo += '\n\n=== 전체 응답 데이터 ===\n' + JSON.stringify(response, null, 2);
+                    resultDiv.textContent = formattedInfo;
+                },
+                fail: function(error) {
+                    console.error('사용자 정보 요청 실패:', error);
+                    statusDiv.className = 'status error';
+                    statusDiv.textContent = '✗ 사용자 정보 조회 실패';
+                    resultDiv.textContent = '에러:\n' + JSON.stringify(error, null, 2);
+                }
+            });
+        }
+        
+        // 로그아웃
+        function kakaoLogout() {
+            if (!Kakao.Auth.getAccessToken()) {
+                alert('이미 로그아웃 상태입니다.');
+                return;
+            }
+            
+            Kakao.Auth.logout(function() {
+                console.log('로그아웃 완료');
+                statusDiv.className = 'status info';
+                statusDiv.textContent = 'ℹ 로그아웃 완료';
+                resultDiv.textContent = '로그아웃되었습니다.';
+            });
+        }
+        
+        // 디버깅을 위한 전역 함수
+        window.getKakaoInfo = function() {
+            return {
+                initialized: Kakao.isInitialized(),
+                accessToken: Kakao.Auth.getAccessToken(),
+                version: Kakao.VERSION
+            };
+        };
+    </script>
+</body>
+</html>

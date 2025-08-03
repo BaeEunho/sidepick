@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>로그인 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="auth-styles.css">
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 로그인 섹션 -->
+    <section class="auth-section">
+        <div class="auth-container">
+            <div class="auth-box">
+                <h1>로그인</h1>
+                <p class="auth-subtitle">나와 통하는 사람을 만날 시간</p>
+
+
+                <form class="auth-form" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label for="email">이메일</label>
+                        <input type="email" id="email" name="email" placeholder="example@email.com" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="password">비밀번호</label>
+                        <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+                    </div>
+
+                    <div class="form-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="remember">
+                            <span>로그인 상태 유지</span>
+                        </label>
+                        <a href="#" class="forgot-link">비밀번호 찾기</a>
+                    </div>
+
+                    <button type="submit" class="auth-submit-btn">로그인</button>
+                </form>
+
+
+                <div class="auth-footer">
+                    <p>아직 회원이 아니신가요? <a href="signup.html">회원가입</a></p>
+                    <p class="login-benefit">로그인 후 정치 성향 테스트와 매칭 서비스를 이용하실 수 있습니다.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        async function handleLogin(event) {
+            event.preventDefault();
+            
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            
+            try {
+                // 실제 서버 API 호출
+                const response = await login(email, password);
+                
+                if (response.success) {
+                    // 로그인 데이터 동기화
+                    syncAuthData(response.data.user, response.data.token);
+                    
+                    // AuthManager 호환성을 위한 로그인 처리
+                    AuthManager.login(email, {
+                        name: response.data.user.name,
+                        email: response.data.user.email,
+                        phone: response.data.user.phone,
+                        birthdate: response.data.user.birthdate,
+                        gender: response.data.user.gender
+                    });
+                    
+                    // 정치 성향 테스트 완료 여부 확인
+                    if (response.data.user.political_type) {
+                        // 정치 성향 타입 정보 저장
+                        const politicalType = response.data.user.political_type;
+                        const typeInfo = getPoliticalTypeInfo(politicalType);
+                        
+                        sessionStorage.setItem('politicalType', politicalType);
+                        sessionStorage.setItem('userType', JSON.stringify({
+                            code: politicalType,
+                            title: typeInfo.title,
+                            orientation: typeInfo.orientation
+                        }));
+                        
+                        // AuthManager 테스트 완료 상태 설정
+                        AuthManager.setTestComplete();
+                        
+                        alert('로그인되었습니다.');
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('로그인되었습니다. 정치 성향 테스트를 진행해주세요.');
+                        window.location.href = 'political-test.html';
+                    }
+                } else {
+                    alert(response.message || '로그인에 실패했습니다.');
+                }
+            } catch (error) {
+                console.error('로그인 오류:', error);
+                
+                // 서버 연결 실패 시 데모 모드로 동작
+                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
+                    console.log('서버 연결 실패 - 데모 모드로 진행');
+                    
+                    // 데모 모드: 가입된 사용자 확인
+                    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
+                    if (!registeredUsers.includes(email)) {
+                        alert('[데모 모드] 등록되지 않은 이메일입니다.\n회원가입을 먼저 진행해주세요.');
+                        return;
+                    }
+                    
+                    // 데모용 사용자 프로필
+                    const demoProfile = {
+                        name: '홍길동',
+                        email: email,
+                        phone: '010-1234-5678',
+                        birthdate: '1995-01-01',
+                        gender: 'male'
+                    };
+                    
+                    // AuthManager를 통해 로그인 처리
+                    AuthManager.login(email, demoProfile);
+                    
+                    // 테스트 완료 여부 확인 (데모에서는 localStorage에서 확인)
+                    const savedPoliticalType = localStorage.getItem(`politicalType_${email}`);
+                    if (savedPoliticalType) {
+                        const typeInfo = getPoliticalTypeInfo(savedPoliticalType);
+                        
+                        sessionStorage.setItem('politicalType', savedPoliticalType);
+                        sessionStorage.setItem('userType', JSON.stringify({
+                            code: savedPoliticalType,
+                            title: typeInfo.title,
+                            orientation: typeInfo.orientation
+                        }));
+                        
+                        AuthManager.setTestComplete();
+                        alert('[데모 모드] 로그인되었습니다.');
+                        window.location.href = 'index.html';
+                    } else {
+                        alert('[데모 모드] 로그인되었습니다.\n정치 성향 테스트를 진행해주세요.');
+                        window.location.href = 'political-test.html';
+                    }
+                } else {
+                    alert(error.message || '로그인 중 오류가 발생했습니다.');
+                }
+            }
+        }
+        
+        // 정치 성향 타입 정보 가져오기
+        function getPoliticalTypeInfo(code) {
+            const orientationMap = {
+                // 진보 성향
+                'MPOS': { title: '시장 다원주의자', orientation: 'progressive' },
+                'MPON': { title: '시장 자유주의자', orientation: 'progressive' },
+                'MPTS': { title: '시장 유목민', orientation: 'progressive' },
+                'MPTN': { title: '시장 무정부주의자', orientation: 'progressive' },
+                'GPOS': { title: '사회 다원주의자', orientation: 'progressive' },
+                'GPON': { title: '복지 자유주의자', orientation: 'progressive' },
+                'GPTS': { title: '온정적 개혁주의자', orientation: 'progressive' },
+                'GPTN': { title: '계몽적 엘리트주의자', orientation: 'progressive' },
+                // 보수 성향
+                'MCOS': { title: '시장 공동체주의자', orientation: 'conservative' },
+                'MCON': { title: '기업가적 보수주의자', orientation: 'conservative' },
+                'MCTS': { title: '실용적 전통주의자', orientation: 'conservative' },
+                'MCTN': { title: '자유 보수주의자', orientation: 'conservative' },
+                'GCOS': { title: '공동체 중심주의자', orientation: 'conservative' },
+                'GCON': { title: '국가 보수주의자', orientation: 'conservative' },
+                'GCTS': { title: '온정적 보수주의자', orientation: 'conservative' },
+                'GCTN': { title: '권위주의적 보수주의자', orientation: 'conservative' }
+            };
+            
+            return orientationMap[code] || { title: '알 수 없음', orientation: 'unknown' };
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 상태 디버깅</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        h2 {
+            color: #555;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .data-view {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            word-break: break-word;
+            margin: 10px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .status-pending {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        .status-confirmed {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="debug-container">
+        <h1>결제 상태 디버깅 페이지</h1>
+        
+        <h2>1. appliedMeetings 데이터</h2>
+        <div id="applied-meetings" class="data-view">로딩중...</div>
+        
+        <h2>2. selectedMeeting 데이터</h2>
+        <div id="selected-meeting" class="data-view">로딩중...</div>
+        
+        <h2>3. 참가자 정보</h2>
+        <div id="participant-info" class="data-view">로딩중...</div>
+        
+        <h2>4. 결제 정보</h2>
+        <div id="payment-info" class="data-view">로딩중...</div>
+        
+        <h2>5. 테스트 액션</h2>
+        <button onclick="simulatePendingStatus()">입금 대기 상태로 설정</button>
+        <button onclick="simulateConfirmedStatus()">참가 확정 상태로 설정</button>
+        <button onclick="clearAllData()">모든 데이터 초기화</button>
+        <button onclick="refreshData()">데이터 새로고침</button>
+        
+        <h2>6. 페이지 이동</h2>
+        <button onclick="location.href='index.html'">홈으로</button>
+        <button onclick="location.href='mypage.html'">마이페이지로</button>
+        <button onclick="location.href='meeting-schedule.html'">미팅 일정으로</button>
+    </div>
+
+    <script>
+        function loadData() {
+            // appliedMeetings
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            document.getElementById('applied-meetings').innerHTML = JSON.stringify(appliedMeetings, null, 2);
+            
+            // selectedMeeting
+            const selectedMeeting = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+            document.getElementById('selected-meeting').innerHTML = JSON.stringify(selectedMeeting, null, 2);
+            
+            // participantInfo
+            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
+            document.getElementById('participant-info').innerHTML = JSON.stringify(participantInfo, null, 2);
+            
+            // paymentInfo
+            const paymentInfo = JSON.parse(sessionStorage.getItem('paymentInfo') || '{}');
+            document.getElementById('payment-info').innerHTML = JSON.stringify(paymentInfo, null, 2);
+            
+            // 상태별 색상 적용
+            const appliedView = document.getElementById('applied-meetings');
+            if (appliedView.innerHTML.includes('"status": "pending"')) {
+                appliedView.innerHTML = appliedView.innerHTML.replace(/"status": "pending"/g, '<span class="status-pending">"status": "pending"</span>');
+            }
+            if (appliedView.innerHTML.includes('"status": "confirmed"')) {
+                appliedView.innerHTML = appliedView.innerHTML.replace(/"status": "confirmed"/g, '<span class="status-confirmed">"status": "confirmed"</span>');
+            }
+        }
+        
+        function simulatePendingStatus() {
+            // 테스트용 데이터 생성
+            const politicalType = sessionStorage.getItem('politicalType') || 'MPOS';
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            const orientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+            
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                status: 'pending',
+                appliedAt: new Date().toISOString(),
+                orientation: orientation,
+                gender: sessionStorage.getItem('userGender') || 'male',
+                meetingId: '2025-08-23'
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            
+            alert('입금 대기 상태로 설정되었습니다.');
+            refreshData();
+        }
+        
+        function simulateConfirmedStatus() {
+            // 테스트용 데이터 생성
+            const politicalType = sessionStorage.getItem('politicalType') || 'MPOS';
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            const orientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+            
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                status: 'confirmed',
+                appliedAt: new Date(Date.now() - 86400000).toISOString(), // 1일 전
+                confirmedAt: new Date().toISOString(),
+                orientation: orientation,
+                gender: sessionStorage.getItem('userGender') || 'male',
+                meetingId: '2025-08-23'
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            
+            alert('참가 확정 상태로 설정되었습니다.');
+            refreshData();
+        }
+        
+        function clearAllData() {
+            if (confirm('정말로 모든 미팅 관련 데이터를 초기화하시겠습니까?')) {
+                sessionStorage.removeItem('appliedMeetings');
+                sessionStorage.removeItem('selectedMeeting');
+                sessionStorage.removeItem('participantInfo');
+                sessionStorage.removeItem('paymentInfo');
+                sessionStorage.removeItem('orderData');
+                sessionStorage.removeItem('meetingCounts');
+                sessionStorage.removeItem('confirmedMeetingCounts');
+                alert('데이터가 초기화되었습니다.');
+                refreshData();
+            }
+        }
+        
+        function refreshData() {
+            loadData();
+        }
+        
+        // 페이지 로드 시 데이터 표시
+        document.addEventListener('DOMContentLoaded', loadData);
+        
+        // 자동 새로고침 (5초마다)
+        setInterval(loadData, 5000);
+    </script>
+</body>
+</html>

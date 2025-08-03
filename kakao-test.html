@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오 로그인 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>카카오 로그인 테스트</h1>
+    
+    <button onclick="testKakaoLogin()">카카오 로그인 테스트</button>
+    <button onclick="checkLoginStatus()">로그인 상태 확인</button>
+    <button onclick="getUserInfo()">사용자 정보 가져오기</button>
+    <button onclick="testKakaoLogout()">로그아웃</button>
+    
+    <div id="result"></div>
+
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    
+    <script>
+        // Kakao SDK 초기화
+        Kakao.init('086f0d034b50fde43316d686a0bf74ea');
+        console.log('Kakao SDK initialized:', Kakao.isInitialized());
+        
+        const resultDiv = document.getElementById('result');
+        
+        function testKakaoLogin() {
+            Kakao.Auth.login({
+                success: function(authObj) {
+                    resultDiv.textContent = '로그인 성공!\n' + JSON.stringify(authObj, null, 2);
+                    getUserInfo();
+                },
+                fail: function(err) {
+                    resultDiv.textContent = '로그인 실패!\n' + JSON.stringify(err, null, 2);
+                }
+            });
+        }
+        
+        function checkLoginStatus() {
+            if (Kakao.Auth.getAccessToken()) {
+                resultDiv.textContent = '로그인 상태: 로그인됨\n액세스 토큰: ' + Kakao.Auth.getAccessToken();
+            } else {
+                resultDiv.textContent = '로그인 상태: 로그아웃됨';
+            }
+        }
+        
+        function getUserInfo() {
+            Kakao.API.request({
+                url: '/v2/user/me',
+                success: function(response) {
+                    resultDiv.textContent = '사용자 정보:\n' + JSON.stringify(response, null, 2);
+                },
+                fail: function(error) {
+                    resultDiv.textContent = '사용자 정보 요청 실패!\n' + JSON.stringify(error, null, 2);
+                }
+            });
+        }
+        
+        function testKakaoLogout() {
+            if (!Kakao.Auth.getAccessToken()) {
+                resultDiv.textContent = '이미 로그아웃 상태입니다.';
+                return;
+            }
+            
+            Kakao.Auth.logout(function() {
+                resultDiv.textContent = '로그아웃 완료!';
+            });
+        }
+    </script>
+</body>
+</html>

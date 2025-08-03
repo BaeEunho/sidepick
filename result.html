@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <!-- Google Tag Manager -->
+    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+    })(window,document,'script','dataLayer','GTM-NBFJXK8L');</script>
+    <!-- End Google Tag Manager -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>SidePick 정치 성향 결과</title>
+    <meta name="description" content="당신의 정치 성향 분석 결과를 확인해보세요">
+    <link rel="stylesheet" href="result-style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* 버튼을 링크처럼 보이게 하는 스타일 */
+        button.action-link {
+            background: none;
+            border: none;
+            color: inherit;
+            font: inherit;
+            cursor: pointer;
+            text-decoration: none;
+            padding: 0;
+        }
+        button.action-link:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <h1><a href="index.html">SidePick</a></h1>
+            </div>
+            <nav class="nav">
+                <a href="test.html" class="nav-link">다시 테스트하기</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- 메인 결과 섹션 -->
+    <section class="hero-result">
+        <div class="container">
+            <div class="result-header">
+                <h2 class="result-label">당신의 정치 성향</h2>
+                <h1 id="personality-name" class="personality-name">시장 다원주의자</h1>
+                <div id="personality-code" class="personality-code">MPOS</div>
+                <p id="personality-motto" class="personality-motto">
+                    "자유로운 경쟁과 다양성이 사회를 발전시킨다"
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 차트 섹션 -->
+    <section class="chart-section">
+        <div class="container">
+            <h2 class="section-title">4개 축 분석 결과</h2>
+            <div class="axis-descriptions">
+                <div class="axis-item">
+                    <h4>경제관</h4>
+                    <div class="axis-scale">
+                        <span class="scale-left">정부개입</span>
+                        <div class="scale-bar">
+                            <div id="economic-indicator" class="scale-indicator"></div>
+                        </div>
+                        <span class="scale-right">시장경제</span>
+                    </div>
+                </div>
+                <div class="axis-item">
+                    <h4>사회관</h4>
+                    <div class="axis-scale">
+                        <span class="scale-left">보수사회</span>
+                        <div class="scale-bar">
+                            <div id="social-indicator" class="scale-indicator"></div>
+                        </div>
+                        <span class="scale-right">진보사회</span>
+                    </div>
+                </div>
+                <div class="axis-item">
+                    <h4>문화관</h4>
+                    <div class="axis-scale">
+                        <span class="scale-left">전통문화</span>
+                        <div class="scale-bar">
+                            <div id="cultural-indicator" class="scale-indicator"></div>
+                        </div>
+                        <span class="scale-right">개방문화</span>
+                    </div>
+                </div>
+                <div class="axis-item">
+                    <h4>참여관</h4>
+                    <div class="axis-scale">
+                        <span class="scale-left">전문가주도</span>
+                        <div class="scale-bar">
+                            <div id="participation-indicator" class="scale-indicator"></div>
+                        </div>
+                        <span class="scale-right">시민참여</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 성향 상세 설명 -->
+    <section class="description-section">
+        <div class="container">
+            <div class="description-grid">
+                <div class="description-main">
+                    <h2 class="section-title">성향 설명</h2>
+                    <p id="personality-description" class="personality-description">
+                        당신은 자유로운 시장경제를 신뢰하면서도 사회적 다양성을 적극 지지하는 성향입니다. 
+                        경제적 효율성과 사회적 평등이 조화를 이룰 수 있다고 믿으며, 개인의 자유와 사회적 책임을 균형있게 추구합니다.
+                    </p>
+                </div>
+                <div class="core-values">
+                    <h3>핵심 가치관</h3>
+                    <ul id="core-values-list" class="values-list">
+                        <li>경제적 자유와 공정한 경쟁</li>
+                        <li>사회적 다양성과 포용성</li>
+                        <li>시민 참여와 민주적 의사결정</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 일상에서 드러나는 특징 -->
+    <section class="traits-section">
+        <div class="container">
+            <h2 class="section-title">일상에서 이런 모습이에요</h2>
+            <div id="daily-traits" class="traits-grid">
+                <div class="trait-card">
+                    <div class="trait-icon">💼</div>
+                    <p>스타트업과 사회적 기업에 관심이 많음</p>
+                </div>
+                <div class="trait-card">
+                    <div class="trait-icon">🌈</div>
+                    <p>다양성과 포용성을 다룬 뉴스에 긍정적 반응</p>
+                </div>
+                <div class="trait-card">
+                    <div class="trait-icon">🆕</div>
+                    <p>새로운 정책이나 제도 실험을 지지함</p>
+                </div>
+                <div class="trait-card">
+                    <div class="trait-icon">🗳️</div>
+                    <p>시민 참여형 정책 결정 과정을 선호함</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 호환성 섹션 -->
+    <section class="compatibility-section">
+        <div class="container">
+            <h2 class="section-title">이런 성향과 잘 맞아요</h2>
+            <div id="compatible-types" class="compatibility-grid">
+                <div class="compatibility-card">
+                    <div class="compatibility-header">
+                        <h3>참여 자유주의자</h3>
+                        <span class="compatibility-code">MPTS</span>
+                    </div>
+                    <p class="compatibility-reason">경제 철학과 참여 의식 공유</p>
+                </div>
+                <div class="compatibility-card">
+                    <div class="compatibility-header">
+                        <h3>참여 사회민주주의자</h3>
+                        <span class="compatibility-code">GPOS</span>
+                    </div>
+                    <p class="compatibility-reason">사회적 가치와 참여 정신 일치</p>
+                </div>
+                <div class="compatibility-card">
+                    <div class="compatibility-header">
+                        <h3>테크노 자유주의자</h3>
+                        <span class="compatibility-code">MPON</span>
+                    </div>
+                    <p class="compatibility-reason">진보적 가치관과 개방성 공유</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 대화 주제 섹션 -->
+    <section class="topics-section">
+        <div class="container">
+            <div class="topics-grid">
+                <div class="good-topics">
+                    <h3>🗣️ 이런 주제로 대화하면 재미있어요</h3>
+                    <ul id="good-topics-list" class="topics-list">
+                        <li>사회적 기업과 임팩트 투자</li>
+                        <li>다양성 정책과 차별 금지</li>
+                        <li>시민 참여형 정책 실험</li>
+                        <li>글로벌 트렌드와 혁신</li>
+                    </ul>
+                </div>
+                <div class="sensitive-topics">
+                    <h3>⚠️ 이런 주제는 조심스럽게 접근해요</h3>
+                    <ul id="sensitive-topics-list" class="topics-list">
+                        <li>전통적 가족관과 성 역할</li>
+                        <li>강한 정부 통제나 규제</li>
+                        <li>배타적 민족주의</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA 섹션 -->
+    <section class="cta-section">
+        <div class="container">
+            <div class="cta-content">
+                <h2>당신과 가치관이 맞는 사람을 만나보세요</h2>
+                <p>SidePick에서 정치 성향이 비슷한 사람들과 의미 있는 관계를 시작하세요</p>
+                
+                <div class="cta-buttons">
+                    <a href="#" id="get-matching-btn" class="cta-btn primary">
+                        나와 맞는 사람 찾아보기
+                    </a>
+                    <button id="share-result-btn" class="cta-btn secondary">
+                        결과 공유하기
+                    </button>
+                </div>
+
+                <div class="additional-actions">
+                    <button class="action-link" id="copy-test-link-btn">친구도 테스트해보기</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-main">
+                    <div class="logo">
+                        <h3>SidePick</h3>
+                        <p>정치 성향 기반 매칭 서비스</p>
+                    </div>
+                    <div class="footer-links">
+                        <a href="index.html">홈</a>
+                        <a href="test.html">테스트</a>
+                        <a href="#">서비스 소개</a>
+                        <a href="#">개인정보처리방침</a>
+                    </div>
+                </div>
+                <div class="footer-bottom">
+                    <p>&copy; 2024 SidePick. All rights reserved.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript 파일들 -->
+    <script src="result-data.js"></script>
+    <script src="result-script.js"></script>
+</body>
+</html>

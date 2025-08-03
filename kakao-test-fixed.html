@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카카오 로그인 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .error {
+            color: red;
+            background-color: #ffe0e0;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>카카오 로그인 테스트</h1>
+    
+    <div id="protocol-check" class="error" style="display: none;">
+        ⚠️ 로컬 파일로 실행 중입니다. 웹 서버에서 실행해주세요!
+    </div>
+    
+    <button onclick="testKakaoLogin()">카카오 로그인 테스트</button>
+    <button onclick="checkLoginStatus()">로그인 상태 확인</button>
+    <button onclick="getUserInfo()">사용자 정보 가져오기</button>
+    <button onclick="testKakaoLogout()">로그아웃</button>
+    
+    <div id="result"></div>
+
+    <script>
+        // 프로토콜 체크
+        if (window.location.protocol === 'file:') {
+            document.getElementById('protocol-check').style.display = 'block';
+            console.warn('파일 프로토콜에서는 Kakao SDK가 제대로 작동하지 않을 수 있습니다.');
+        }
+        
+        // URL 해시 제거 (easyXDM 에러 방지)
+        if (window.location.hash && window.location.hash.includes('xdm')) {
+            window.location.hash = '';
+        }
+    </script>
+
+    <!-- Kakao SDK -->
+    <script src="https://developers.kakao.com/sdk/js/kakao.js"></script>
+    
+    <script>
+        const resultDiv = document.getElementById('result');
+        
+        // Kakao SDK 초기화 지연
+        window.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() {
+                try {
+                    if (typeof Kakao !== 'undefined') {
+                        Kakao.init('086f0d034b50fde43316d686a0bf74ea');
+                        console.log('Kakao SDK initialized:', Kakao.isInitialized());
+                        resultDiv.textContent = 'Kakao SDK 초기화 완료!';
+                    } else {
+                        throw new Error('Kakao SDK를 로드할 수 없습니다.');
+                    }
+                } catch (error) {
+                    console.error('Kakao 초기화 에러:', error);
+                    resultDiv.textContent = '에러: ' + error.message;
+                }
+            }, 500); // 500ms 지연
+        });
+        
+        function testKakaoLogin() {
+            if (!Kakao.isInitialized()) {
+                resultDiv.textContent = '에러: Kakao SDK가 아직 초기화되지 않았습니다.';
+                return;
+            }
+            
+            Kakao.Auth.login({
+                success: function(authObj) {
+                    resultDiv.textContent = '로그인 성공!\n' + JSON.stringify(authObj, null, 2);
+                    getUserInfo();
+                },
+                fail: function(err) {
+                    resultDiv.textContent = '로그인 실패!\n' + JSON.stringify(err, null, 2);
+                }
+            });
+        }
+        
+        function checkLoginStatus() {
+            if (!Kakao.isInitialized()) {
+                resultDiv.textContent = '에러: Kakao SDK가 아직 초기화되지 않았습니다.';
+                return;
+            }
+            
+            if (Kakao.Auth.getAccessToken()) {
+                resultDiv.textContent = '로그인 상태: 로그인됨\n액세스 토큰: ' + Kakao.Auth.getAccessToken();
+            } else {
+                resultDiv.textContent = '로그인 상태: 로그아웃됨';
+            }
+        }
+        
+        function getUserInfo() {
+            if (!Kakao.isInitialized()) {
+                resultDiv.textContent = '에러: Kakao SDK가 아직 초기화되지 않았습니다.';
+                return;
+            }
+            
+            Kakao.API.request({
+                url: '/v2/user/me',
+                success: function(response) {
+                    resultDiv.textContent = '사용자 정보:\n' + JSON.stringify(response, null, 2);
+                },
+                fail: function(error) {
+                    resultDiv.textContent = '사용자 정보 요청 실패!\n' + JSON.stringify(error, null, 2);
+                }
+            });
+        }
+        
+        function testKakaoLogout() {
+            if (!Kakao.isInitialized()) {
+                resultDiv.textContent = '에러: Kakao SDK가 아직 초기화되지 않았습니다.';
+                return;
+            }
+            
+            if (!Kakao.Auth.getAccessToken()) {
+                resultDiv.textContent = '이미 로그아웃 상태입니다.';
+                return;
+            }
+            
+            Kakao.Auth.logout(function() {
+                resultDiv.textContent = '로그아웃 완료!';
+            });
+        }
+    </script>
+</body>
+</html>

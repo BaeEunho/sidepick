@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>소개팅 일정 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="schedule-styles.css">
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#intro">서비스 소개</a></li>
+                <li><a href="index.html#test">성향 테스트</a></li>
+                <li><a href="index.html#meeting">오프라인 소개팅</a></li>
+                <li><a href="index.html#faq">자주 묻는 질문</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="political-test.html?logged_in=true" class="nav-btn">성향 테스트 받기</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 모임 일정 섹션 -->
+    <section class="schedule-section">
+        <div class="container">
+            <div class="user-type-info">
+                <h1>당신의 정치 성향</h1>
+                <div class="type-display">
+                    <span id="user-type-icon">🌐</span>
+                    <h2 id="user-type-title">시장 다원주의자</h2>
+                </div>
+                <p id="orientation-text" class="orientation-info">진보 성향 소개팅에 참여하실 수 있습니다</p>
+            </div>
+
+            <div class="schedule-content">
+                <h2>8월 소개팅 일정</h2>
+                <div id="progressive-meetings" class="meetings-section">
+                    <h3 class="orientation-label progressive">진보 성향 소개팅</h3>
+                    <div class="meetings-grid">
+                        <div class="meeting-card">
+                            <div class="meeting-date">
+                                <span class="day">23</span>
+                                <span class="month">8월</span>
+                                <span class="weekday">토요일</span>
+                            </div>
+                            <div class="meeting-info">
+                                <h4>강남 진보 성향 소개팅</h4>
+                                <p class="location">📍 강남역 파티룸</p>
+                                <p class="time">⏰ 오후 3시 - 5시</p>
+                                <p class="participants">
+                                    <span class="male-count" data-gender="male" data-current="0">👨 남자 0/4명</span>
+                                    <span class="female-count" data-gender="female" data-current="0">👩 여자 0/4명</span>
+                                </p>
+                                <div class="type-tags">
+                                    <span class="type-tag">시장 다원주의자</span>
+                                    <span class="type-tag">테크노 자유주의자</span>
+                                    <span class="type-tag">참여 자유주의자</span>
+                                    <span class="type-tag">엘리트 자유주의자</span>
+                                    <span class="type-tag">참여 사회민주주의자</span>
+                                    <span class="type-tag">전문가 사회민주주의자</span>
+                                    <span class="type-tag">민중 진보주의자</span>
+                                    <span class="type-tag">계획 진보주의자</span>
+                                </div>
+                            </div>
+                            <div class="meeting-actions">
+                                <button class="apply-btn" onclick="applyMeeting(this)">신청하기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="conservative-meetings" class="meetings-section">
+                    <h3 class="orientation-label conservative">보수 성향 소개팅</h3>
+                    <div class="meetings-grid">
+                        <div class="meeting-card">
+                            <div class="meeting-date">
+                                <span class="day">9</span>
+                                <span class="month">8월</span>
+                                <span class="weekday">토요일</span>
+                            </div>
+                            <div class="meeting-info">
+                                <h4>강남 보수 성향 소개팅</h4>
+                                <p class="location">📍 강남역 파티룸</p>
+                                <p class="time">⏰ 오후 3시 - 5시</p>
+                                <p class="participants">
+                                    <span class="male-count" data-gender="male" data-current="0">👨 남자 0/4명</span>
+                                    <span class="female-count" data-gender="female" data-current="0">👩 여자 0/4명</span>
+                                </p>
+                                <div class="type-tags">
+                                    <span class="type-tag">문화 보수주의자</span>
+                                    <span class="type-tag">온건 보수주의자</span>
+                                    <span class="type-tag">풀뿌리 보수주의자</span>
+                                    <span class="type-tag">전통 보수주의자</span>
+                                    <span class="type-tag">온건 국가주의자</span>
+                                    <span class="type-tag">권위 보수주의자</span>
+                                    <span class="type-tag">민족 보수주의자</span>
+                                    <span class="type-tag">위계 보수주의자</span>
+                                </div>
+                            </div>
+                            <div class="meeting-actions">
+                                <button class="apply-btn" onclick="applyMeeting(this)">신청하기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="alarm-signup">
+                    <p>날짜가 맞지 않으신가요?</p>
+                    <button class="alarm-btn" onclick="showAlarmModal()">다음 일정 알림 받기</button>
+                </div>
+            </div>
+
+            <div class="notice-box">
+                <h3>📌 소개팅 안내사항</h3>
+                <ul>
+                    <li>모든 소개팅은 8명(남성 4명, 여성 4명)으로 구성됩니다</li>
+                    <li>참가비는 1인당 45,000원입니다</li>
+                    <li>본인 성별에 해당하는 자리만 신청 가능합니다</li>
+                    <li>성별 자리가 마감된 경우 알림 신청이 가능합니다</li>
+                    <li>신청 후 24시간 이내에 확정 안내를 받으실 수 있습니다</li>
+                    <li>소개팅 3일 전까지 취소 가능하며, 이후 취소 시 환불이 제한됩니다</li>
+                    <li>같은 정치 성향을 가진 분들끼리만 모이므로 편안한 대화가 가능합니다</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향 기반 오프라인 만남 서비스</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="political-test.html">성향 테스트</a></li>
+                        <li><a href="meeting-schedule.html">모임 일정</a></li>
+                        <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <ul>
+                        <li>평일 10:00 - 18:00</li>
+                        <li><a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>정책</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 알림 신청 모달 -->
+    <div id="alarmModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <span class="close" onclick="closeAlarmModal()">&times;</span>
+            <h2>다음 일정 알림 받기</h2>
+            <p id="alarm-message">새로운 소개팅 일정이 등록되면 알려드립니다.</p>
+            <form id="alarmForm" onsubmit="submitAlarmForm(event)">
+                <div class="form-group">
+                    <label>이메일</label>
+                    <input type="email" name="email" required placeholder="your@email.com">
+                </div>
+                <input type="hidden" name="preference" value="">
+                <button type="submit" class="submit-btn">알림 신청하기</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="schedule-script.js?v=6"></script>
+    <script src="attendance-update.js"></script>
+    
+    <!-- 참석 인원 실시간 업데이트 -->
+    <script>
+        (function() {
+            console.log('참석 인원 업데이트 스크립트 시작');
+            
+            // 즉시 실행하고 5초마다 반복
+            function updateAttendance() {
+                console.log('참석 인원 업데이트 중...');
+                
+                fetch('http://localhost:3000/api/meetings/attendance')
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('API 응답:', data);
+                        
+                        if (data.success && data.data) {
+                            // 진보 모임
+                            let progressiveMale = 0;
+                            let progressiveFemale = 0;
+                            
+                            // 보수 모임
+                            let conservativeMale = 0;
+                            let conservativeFemale = 0;
+                            
+                            // 데이터 집계
+                            Object.values(data.data).forEach(meeting => {
+                                if (meeting.orientation === 'progressive') {
+                                    progressiveMale += meeting.male;
+                                    progressiveFemale += meeting.female;
+                                } else if (meeting.orientation === 'conservative') {
+                                    conservativeMale += meeting.male;
+                                    conservativeFemale += meeting.female;
+                                }
+                            });
+                            
+                            // 모든 male-count와 female-count 요소 찾기
+                            document.querySelectorAll('.meeting-card').forEach(card => {
+                                const isProgressive = card.closest('#progressive-meetings');
+                                const isConservative = card.closest('#conservative-meetings');
+                                
+                                const maleCount = card.querySelector('.male-count');
+                                const femaleCount = card.querySelector('.female-count');
+                                
+                                if (isProgressive) {
+                                    if (maleCount) maleCount.textContent = `👨 남자 ${progressiveMale}/4명`;
+                                    if (femaleCount) femaleCount.textContent = `👩 여자 ${progressiveFemale}/4명`;
+                                } else if (isConservative) {
+                                    if (maleCount) maleCount.textContent = `👨 남자 ${conservativeMale}/4명`;
+                                    if (femaleCount) femaleCount.textContent = `👩 여자 ${conservativeFemale}/4명`;
+                                }
+                            });
+                            
+                            console.log('업데이트 완료 - 진보:', progressiveMale, '남/', progressiveFemale, '여, 보수:', conservativeMale, '남/', conservativeFemale, '여');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('API 호출 실패:', error);
+                    });
+            }
+            
+            // 페이지 로드 후 1초 뒤에 시작
+            setTimeout(function() {
+                updateAttendance();
+                // 5초마다 업데이트
+                setInterval(updateAttendance, 5000);
+            }, 1000);
+        })();
+    </script>
+</body>
+</html>

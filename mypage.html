@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>마이페이지 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="mypage-styles.css">
+    <script src="auth-check.js"></script>
+    <script src="political-test-script.js"></script>
+    <script src="mypage-script.js?v=4" defer></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#intro">서비스 소개</a></li>
+                <li><a href="index.html#test">성향 테스트</a></li>
+                <li><a href="meeting-schedule.html">소개팅 일정</a></li>
+                <li><a href="index.html#faq">FAQ</a></li>
+            </ul>
+            <div class="auth-buttons">
+                <!-- AuthManager가 자동으로 채워줌 -->
+            </div>
+        </nav>
+    </header>
+
+    <!-- 마이페이지 콘텐츠 -->
+    <section class="mypage-section">
+        <div class="container">
+            <h1>마이페이지</h1>
+            
+            <!-- 데이터 동기화 상태 표시 -->
+            <div id="sync-status" class="sync-status">
+                <span class="sync-icon">🔄</span>
+                <span class="sync-text">데이터 동기화 중...</span>
+            </div>
+            
+            <!-- 프로필 정보 -->
+            <div class="profile-card">
+                <h2>내 프로필</h2>
+                <div class="profile-info">
+                    <div class="info-row">
+                        <span class="label">이름</span>
+                        <span class="value" id="profile-name">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">이메일</span>
+                        <span class="value" id="profile-email">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">휴대폰</span>
+                        <span class="value" id="profile-phone">-</span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">성별</span>
+                        <span class="value" id="profile-gender">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 정치 성향 정보 -->
+            <div class="political-type-card">
+                <h2>내 정치 성향</h2>
+                <div class="type-display">
+                    <span id="type-icon" class="type-icon-large">🎯</span>
+                    <div class="type-info">
+                        <h3 id="type-title">-</h3>
+                        <p id="type-code" class="type-code">-</p>
+                        <p id="type-percentage" class="type-percentage">-</p>
+                    </div>
+                </div>
+                <p id="type-description" class="type-description">-</p>
+                
+                <div class="type-details">
+                    <h4>축별 점수</h4>
+                    <div id="axis-scores" class="axis-scores">
+                        <!-- JavaScript로 채워짐 -->
+                    </div>
+                </div>
+                
+                <div class="type-traits">
+                    <h4>연애에서의 특징</h4>
+                    <ul id="relationship-traits">
+                        <!-- JavaScript로 채워짐 -->
+                    </ul>
+                </div>
+                
+                <div class="conversation-guide">
+                    <h4>대화 가이드</h4>
+                    <div class="topics-container">
+                        <div class="good-topics">
+                            <h5>💚 이런 대화를 즐겨요</h5>
+                            <ul id="good-topics">
+                                <!-- JavaScript로 채워짐 -->
+                            </ul>
+                        </div>
+                        <div class="avoid-topics">
+                            <h5>💔 이런 대화는 피해주세요</h5>
+                            <ul id="avoid-topics">
+                                <!-- JavaScript로 채워짐 -->
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="matching-info">
+                    <h4>잘 맞는 성향</h4>
+                    <div id="matching-types" class="matching-types-grid">
+                        <!-- JavaScript로 채워짐 -->
+                    </div>
+                </div>
+                
+                <div class="test-info">
+                    <p class="test-date">테스트 완료일: <span id="test-date">-</span></p>
+                </div>
+            </div>
+
+            <!-- 예정된 소개팅 -->
+            <div class="upcoming-meetings-card">
+                <h2>예정된 소개팅</h2>
+                <div id="upcoming-meetings" class="upcoming-meetings">
+                    <!-- JavaScript로 채워짐 -->
+                </div>
+            </div>
+
+            <!-- 계정 설정 -->
+            <div class="account-settings-card">
+                <h2>계정 설정</h2>
+                <div class="settings-actions">
+                    <button class="settings-btn" onclick="changePassword()">비밀번호 변경</button>
+                    <button class="settings-btn" onclick="updateProfile()">프로필 수정</button>
+                    <button class="settings-btn danger" onclick="deleteAccount()">회원 탈퇴</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향 기반 오프라인 만남 서비스</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="political-test.html">성향 테스트</a></li>
+                        <li><a href="meeting-schedule.html">모임 일정</a></li>
+                        <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <ul>
+                        <li>평일 10:00 - 18:00</li>
+                        <li><a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>정책</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

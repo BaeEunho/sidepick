@@ -1,0 +1,197 @@
+/* 정책 페이지 공통 스타일 */
+
+.policy-section {
+    padding: 100px 0 80px;
+    background-color: var(--gray-100);
+    min-height: calc(100vh - 70px);
+}
+
+.policy-section h1 {
+    font-size: 42px;
+    font-weight: 800;
+    color: var(--gray-900);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.policy-date {
+    text-align: center;
+    color: var(--gray-600);
+    font-size: 16px;
+    margin-bottom: 50px;
+}
+
+.policy-content {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.policy-box {
+    background-color: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    margin-bottom: 30px;
+    box-shadow: var(--shadow-sm);
+}
+
+.policy-box h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--gray-200);
+}
+
+.policy-box h3 {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--gray-800);
+    margin-top: 25px;
+    margin-bottom: 15px;
+}
+
+.policy-box p {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin-bottom: 15px;
+}
+
+.policy-box ul,
+.policy-box ol {
+    margin-left: 20px;
+    margin-bottom: 20px;
+}
+
+.policy-box li {
+    font-size: 16px;
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin-bottom: 10px;
+}
+
+/* 환불 테이블 */
+.refund-table {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.refund-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--white);
+}
+
+.refund-table th {
+    background-color: var(--gray-100);
+    padding: 15px;
+    text-align: left;
+    font-weight: 600;
+    color: var(--gray-900);
+    border-bottom: 2px solid var(--gray-300);
+}
+
+.refund-table td {
+    padding: 15px;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.refund-table .highlight {
+    color: var(--primary-blue);
+    font-weight: 700;
+}
+
+.refund-table .warning {
+    color: var(--coral);
+    font-weight: 700;
+}
+
+/* 노트 및 경고 박스 */
+.note {
+    display: block;
+    margin-top: 20px;
+    padding: 15px;
+    background-color: var(--light-blue);
+    border-left: 4px solid var(--primary-blue);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--gray-700);
+}
+
+.warning-box {
+    background-color: #fff5f5;
+    border: 1px solid #feb2b2;
+    border-radius: 12px;
+    padding: 25px;
+    margin: 20px 0;
+}
+
+.warning-box h3 {
+    color: #c53030;
+    margin-top: 0;
+}
+
+.warning-box p,
+.warning-box li {
+    color: #742a2a;
+}
+
+/* 연락처 정보 */
+.contact-info {
+    background-color: var(--gray-100);
+    padding: 25px;
+    border-radius: 12px;
+    margin-top: 20px;
+}
+
+.contact-info p {
+    margin-bottom: 8px;
+}
+
+.contact-info p:last-child {
+    margin-bottom: 0;
+}
+
+/* 정책 공지 */
+.policy-notice {
+    background-color: var(--gray-100);
+    padding: 30px;
+    border-radius: 16px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+.policy-notice p {
+    font-size: 14px;
+    color: var(--gray-600);
+    margin: 0;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .policy-section {
+        padding: 80px 0 60px;
+    }
+
+    .policy-section h1 {
+        font-size: 32px;
+    }
+
+    .policy-box {
+        padding: 30px 20px;
+    }
+
+    .policy-box h2 {
+        font-size: 20px;
+    }
+
+    .refund-table {
+        font-size: 14px;
+    }
+
+    .refund-table th,
+    .refund-table td {
+        padding: 10px;
+    }
+}

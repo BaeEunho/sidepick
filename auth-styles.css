@@ -1,0 +1,463 @@
+/* 로그인/회원가입 페이지 공통 스타일 */
+
+.auth-section {
+    min-height: calc(100vh - 70px);
+    display: flex;
+    align-items: center;
+    padding: 80px 0;
+    background-color: var(--gray-100);
+}
+
+.auth-container {
+    width: 100%;
+    max-width: 480px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.auth-box {
+    background-color: var(--white);
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    padding: 50px 40px;
+}
+
+.signup-box {
+    max-width: 580px;
+}
+
+.auth-box h1 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--gray-900);
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.auth-subtitle {
+    font-size: 18px;
+    color: var(--gray-600);
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+/* 폼 스타일 */
+.auth-form {
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 8px;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 16px;
+    border: 1px solid var(--gray-300);
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.form-group input:focus {
+    outline: none;
+    border-color: var(--primary-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.input-hint {
+    display: block;
+    font-size: 13px;
+    color: var(--gray-500);
+    margin-top: 5px;
+}
+
+.error-message {
+    font-size: 13px;
+    margin-top: 5px;
+    display: block;
+    min-height: 18px;
+    font-weight: 500;
+}
+
+.verify-btn {
+    position: absolute;
+    right: 5px;
+    top: 34px;
+    padding: 8px 16px;
+    background-color: var(--primary-blue);
+    color: var(--white);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.verify-btn:hover {
+    background-color: var(--dark-blue);
+}
+
+.verify-btn:disabled {
+    background: #95a5a6;
+    cursor: not-allowed;
+}
+
+.timer {
+    position: absolute;
+    right: 100px;
+    top: 33px;
+    font-size: 14px;
+    color: var(--coral);
+    font-weight: 600;
+    line-height: 40px;
+}
+
+/* 라디오 & 체크박스 */
+.radio-group {
+    display: flex;
+    gap: 30px;
+}
+
+.radio-label,
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--gray-700);
+}
+
+.radio-label input,
+.checkbox-label input {
+    width: auto;
+    margin-right: 8px;
+}
+
+.checkbox-label a {
+    margin-left: auto;
+    color: var(--primary-blue);
+    font-size: 14px;
+    text-decoration: underline;
+}
+
+/* 폼 옵션 */
+.form-options {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.forgot-link {
+    font-size: 14px;
+    color: var(--gray-600);
+    text-decoration: underline;
+}
+
+.forgot-link:hover {
+    color: var(--gray-800);
+}
+
+/* 약관 동의 */
+.terms-section {
+    background-color: var(--gray-100);
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+}
+
+.terms-list {
+    margin-top: 15px;
+    padding-left: 20px;
+}
+
+.terms-list .checkbox-label {
+    margin-bottom: 10px;
+}
+
+/* 제출 버튼 */
+.auth-submit-btn {
+    width: 100%;
+    padding: 16px;
+    background-color: var(--coral);
+    color: var(--white);
+    border: none;
+    border-radius: 12px;
+    font-size: 18px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.auth-submit-btn:hover {
+    background-color: var(--orange);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.auth-submit-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.auth-submit-btn:disabled:hover {
+    background-color: var(--coral);
+    transform: none;
+    box-shadow: none;
+}
+
+/* 카카오 로그인 버튼 */
+.kakao-login-btn {
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.kakao-login-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.kakao-login-btn svg {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+}
+
+/* 구분선 */
+.divider {
+    text-align: center;
+    margin: 20px 0 30px;
+    position: relative;
+}
+
+.divider span {
+    background-color: var(--white);
+    padding: 0 20px;
+    color: var(--gray-500);
+    font-size: 14px;
+    position: relative;
+    z-index: 1;
+}
+
+.divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background-color: var(--gray-300);
+}
+
+/* 소셜 로그인 */
+.social-login {
+    margin-bottom: 30px;
+}
+
+.social-btn {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 12px;
+    border: 1px solid var(--gray-300);
+    border-radius: 12px;
+    background-color: var(--white);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.social-btn:hover {
+    background-color: var(--gray-100);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-sm);
+}
+
+.social-btn.kakao {
+    background-color: #FEE500;
+    border-color: #FEE500;
+    color: #000000;
+}
+
+.social-btn.kakao img {
+    width: 20px;
+    height: 20px;
+}
+
+.social-btn.naver {
+    background-color: #03C75A;
+    border-color: #03C75A;
+    color: var(--white);
+}
+
+.naver-icon {
+    font-weight: 800;
+    font-size: 18px;
+}
+
+.social-btn.google {
+    background-color: var(--white);
+    border-color: var(--gray-300);
+    color: var(--gray-700);
+}
+
+.google-icon {
+    font-weight: 700;
+    font-size: 18px;
+    color: #4285F4;
+}
+
+/* 하단 링크 */
+.auth-footer {
+    text-align: center;
+}
+
+.auth-footer p {
+    font-size: 16px;
+    color: var(--gray-600);
+}
+
+.auth-footer a {
+    color: var(--primary-blue);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.auth-footer a:hover {
+    text-decoration: underline;
+}
+
+.test-notice {
+    margin-top: 15px;
+    padding: 15px;
+    background-color: var(--light-blue);
+    border-radius: 8px;
+    font-size: 14px;
+    color: var(--primary-blue);
+}
+
+.login-benefit {
+    margin-top: 20px;
+    font-size: 14px;
+    color: var(--gray-500);
+    background-color: var(--gray-100);
+    padding: 12px 20px;
+    border-radius: 8px;
+}
+
+.kakao-notice {
+    margin-top: 10px;
+    font-size: 13px;
+    color: var(--gray-500);
+}
+
+/* 회원가입 옵션 */
+.signup-options {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 30px;
+}
+
+.email-signup-btn {
+    width: 100%;
+    padding: 14px;
+    background-color: var(--white);
+    border: 2px solid var(--primary-blue);
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--primary-blue);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+}
+
+.email-signup-btn:hover {
+    background-color: var(--primary-blue);
+    color: var(--white);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+.email-signup-btn svg {
+    width: 20px;
+    height: 16px;
+}
+
+/* 뒤로가기 버튼 */
+.back-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    background: none;
+    border: none;
+    color: var(--gray-600);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    margin-bottom: 20px;
+    padding: 5px;
+    transition: color 0.3s ease;
+}
+
+.back-btn:hover {
+    color: var(--primary-blue);
+}
+
+.back-btn svg {
+    width: 20px;
+    height: 20px;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 480px) {
+    .auth-box {
+        padding: 40px 30px;
+    }
+
+    .auth-box h1 {
+        font-size: 28px;
+    }
+
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    .radio-group {
+        gap: 20px;
+    }
+
+    .terms-list {
+        padding-left: 10px;
+    }
+}

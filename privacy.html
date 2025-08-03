@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>개인정보 처리방침 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .privacy-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 100px 20px 50px;
+        }
+        .privacy-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        .privacy-header h1 {
+            font-size: 32px;
+            color: var(--gray-900);
+            margin-bottom: 10px;
+        }
+        .privacy-header .date {
+            color: var(--gray-600);
+            font-size: 16px;
+        }
+        .privacy-content {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .privacy-content h2 {
+            font-size: 20px;
+            color: var(--gray-900);
+            margin: 40px 0 20px;
+            font-weight: 700;
+        }
+        .privacy-content h2:first-child {
+            margin-top: 0;
+        }
+        .privacy-content h3 {
+            font-size: 18px;
+            color: var(--gray-800);
+            margin: 30px 0 15px;
+            font-weight: 600;
+        }
+        .privacy-content p {
+            line-height: 1.8;
+            color: var(--gray-700);
+            margin-bottom: 15px;
+        }
+        .privacy-content ul {
+            margin: 15px 0;
+            padding-left: 20px;
+        }
+        .privacy-content li {
+            line-height: 1.8;
+            color: var(--gray-700);
+            margin-bottom: 10px;
+        }
+        .privacy-content table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        .privacy-content th,
+        .privacy-content td {
+            border: 1px solid var(--gray-300);
+            padding: 12px;
+            text-align: left;
+        }
+        .privacy-content th {
+            background-color: var(--gray-100);
+            font-weight: 600;
+        }
+        .highlight-box {
+            background-color: #E8F4F8;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-blue);
+        }
+        .back-button {
+            display: inline-block;
+            margin-top: 30px;
+            padding: 12px 30px;
+            background-color: var(--primary-blue);
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .back-button:hover {
+            background-color: var(--dark-blue);
+            transform: translateY(-2px);
+        }
+        
+        /* 모바일 테이블 스타일 */
+        @media (max-width: 768px) {
+            .privacy-content table {
+                display: block;
+                border: none;
+            }
+            
+            .privacy-content thead {
+                display: none;
+            }
+            
+            .privacy-content tbody {
+                display: block;
+            }
+            
+            .privacy-content tr {
+                display: block;
+                border: 1px solid var(--gray-200);
+                border-radius: 8px;
+                margin-bottom: 16px;
+                padding: 16px;
+            }
+            
+            .privacy-content td {
+                display: block;
+                border: none;
+                padding: 8px 0;
+                text-align: left;
+            }
+            
+            .privacy-content td:before {
+                content: attr(data-label);
+                font-weight: 600;
+                display: block;
+                margin-bottom: 4px;
+                color: var(--gray-700);
+            }
+            
+            .privacy-content td:first-child {
+                font-weight: 600;
+                color: var(--primary-blue);
+                margin-bottom: 12px;
+                padding-bottom: 12px;
+                border-bottom: 1px solid var(--gray-200);
+            }
+            
+            .privacy-content td:first-child:before {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+        </nav>
+    </header>
+
+    <div class="privacy-container">
+        <div class="privacy-header">
+            <h1>개인정보 처리방침</h1>
+            <p class="date">시행일: 2025년 7월 28일</p>
+        </div>
+
+        <div class="privacy-content">
+            <h2>제1조 (개인정보의 처리 목적)</h2>
+            <p>사이드픽(이하 "회사")는 다음의 목적을 위하여 개인정보를 처리합니다. 처리하는 개인정보는 다음의 목적 이외의 용도로는 이용되지 않으며, 이용 목적이 변경되는 경우에는 「개인정보 보호법」 제18조에 따라 별도의 동의를 받는 등 필요한 조치를 이행할 예정입니다.</p>
+            
+            <h3>1. 회원 가입 및 관리</h3>
+            <ul>
+                <li>회원 가입의사 확인, 회원제 서비스 제공에 따른 본인 식별·인증</li>
+                <li>회원자격 유지·관리, 서비스 부정이용 방지</li>
+                <li>만 20세 이상 연령 확인</li>
+                <li>각종 고지·통지</li>
+            </ul>
+
+            <h3>2. 서비스 제공</h3>
+            <ul>
+                <li>정치 성향 테스트 수행 및 결과 분석</li>
+                <li>16가지 정치 성향 유형 진단 및 분류</li>
+                <li>진보/보수 성향별 오프라인 소개팅 매칭</li>
+                <li>소개팅 일정 안내 및 관리</li>
+                <li>매칭 결과 통보</li>
+            </ul>
+
+            <h3>3. 서비스 이용료 결제</h3>
+            <ul>
+                <li>오프라인 소개팅 참가비 결제 처리</li>
+                <li>결제 내역 관리 및 환불 처리</li>
+            </ul>
+
+            <h2>제2조 (처리하는 개인정보의 항목)</h2>
+            <p>회사는 다음의 개인정보 항목을 처리하고 있습니다.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>구분</th>
+                        <th>수집 항목</th>
+                        <th>수집 목적</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>회원가입 시</td>
+                        <td data-label="수집 항목">
+                            [필수] 이름, 생년월일, 성별, 이메일, 휴대폰번호, 비밀번호<br>
+                            [선택] 마케팅 수신 동의 여부
+                        </td>
+                        <td data-label="수집 목적">회원 가입 및 본인 확인</td>
+                    </tr>
+                    <tr>
+                        <td>정치 성향 테스트</td>
+                        <td data-label="수집 항목">[필수] 60개 문항에 대한 응답, 정치 성향 진단 결과(16가지 유형)</td>
+                        <td data-label="수집 목적">성향 분석 및 매칭 서비스 제공</td>
+                    </tr>
+                    <tr>
+                        <td>소개팅 신청</td>
+                        <td data-label="수집 항목">[필수] 참가 희망 일정, 결제 정보</td>
+                        <td data-label="수집 목적">오프라인 소개팅 주선</td>
+                    </tr>
+                    <tr>
+                        <td>서비스 이용 중</td>
+                        <td>서비스 이용 기록, 접속 로그, 쿠키, 접속 IP 정보</td>
+                        <td>서비스 개선 및 부정이용 방지</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="highlight-box">
+                <strong>중요:</strong> 회원의 정치 성향 정보는 매칭 서비스 제공 목적으로만 사용되며, 본인의 동의 없이 제3자에게 제공되지 않습니다.
+            </div>
+
+            <h2>제3조 (개인정보의 처리 및 보유 기간)</h2>
+            <p>회사는 법령에 따른 개인정보 보유·이용기간 또는 정보주체로부터 개인정보를 수집 시에 동의받은 개인정보 보유·이용기간 내에서 개인정보를 처리·보유합니다.</p>
+
+            <ul>
+                <li><strong>회원 정보:</strong> 회원 탈퇴 시까지 (단, 관계 법령에 따라 보존 필요시 해당 기간)</li>
+                <li><strong>정치 성향 테스트 결과:</strong> 회원 탈퇴 후 즉시 삭제</li>
+                <li><strong>결제 정보:</strong> 전자상거래법에 따라 5년 보관</li>
+                <li><strong>서비스 이용 기록:</strong> 통신비밀보호법에 따라 3개월 보관</li>
+            </ul>
+
+            <h2>제4조 (개인정보의 제3자 제공)</h2>
+            <p>회사는 정보주체의 개인정보를 제1조(개인정보의 처리 목적)에서 명시한 범위 내에서만 처리하며, 정보주체의 동의, 법률의 특별한 규정 등 「개인정보 보호법」 제17조 및 제18조에 해당하는 경우에만 개인정보를 제3자에게 제공합니다.</p>
+            
+            <p><strong>회사는 현재 개인정보를 제3자에게 제공하고 있지 않습니다.</strong></p>
+
+            <h2>제5조 (개인정보처리의 위탁)</h2>
+            <p>회사는 원활한 개인정보 업무처리를 위하여 다음과 같이 개인정보 처리업무를 위탁하고 있습니다.</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>위탁받는 자 (수탁자)</th>
+                        <th>위탁하는 업무의 내용</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Vercel Inc.</td>
+                        <td>웹사이트 호스팅 및 서버 운영</td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <p>※ 결제는 무통장입금 방식으로만 진행되며, 별도의 결제대행업체를 이용하지 않습니다.</p>
+
+            <h2>제6조 (정보주체의 권리·의무 및 행사방법)</h2>
+            <p>정보주체는 회사에 대해 언제든지 개인정보 보호 관련 권리를 행사할 수 있습니다.</p>
+            
+            <ul>
+                <li>개인정보 열람요구</li>
+                <li>오류 등이 있을 경우 정정 요구</li>
+                <li>삭제요구</li>
+                <li>처리정지 요구</li>
+            </ul>
+
+            <p>권리 행사는 회사에 대해 「개인정보 보호법」 시행령 제41조제1항에 따라 서면, 전자우편, 모사전송(FAX) 등을 통하여 하실 수 있으며 회사는 이에 대해 지체 없이 조치하겠습니다.</p>
+
+            <h2>제7조 (개인정보의 파기)</h2>
+            <p>회사는 개인정보 보유기간의 경과, 처리목적 달성 등 개인정보가 불필요하게 되었을 때에는 지체없이 해당 개인정보를 파기합니다.</p>
+
+            <h3>파기절차</h3>
+            <ul>
+                <li>이용자가 입력한 정보는 목적 달성 후 별도의 DB에 옮겨져(종이의 경우 별도의 서류) 내부 방침 및 기타 관련 법령에 따라 일정기간 저장된 후 혹은 즉시 파기됩니다.</li>
+            </ul>
+
+            <h3>파기방법</h3>
+            <ul>
+                <li>전자적 파일 형태의 정보는 기록을 재생할 수 없는 기술적 방법을 사용합니다.</li>
+                <li>종이에 출력된 개인정보는 분쇄기로 분쇄하거나 소각을 통하여 파기합니다.</li>
+            </ul>
+
+            <h2>제8조 (개인정보의 안전성 확보조치)</h2>
+            <p>회사는 개인정보의 안전성 확보를 위해 다음과 같은 조치를 취하고 있습니다.</p>
+
+            <ul>
+                <li><strong>관리적 조치:</strong> 내부관리계획 수립·시행, 정기적 직원 교육 등</li>
+                <li><strong>기술적 조치:</strong> 개인정보처리시스템 등의 접근권한 관리, 접근통제시스템 설치, 고유식별정보 등의 암호화, 보안프로그램 설치</li>
+                <li><strong>물리적 조치:</strong> 전산실, 자료보관실 등의 접근통제</li>
+            </ul>
+
+            <h2>제9조 (개인정보 보호책임자)</h2>
+            <p>회사는 개인정보 처리에 관한 업무를 총괄해서 책임지고, 개인정보 처리와 관련한 정보주체의 불만처리 및 피해구제 등을 위하여 아래와 같이 개인정보 보호책임자를 지정하고 있습니다.</p>
+
+            <div class="highlight-box">
+                <p><strong>개인정보 보호책임자</strong></p>
+                <p>성명: 배은호</p>
+                <p>직책: 개인정보보호책임자</p>
+                <p>이메일: clsrna3@naver.com</p>
+            </div>
+
+            <h2>제10조 (정보주체의 권익침해에 대한 구제방법)</h2>
+            <p>정보주체는 개인정보침해로 인한 구제를 받기 위하여 개인정보분쟁조정위원회, 한국인터넷진흥원 개인정보침해신고센터 등에 분쟁해결이나 상담 등을 신청할 수 있습니다.</p>
+
+            <ul>
+                <li>개인정보분쟁조정위원회: (국번없이) 1833-6972 (www.kopico.go.kr)</li>
+                <li>개인정보침해신고센터: (국번없이) 118 (privacy.kisa.or.kr)</li>
+                <li>대검찰청: (국번없이) 1301 (www.spo.go.kr)</li>
+                <li>경찰청: (국번없이) 182 (ecrm.cyber.go.kr)</li>
+            </ul>
+
+            <h2>제11조 (개인정보 처리방침의 변경)</h2>
+            <p>이 개인정보 처리방침은 2025년 7월 28일부터 적용되며, 법령 및 방침에 따른 변경내용의 추가, 삭제 및 정정이 있는 경우에는 변경사항의 시행 7일 전부터 공지사항을 통하여 고지할 것입니다.</p>
+
+            <h2>부칙</h2>
+            <p>이 개인정보 처리방침은 2025년 7월 28일부터 시행됩니다.</p>
+        </div>
+
+        <button onclick="goBack()" class="back-button">돌아가기</button>
+        
+        <script>
+            function goBack() {
+                // history.length가 1보다 크면 이전 페이지가 있음
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else {
+                    // 이전 페이지가 없으면 메인 페이지로
+                    window.location.href = 'index.html';
+                }
+            }
+        </script>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향으로 만나는<br>특별한 인연</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="political-test.html">성향 테스트</a></li>
+                        <li><a href="meeting-schedule.html">모임 일정</a></li>
+                        <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <p>평일 10:00 - 18:00</p>
+                    <a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a>
+                </div>
+                <div class="footer-section">
+                    <h4>정책</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>모임 신청 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="apply-styles.css">
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <div class="auth-buttons">
+                <span class="user-name" id="user-name-display"></span>
+                <a href="mypage.html" class="mypage-btn">마이페이지</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 모임 신청 섹션 -->
+    <section class="apply-section">
+        <div class="container">
+            <h1>모임 신청하기</h1>
+            
+            <!-- 모임 정보 카드 -->
+            <div class="meeting-info-card">
+                <h2>진보 개혁형 × 사회 복지형</h2>
+                <div class="meeting-info-grid">
+                    <div class="info-item">
+                        <span class="info-label">날짜</span>
+                        <span class="info-value">12월 7일 (토) 15:00</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">장소</span>
+                        <span class="info-value">강남역 파티룸</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">참가비</span>
+                        <span class="info-value">45,000원</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">연령대</span>
+                        <span class="info-value">25-32세</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">현재 신청 현황</span>
+                        <span class="info-value">남성 2/4, 여성 3/4</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 신청 양식 -->
+            <form class="apply-form" onsubmit="handleApply(event)">
+                <div class="form-section">
+                    <h3>기본 정보</h3>
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="name">이름</label>
+                            <input type="text" id="name" name="name" value="" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="age">나이</label>
+                            <input type="text" id="age" name="age" value="" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="gender">성별</label>
+                            <input type="text" id="gender" name="gender" value="" readonly>
+                        </div>
+                        <div class="form-group">
+                            <label for="type">정치 성향</label>
+                            <input type="text" id="type" name="type" value="" readonly>
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-section">
+                    <h3>결제 정보</h3>
+                    <div class="payment-info">
+                        <div class="payment-row">
+                            <span>참가비</span>
+                            <span>45,000원</span>
+                        </div>
+                        <div class="payment-divider"></div>
+                        <div class="payment-row total">
+                            <span>총 결제금액</span>
+                            <span>45,000원</span>
+                        </div>
+                    </div>
+                    
+                    <div class="payment-method">
+                        <label>결제 수단</label>
+                        <div class="payment-notice">
+                            <p>현재 무통장 입금만 가능합니다.</p>
+                            <div class="bank-info">
+                                <div class="bank-row">
+                                    <span>은행명:</span>
+                                    <span>국민은행</span>
+                                </div>
+                                <div class="bank-row">
+                                    <span>계좌번호:</span>
+                                    <span>123-456-789012</span>
+                                </div>
+                                <div class="bank-row">
+                                    <span>예금주:</span>
+                                    <span>(주)사이드픽</span>
+                                </div>
+                            </div>
+                            <p class="payment-alert">⚠️ 신청 후 24시간 이내에 입금해주셔야 합니다.</p>
+                            <p class="payment-alert">⚠️ 입금 확인 후 참가 확정 문자가 발송됩니다.</p>
+                        </div>
+                        <input type="hidden" name="payment" value="bank">
+                    </div>
+                </div>
+
+                <div class="terms-agree">
+                    <label class="checkbox-label">
+                        <input type="checkbox" required>
+                        <span>환불 정책을 확인했으며 동의합니다</span>
+                        <a href="#" onclick="showRefundPolicy(event)">정책 보기</a>
+                    </label>
+                    <label class="checkbox-label">
+                        <input type="checkbox" required>
+                        <span>노쇼 시 향후 모임 참여가 제한될 수 있음을 확인했습니다</span>
+                    </label>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="submit-btn">신청하기</button>
+                    <button type="button" class="cancel-btn" onclick="history.back()">취소</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <script>
+        // 페이지 로드 시 인증 확인
+        document.addEventListener('DOMContentLoaded', function() {
+            // 인증된 사용자인지 확인 (성향 테스트까지 완료한 사용자)
+            if (!AuthManager.checkPageAccess('verified')) {
+                return; // checkPageAccess가 리다이렉트 처리함
+            }
+            
+            // 사용자 정보 가져오기
+            const userState = AuthManager.getUserState();
+            
+            // 헤더에 사용자 이름 표시
+            const userNameDisplay = document.getElementById('user-name-display');
+            if (userNameDisplay && userState.profile && userState.profile.name) {
+                userNameDisplay.textContent = userState.profile.name + '님';
+            }
+            
+            // 기본 정보 필드 업데이트
+            document.getElementById('name').value = userState.profile.name || '';
+            
+            // 나이 계산 (생년월일로부터)
+            const birthDate = userState.profile.birthdate ? new Date(userState.profile.birthdate) : null;
+            if (birthDate) {
+                const today = new Date();
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                const dayDiff = today.getDate() - birthDate.getDate();
+                const actualAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
+                document.getElementById('age').value = actualAge + '세';
+            } else {
+                document.getElementById('age').value = '정보 없음';
+            }
+            
+            document.getElementById('gender').value = userState.profile.gender === 'male' ? '남성' : '여성';
+            
+            // 정치 성향 정보 표시
+            const politicalType = JSON.parse(sessionStorage.getItem('userType') || '{}');
+            document.getElementById('type').value = politicalType.title || '정보 없음';
+            
+            // URL 파라미터에서 모임 타입 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const meetingType = urlParams.get('type');
+            
+            // 모임 타입에 따라 정보 업데이트 (필요한 경우)
+            updateMeetingInfo(meetingType);
+        });
+        
+        
+        // 모임 정보 업데이트 함수
+        function updateMeetingInfo(type) {
+            const meetingData = {
+                'progressive': {
+                    title: '진보 개혁형 × 사회 복지형',
+                    date: '12월 7일 (토) 15:00',
+                    location: '강남역 파티룸',
+                    age: '25-32세',
+                    status: '남성 2/4, 여성 3/4'
+                },
+                'moderate': {
+                    title: '중도 실용형 × 경제 성장형',
+                    date: '12월 8일 (일) 14:00',
+                    location: '강남역 파티룸',
+                    age: '28-35세',
+                    status: '남성 3/4, 여성 2/4'
+                },
+                'environment': {
+                    title: '환경 우선형 × 글로벌 시민형',
+                    date: '12월 8일 (일) 18:00',
+                    location: '강남역 파티룸',
+                    age: '23-30세',
+                    status: '남성 1/4, 여성 4/4'
+                }
+            };
+            
+            if (type && meetingData[type]) {
+                const data = meetingData[type];
+                document.querySelector('.meeting-info-card h2').textContent = data.title;
+                document.querySelector('.info-value:nth-of-type(1)').textContent = data.date;
+                document.querySelector('.info-value:nth-of-type(2)').textContent = data.location;
+                document.querySelector('.info-value:nth-of-type(4)').textContent = data.age;
+                document.querySelector('.info-value:nth-of-type(5)').textContent = data.status;
+            }
+        }
+
+        async function handleApply(event) {
+            event.preventDefault();
+            
+            // 폼 데이터 수집 (결제 정보만)
+            const formData = {
+                payment: document.querySelector('input[name="payment"]')?.value || 'bank'
+            };
+            
+            // URL 파라미터에서 필요한 정보 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const meetingId = urlParams.get('meetingId') || `meeting-${Date.now()}`;
+            const orientation = urlParams.get('orientation') || 'progressive';
+            
+            // 사용자 정보 가져오기
+            const userState = AuthManager.getUserState();
+            const politicalType = sessionStorage.getItem('politicalType');
+            
+            // 모임 정보 가져오기 (화면에서)
+            const meetingTitle = document.querySelector('.meeting-info-card h2').textContent;
+            const meetingDate = document.querySelector('.info-value').textContent;
+            const meetingLocation = document.querySelector('.info-value:nth-of-type(2)').textContent;
+            
+            // API 요청 데이터 구성
+            const requestData = {
+                meetingId: meetingId,
+                orientation: orientation,
+                meetingInfo: {
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation
+                },
+                applicationData: formData
+            };
+            
+            // 디버깅: 전송할 데이터 확인
+            console.log('=== 모임 신청 데이터 ===');
+            console.log('Request Data:', requestData);
+            console.log('User Email:', userState.profile?.email || sessionStorage.getItem('userEmail'));
+            console.log('Political Type:', politicalType);
+            console.log('Auth Token:', localStorage.getItem('authToken'));
+            
+            // 디버깅: 전송 데이터 확인
+            console.log('모임 신청 데이터:', requestData);
+            console.log('사용자 이메일:', userState.email);
+            console.log('정치 성향:', politicalType);
+            console.log('인증 토큰:', localStorage.getItem('authToken'));
+            
+            try {
+                // 서버 API 호출
+                const response = await fetch('http://localhost:3000/api/meetings/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${localStorage.getItem('authToken') || ''}` // localStorage에서 토큰 가져오기
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                // 디버깅: 서버 응답 확인
+                console.log('서버 응답 상태:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`서버 오류: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('서버 응답 데이터:', result);
+                
+                // 성공 시 sessionStorage 업데이트 (백업용)
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                appliedMeetings[orientation] = {
+                    appliedAt: new Date().toISOString(),
+                    status: 'pending',
+                    formData: formData,
+                    meetingId: meetingId,
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation,
+                    applicationId: result.data?.bookingId || result.bookingId // 서버에서 반환한 신청 ID
+                };
+                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                
+                // 성공 메시지 표시
+                alert('신청이 접수되었습니다!\n\n💳 무통장 입금 안내\n은행: 국민은행\n계좌: 123-456-789012\n예금주: (주)사이드픽\n금액: 45,000원\n\n⚠️ 24시간 이내 입금 부탁드립니다.\n입금 확인 후 참가 확정 문자를 보내드리겠습니다.');
+                
+                // 신청 완료 페이지로 이동
+                window.location.href = 'meeting-schedule.html';
+                
+            } catch (error) {
+                console.error('신청 처리 중 오류:', error);
+                
+                // API 호출 실패 시 폴백: sessionStorage에만 저장 (데모 모드)
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                appliedMeetings[orientation] = {
+                    appliedAt: new Date().toISOString(),
+                    status: 'pending',
+                    formData: formData,
+                    meetingId: meetingId,
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation,
+                    demoMode: true // 데모 모드 표시
+                };
+                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                
+                // 데모 모드 알림
+                alert('[데모 모드]\n신청이 로컬에 저장되었습니다.\n\n실제 서비스에서는 서버에 저장됩니다.\n\n💳 무통장 입금 안내\n은행: 국민은행\n계좌: 123-456-789012\n예금주: (주)사이드픽\n금액: 45,000원');
+                
+                window.location.href = 'meeting-schedule.html';
+            }
+        }
+        
+        // 환불 정책 모달 표시
+        function showRefundPolicy(event) {
+            event.preventDefault();
+            
+            // 모바일인 경우 모달로 표시
+            if (window.innerWidth <= 768) {
+                const modal = document.createElement('div');
+                modal.className = 'policy-modal';
+                modal.innerHTML = `
+                    <div class="policy-modal-content">
+                        <div class="policy-modal-header">
+                            <h3>환불 정책</h3>
+                            <button onclick="this.closest('.policy-modal').remove()" class="close-btn">&times;</button>
+                        </div>
+                        <div class="policy-modal-body">
+                            <h4>1. 전액 환불</h4>
+                            <ul>
+                                <li>모임 3일 전까지: 100% 환불</li>
+                                <li>모임 주최 측 사정으로 취소 시: 100% 환불</li>
+                            </ul>
+                            
+                            <h4>2. 부분 환불</h4>
+                            <ul>
+                                <li>모임 2일 전: 70% 환불</li>
+                                <li>모임 1일 전: 50% 환불</li>
+                            </ul>
+                            
+                            <h4>3. 환불 불가</h4>
+                            <ul>
+                                <li>모임 당일 취소</li>
+                                <li>무단 불참(노쇼)</li>
+                            </ul>
+                            
+                            <h4>4. 환불 방법</h4>
+                            <p>취소 신청 시 등록하신 계좌로 3-5영업일 이내 환불 처리됩니다.</p>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                
+                // 모달 외부 클릭 시 닫기
+                modal.addEventListener('click', (e) => {
+                    if (e.target === modal) {
+                        modal.remove();
+                    }
+                });
+            } else {
+                // 데스크탑은 새 창으로
+                window.open('refund.html', '_blank');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,828 @@
+/* 마이페이지 스타일 */
+.mypage-section {
+    padding: 100px 0 80px;
+    background-color: var(--gray-50);
+    min-height: calc(100vh - 70px);
+}
+
+/* 동기화 상태 표시 */
+.sync-status {
+    position: fixed;
+    top: 80px;
+    right: 20px;
+    background: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 1000;
+    transition: all 0.3s ease;
+}
+
+.sync-status.hidden {
+    opacity: 0;
+    transform: translateX(100%);
+}
+
+.sync-status.success {
+    background: #10B981;
+    color: white;
+}
+
+.sync-status.error {
+    background: #EF4444;
+    color: white;
+}
+
+.sync-icon {
+    font-size: 1.2rem;
+}
+
+.sync-status.loading .sync-icon {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.last-update {
+    font-size: 0.8rem;
+    color: #666;
+    font-weight: normal;
+    margin-left: 10px;
+}
+
+.mypage-section h1 {
+    font-size: 36px;
+    font-weight: 800;
+    color: var(--gray-900);
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+/* 공통 카드 스타일 */
+.profile-card,
+.political-type-card,
+.upcoming-meetings-card,
+.account-settings-card {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 40px;
+    box-shadow: var(--shadow-md);
+    margin-bottom: 30px;
+}
+
+.profile-card h2,
+.political-type-card h2,
+.upcoming-meetings-card h2,
+.account-settings-card h2 {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 30px;
+}
+
+/* 프로필 카드 */
+.profile-info {
+    display: grid;
+    gap: 20px;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid var(--gray-200);
+}
+
+.info-row:last-child {
+    border-bottom: none;
+}
+
+.info-row .label {
+    font-weight: 600;
+    color: var(--gray-600);
+}
+
+.info-row .value {
+    font-weight: 500;
+    color: var(--gray-900);
+}
+
+/* 정치 성향 카드 */
+.type-display {
+    display: flex;
+    align-items: center;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.type-icon-large {
+    font-size: 80px;
+    line-height: 1;
+}
+
+.type-info h3 {
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--gray-900);
+    margin-bottom: 5px;
+}
+
+.type-code {
+    font-size: 18px;
+    color: var(--gray-600);
+    font-weight: 500;
+}
+
+.type-percentage {
+    font-size: 16px;
+    color: var(--coral);
+    font-weight: 600;
+    margin-top: 5px;
+}
+
+.type-description {
+    font-size: 18px;
+    line-height: 1.6;
+    color: var(--gray-700);
+    margin-bottom: 40px;
+}
+
+.type-details {
+    margin-bottom: 30px;
+}
+
+.type-details h4,
+.type-traits h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+}
+
+.axis-scores {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.axis-item {
+    background: var(--gray-100);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+}
+
+.axis-item h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+    margin-bottom: 10px;
+}
+
+.axis-score {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--primary-blue);
+    margin-bottom: 5px;
+}
+
+.axis-detail {
+    font-size: 14px;
+    color: var(--gray-600);
+}
+
+.type-traits ul {
+    list-style: none;
+    padding: 0;
+}
+
+.type-traits li {
+    padding: 10px 0 10px 25px;
+    position: relative;
+    color: var(--gray-700);
+    line-height: 1.6;
+}
+
+.type-traits li::before {
+    content: "💕";
+    position: absolute;
+    left: 0;
+}
+
+.conversation-guide {
+    margin-top: 40px;
+}
+
+.conversation-guide h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+}
+
+.topics-container {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.good-topics,
+.avoid-topics {
+    background: var(--gray-100);
+    padding: 25px;
+    border-radius: 12px;
+}
+
+.good-topics h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #10B981;
+    margin-bottom: 15px;
+}
+
+.avoid-topics h5 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #EF4444;
+    margin-bottom: 15px;
+}
+
+.good-topics ul,
+.avoid-topics ul {
+    list-style: none;
+    padding: 0;
+}
+
+.good-topics li,
+.avoid-topics li {
+    font-size: 15px;
+    color: var(--gray-700);
+    line-height: 1.6;
+    margin-bottom: 10px;
+    padding-left: 20px;
+    position: relative;
+}
+
+.good-topics li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #10B981;
+    font-size: 18px;
+}
+
+.avoid-topics li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: #EF4444;
+    font-size: 18px;
+}
+
+.matching-info {
+    margin-top: 40px;
+}
+
+.matching-info h4 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    margin-bottom: 20px;
+}
+
+.matching-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+}
+
+.matching-type-card {
+    background: var(--gray-100);
+    padding: 20px;
+    border-radius: 12px;
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.matching-type-card:hover {
+    background: var(--gray-200);
+    transform: translateY(-2px);
+}
+
+.match-icon {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 10px;
+}
+
+.match-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-900);
+    display: block;
+    margin-bottom: 5px;
+}
+
+.match-code {
+    font-size: 14px;
+    color: var(--gray-600);
+}
+
+.test-info {
+    margin-top: 40px;
+    padding-top: 30px;
+    border-top: 1px solid var(--gray-200);
+    text-align: center;
+}
+
+.test-date {
+    font-size: 16px;
+    color: var(--gray-600);
+}
+
+.test-date span {
+    font-weight: 600;
+    color: var(--gray-900);
+}
+
+/* 예정된 소개팅 카드 */
+.upcoming-meetings {
+    margin-bottom: 20px;
+}
+
+.meeting-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+    background: var(--gray-100);
+    border-radius: 12px;
+    margin-bottom: 15px;
+}
+
+.meeting-date {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--gray-900);
+    min-width: 120px;
+}
+
+.meeting-details {
+    flex: 1;
+}
+
+.meeting-details p {
+    margin: 5px 0;
+    color: var(--gray-700);
+}
+
+.meeting-status {
+    padding: 8px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.meeting-status.confirmed {
+    background-color: var(--light-blue);
+    color: var(--primary-blue);
+}
+
+.no-meetings {
+    text-align: center;
+    color: var(--gray-600);
+    padding: 40px 0;
+}
+
+.view-all-btn {
+    display: inline-block;
+    color: var(--primary-blue);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.view-all-btn:hover {
+    text-decoration: underline;
+}
+
+/* 계정 설정 카드 */
+.settings-actions {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.settings-btn {
+    padding: 12px 30px;
+    border: 1px solid var(--gray-300);
+    background: var(--white);
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--gray-700);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.settings-btn:hover {
+    background-color: var(--gray-100);
+    transform: translateY(-2px);
+}
+
+.settings-btn.danger {
+    color: #dc2626;
+    border-color: #dc2626;
+}
+
+.settings-btn.danger:hover {
+    background-color: #dc2626;
+    color: var(--white);
+}
+
+/* 테스트 안내 스타일 */
+.test-prompt-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.test-prompt-message {
+    font-size: 1.1rem;
+    color: #666;
+    margin-bottom: 30px;
+    line-height: 1.8;
+}
+
+.test-prompt-btn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 15px 40px;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.test-prompt-btn:hover {
+    background: #357abd;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+}
+
+/* 소개팅 신청 버튼 스타일 */
+.no-meetings-container {
+    text-align: center;
+    padding: 30px;
+}
+
+.apply-meeting-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    margin-top: 20px;
+    transition: all 0.3s ease;
+}
+
+.apply-meeting-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+}
+
+/* 미팅 아이템 스타일 개선 */
+.meeting-item {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 15px;
+}
+
+.meeting-header {
+    display: flex;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.meeting-header h4 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.2rem;
+}
+
+.meeting-details {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.detail-item {
+    white-space: nowrap;
+}
+
+.detail-separator {
+    color: #ccc;
+    font-size: 0.8rem;
+}
+
+.meeting-status.pending {
+    background: #f39c12;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.meeting-status.confirmed {
+    background: #27ae60;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+/* 입금 안내 스타일 */
+.payment-notice {
+    width: 100%;
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.payment-notice p {
+    margin: 5px 0;
+    color: #856404;
+    font-size: 0.9rem;
+}
+
+.payment-notice .warning {
+    color: #e74c3c;
+    font-weight: 600;
+    margin-top: 10px;
+}
+
+/* 모임 액션 버튼 영역 */
+.meeting-actions {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 15px;
+}
+
+.cancel-meeting-btn {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 10px 25px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.cancel-meeting-btn:hover {
+    background: #c0392b;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(231, 76, 60, 0.3);
+}
+
+/* 예정된 소개팅이 없을 때 */
+.no-meetings-container {
+    text-align: center;
+    padding: 40px 20px;
+}
+
+.no-meetings {
+    color: #666;
+    font-size: 1rem;
+    margin-bottom: 20px;
+}
+
+.apply-meeting-btn {
+    background: var(--primary-blue);
+    color: white;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.apply-meeting-btn:hover {
+    background: #4a90e2;
+}
+
+/* 입금 안내 스타일 */
+.payment-notice {
+    padding: 10px 12px;
+    background: #fff7e6;
+    border-radius: 8px;
+    border: 1px solid #ffd9a3;
+}
+
+.payment-compact {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 6px;
+}
+
+.bank-info {
+    font-size: 0.85rem;
+    color: #856404;
+}
+
+.amount {
+    font-weight: 700;
+    color: #333;
+    font-size: 0.95rem;
+    white-space: nowrap;
+}
+
+.warning-text {
+    display: block;
+    color: #e74c3c;
+    font-weight: 600;
+    font-size: 0.8rem;
+}
+
+/* 반응형 디자인 */
+@media (max-width: 768px) {
+    .mypage-section {
+        padding: 80px 20px 60px;
+    }
+    
+    .profile-card,
+    .political-type-card,
+    .upcoming-meetings-card,
+    .account-settings-card {
+        padding: 30px 20px;
+    }
+    
+    .type-display {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .axis-scores {
+        grid-template-columns: 1fr;
+    }
+    
+    .topics-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .matching-types-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    
+    .meeting-header {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .meeting-header h4 {
+        font-size: 1rem;
+        margin: 0;
+        flex: 1;
+    }
+    
+    .meeting-status {
+        font-size: 0.75rem;
+        padding: 4px 12px;
+        white-space: nowrap;
+    }
+    
+    .meeting-details {
+        font-size: 0.85rem;
+        gap: 6px;
+    }
+    
+    .detail-separator {
+        font-size: 0.7rem;
+    }
+    
+    .payment-compact {
+        gap: 8px;
+    }
+    
+    .bank-info {
+        font-size: 0.8rem;
+    }
+    
+    .amount {
+        font-size: 0.9rem;
+    }
+    
+    .warning-text {
+        font-size: 0.75rem;
+    }
+    
+    .settings-actions {
+        flex-direction: column;
+    }
+    
+    .settings-btn {
+        width: 100%;
+    }
+    
+    /* 예정된 소개팅이 없을 때 */
+    .no-meetings-container {
+        text-align: center;
+        padding: 20px;
+    }
+    
+    .no-meetings {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+    
+    .apply-meeting-btn {
+        font-size: 0.9rem;
+        padding: 10px 20px;
+    }
+}
+
+/* 더 작은 모바일 화면 대응 */
+@media (max-width: 480px) {
+    .mypage-section {
+        padding: 70px 15px 50px;
+    }
+    
+    .profile-card,
+    .political-type-card,
+    .upcoming-meetings-card,
+    .account-settings-card {
+        padding: 20px 15px;
+    }
+    
+    
+    .meeting-header h4 {
+        font-size: 0.9rem;
+    }
+    
+    .meeting-status {
+        font-size: 0.7rem;
+        padding: 3px 10px;
+    }
+    
+    .meeting-details {
+        font-size: 0.8rem;
+        gap: 4px;
+    }
+    
+    .detail-item {
+        font-size: 0.75rem;
+    }
+    
+    .payment-notice {
+        padding: 6px 8px;
+    }
+    
+    .payment-compact {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+    }
+    
+    .bank-info {
+        font-size: 0.75rem;
+    }
+    
+    .amount {
+        font-size: 0.85rem;
+    }
+    
+    .warning-text {
+        font-size: 0.7rem;
+        word-break: keep-all;
+    }
+}

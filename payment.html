@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>결제하기 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="payment-styles.css">
+    <script src="auth-check.js"></script>
+</head>
+<body>
+    <!-- 헤더 -->
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html#intro">서비스 소개</a></li>
+                <li><a href="index.html#test">성향 테스트</a></li>
+                <li><a href="index.html#meeting">오프라인 소개팅</a></li>
+                <li><a href="index.html#faq">자주 묻는 질문</a></li>
+            </ul>
+            <div class="nav-cta">
+                <a href="political-test.html?logged_in=true" class="nav-btn">성향 테스트 받기</a>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 결제 섹션 -->
+    <section class="payment-section">
+        <div class="container">
+            <div class="payment-header">
+                <h1>결제하기</h1>
+                <div class="progress-bar">
+                    <div class="progress-step completed">1. 정보 입력</div>
+                    <div class="progress-step active">2. 결제하기</div>
+                    <div class="progress-step">3. 완료</div>
+                </div>
+            </div>
+
+            <div class="payment-content">
+                <!-- 주문 정보 -->
+                <div class="order-summary">
+                    <h2>주문 정보</h2>
+                    <div class="order-card">
+                        <div class="order-header">
+                            <h3 id="order-title">-</h3>
+                            <p class="order-date" id="order-date">-</p>
+                        </div>
+                        <div class="order-details">
+                            <div class="detail-item">
+                                <span class="label">시간</span>
+                                <span class="value" id="order-time">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">장소</span>
+                                <span class="value" id="order-location">-</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="label">참가자</span>
+                                <span class="value" id="order-participant">-</span>
+                            </div>
+                        </div>
+                        <div class="order-price">
+                            <div class="price-row">
+                                <span>소개팅 참가비</span>
+                                <span>45,000원</span>
+                            </div>
+                            <div class="price-row total">
+                                <span>총 결제금액</span>
+                                <span class="total-amount">45,000원</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 무통장입금 안내 -->
+                <div class="payment-info-section">
+                    <h2>무통장입금 안내</h2>
+                    <div class="bank-transfer-info">
+                        <div class="bank-card">
+                            <div class="bank-header">
+                                <h3>입금 계좌 정보</h3>
+                            </div>
+                            <div class="bank-details">
+                                <div class="bank-item">
+                                    <span class="label">은행명</span>
+                                    <span class="value">신한은행</span>
+                                </div>
+                                <div class="bank-item">
+                                    <span class="label">계좌번호</span>
+                                    <div class="account-number">
+                                        <span class="value" id="account-number">110-386-140132</span>
+                                        <button type="button" class="copy-btn" onclick="copyAccountNumber()">복사</button>
+                                    </div>
+                                </div>
+                                <div class="bank-item">
+                                    <span class="label">예금주</span>
+                                    <span class="value">배은호</span>
+                                </div>
+                                <div class="bank-item">
+                                    <span class="label">입금자명</span>
+                                    <span class="value highlight" id="depositor-name">-</span>
+                                </div>
+                                <div class="bank-item">
+                                    <span class="label">입금금액</span>
+                                    <span class="value highlight">45,000원</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 입금 안내사항 -->
+                        <div class="transfer-notice">
+                            <h4>⚠️ 입금 시 주의사항</h4>
+                            <ul>
+                                <li><strong>반드시 신청자 본인 명의로 입금해주세요.</strong></li>
+                                <li>입금자명은 회원가입 시 등록한 이름과 동일해야 합니다.</li>
+                                <li>입금 확인 후 24시간 이내에 예약 확정 문자를 발송해드립니다.</li>
+                                <li>입금 기한은 신청일로부터 <strong>3일</strong>입니다.</li>
+                                <li>기한 내 미입금 시 예약은 자동으로 취소됩니다.</li>
+                            </ul>
+                        </div>
+
+                        <!-- 환불 안내 -->
+                        <div class="refund-notice">
+                            <h4>💡 환불 정책</h4>
+                            <ul>
+                                <li>소개팅 <strong>3일 전까지</strong> 100% 환불 가능</li>
+                                <li>소개팅 3일 전 ~ 당일: 환불 불가</li>
+                                <li>환불 요청은 고객센터로 문의해주세요</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 확인 사항 -->
+                <div class="payment-confirm-section">
+                    <h3>입금 전 확인사항</h3>
+                    <div class="confirm-items">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agree-payment" required>
+                            <span>주문 내용과 입금 계좌 정보를 확인했습니다.</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agree-cancel-policy" required>
+                            <span>소개팅 3일 전까지만 취소 가능함을 확인했습니다.</span>
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="agree-deposit" required>
+                            <span>반드시 본인 명의로 입금해야 함을 확인했습니다.</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- 버튼 -->
+                <div class="button-group">
+                    <button type="button" class="btn-secondary" onclick="history.back()">이전으로</button>
+                    <button type="button" class="btn-primary" id="confirm-button" disabled>입금 정보 확인 완료</button>
+                </div>
+
+                <!-- 고객센터 안내 -->
+                <div class="customer-service">
+                    <h4>고객센터</h4>
+                    <p>입금 확인이나 문의사항은 아래 연락처로 문의해주세요.</p>
+                    <div class="contact-info">
+                        <div class="contact-item">
+                            <span class="label">이메일:</span>
+                            <a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3>사이드픽</h3>
+                    <p>정치 성향 기반 오프라인 만남 서비스</p>
+                </div>
+                <div class="footer-section">
+                    <h4>서비스</h4>
+                    <ul>
+                        <li><a href="political-test.html">성향 테스트</a></li>
+                        <li><a href="meeting-schedule.html">모임 일정</a></li>
+                        <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>고객센터</h4>
+                    <ul>
+                        <li>평일 10:00 - 18:00</li>
+                        <li><a href="mailto:clsrna3@naver.com">clsrna3@naver.com</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>정책</h4>
+                    <ul>
+                        <li><a href="terms.html">이용약관</a></li>
+                        <li><a href="privacy.html">개인정보처리방침</a></li>
+                        <li><a href="refund.html">환불정책</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 사이드픽. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // 페이지 로드 시 주문 정보 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            // 필수 데이터 검증
+            const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
+            
+            // 필수 데이터가 없으면 이전 페이지로
+            if (!meetingInfo.id || !participantInfo.name) {
+                alert('주문 정보가 올바르지 않습니다. 다시 시도해주세요.');
+                window.location.href = 'meeting-schedule.html';
+                return;
+            }
+            
+            // 주문 정보 표시
+            document.getElementById('order-title').textContent = meetingInfo.title || '-';
+            document.getElementById('order-date').textContent = meetingInfo.date || '-';
+            document.getElementById('order-time').textContent = meetingInfo.time || '-';
+            document.getElementById('order-location').textContent = meetingInfo.location || '-';
+            document.getElementById('order-participant').textContent = participantInfo.name || '-';
+            
+            // 입금자명 표시
+            document.getElementById('depositor-name').textContent = participantInfo.name || '-';
+        });
+
+        // 계좌번호 복사 기능
+        function copyAccountNumber() {
+            const accountNumber = document.getElementById('account-number').textContent;
+            
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(accountNumber).then(function() {
+                    // 복사 성공 시 버튼 텍스트 변경
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '복사됨!';
+                    copyBtn.style.backgroundColor = '#10B981';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.backgroundColor = '';
+                    }, 2000);
+                }).catch(function(err) {
+                    alert('계좌번호 복사에 실패했습니다.');
+                });
+            } else {
+                // Clipboard API를 지원하지 않는 경우
+                const textArea = document.createElement('textarea');
+                textArea.value = accountNumber;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.select();
+                
+                try {
+                    document.execCommand('copy');
+                    const copyBtn = document.querySelector('.copy-btn');
+                    const originalText = copyBtn.textContent;
+                    copyBtn.textContent = '복사됨!';
+                    copyBtn.style.backgroundColor = '#10B981';
+                    
+                    setTimeout(() => {
+                        copyBtn.textContent = originalText;
+                        copyBtn.style.backgroundColor = '';
+                    }, 2000);
+                } catch (err) {
+                    alert('계좌번호 복사에 실패했습니다.');
+                }
+                
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // 체크박스 상태에 따른 버튼 활성화
+        const checkboxes = document.querySelectorAll('.confirm-items input[type="checkbox"]');
+        const confirmButton = document.getElementById('confirm-button');
+
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', function() {
+                const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                confirmButton.disabled = !allChecked;
+            });
+        });
+
+        // 확인 완료 버튼 클릭
+        confirmButton.addEventListener('click', function() {
+            // 주문 정보 저장
+            const orderData = {
+                orderId: 'ORD-' + Date.now(),
+                method: 'bank_transfer',
+                amount: 45000,
+                status: 'pending',
+                createdAt: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('orderData', JSON.stringify(orderData));
+            
+            // payment-complete-script.js에서 필요한 paymentInfo도 저장
+            const paymentInfo = {
+                orderId: orderData.orderId,
+                method: 'bank_transfer',
+                amount: 45000
+            };
+            sessionStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
+            
+            // 완료 페이지로 이동
+            window.location.href = 'payment-complete.html';
+        });
+    </script>
+</body>
+</html>

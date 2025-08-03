@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>참석 인원 표시 테스트</title>
+    <style>
+        .meeting-card {
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin: 20px;
+            border-radius: 8px;
+        }
+        .participants {
+            margin-top: 10px;
+        }
+        .male-count, .female-count {
+            display: inline-block;
+            margin-right: 20px;
+            padding: 5px 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>참석 인원 표시 테스트</h1>
+    
+    <div id="progressive-meetings">
+        <h2>진보 모임</h2>
+        <div class="meeting-card">
+            <h3>강남 진보 성향 소개팅</h3>
+            <p class="location">📍 강남역 파티룸</p>
+            <p class="time">⏰ 오후 3시 - 5시</p>
+            <p class="participants">
+                <span class="male-count" data-gender="male" data-current="0">👨 남자 0/4명</span>
+                <span class="female-count" data-gender="female" data-current="0">👩 여자 0/4명</span>
+            </p>
+        </div>
+    </div>
+    
+    <div id="conservative-meetings">
+        <h2>보수 모임</h2>
+        <div class="meeting-card">
+            <h3>강남 보수 성향 소개팅</h3>
+            <p class="location">📍 강남역 파티룸</p>
+            <p class="time">⏰ 오후 3시 - 5시</p>
+            <p class="participants">
+                <span class="male-count" data-gender="male" data-current="0">👨 남자 0/4명</span>
+                <span class="female-count" data-gender="female" data-current="0">👩 여자 0/4명</span>
+            </p>
+        </div>
+    </div>
+    
+    <hr>
+    <h2>API 테스트</h2>
+    <button onclick="testAPI()">API 호출 테스트</button>
+    <button onclick="updateDisplay()">화면 업데이트 테스트</button>
+    <div id="result"></div>
+    
+    <script>
+        // API 테스트
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            try {
+                const response = await fetch('http://localhost:3000/api/meetings/attendance');
+                const data = await response.json();
+                resultDiv.innerHTML = '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                
+                if (data.success && data.data) {
+                    updateAttendance(data.data);
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '<p style="color: red;">에러: ' + error.message + '</p>';
+            }
+        }
+        
+        // 화면 업데이트
+        function updateAttendance(attendanceData) {
+            console.log('updateAttendance 호출:', attendanceData);
+            
+            // 진보 모임 계산
+            let progressiveMale = 0;
+            let progressiveFemale = 0;
+            
+            Object.values(attendanceData).forEach(meeting => {
+                if (meeting.orientation === 'progressive') {
+                    progressiveMale += meeting.male;
+                    progressiveFemale += meeting.female;
+                }
+            });
+            
+            // 진보 모임 업데이트
+            const progressiveCard = document.querySelector('#progressive-meetings .meeting-card');
+            if (progressiveCard) {
+                const maleCount = progressiveCard.querySelector('.male-count');
+                const femaleCount = progressiveCard.querySelector('.female-count');
+                
+                if (maleCount) {
+                    maleCount.textContent = `👨 남자 ${progressiveMale}/4명`;
+                    maleCount.style.background = progressiveMale > 0 ? '#d4f4dd' : '#f0f0f0';
+                }
+                if (femaleCount) {
+                    femaleCount.textContent = `👩 여자 ${progressiveFemale}/4명`;
+                    femaleCount.style.background = progressiveFemale > 0 ? '#d4f4dd' : '#f0f0f0';
+                }
+            }
+        }
+        
+        // 수동 업데이트 테스트
+        function updateDisplay() {
+            const maleCount = document.querySelector('.male-count');
+            if (maleCount) {
+                maleCount.textContent = '👨 남자 1/4명';
+                maleCount.style.background = '#d4f4dd';
+                alert('수동 업데이트 완료!');
+            } else {
+                alert('male-count 요소를 찾을 수 없습니다!');
+            }
+        }
+        
+        // 페이지 로드 시 자동 실행
+        window.onload = function() {
+            console.log('페이지 로드 완료');
+            testAPI();
+        };
+    </script>
+</body>
+</html>
