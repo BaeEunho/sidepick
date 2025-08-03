@@ -21,7 +21,6 @@ try {
       projectId: 'sidepick-demo'
     });
     console.log('Firebase 에뮬레이터 모드로 실행 중');
-    console.log("aaaa")
   }
 } catch (error) {
   console.error('Firebase 초기화 실패:', error);

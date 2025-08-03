@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Code 에러 디버그</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 20px; background: #f0f0f0; white-space: pre-wrap; }
+        .error { color: red; }
+        .success { color: green; }
+    </style>
+</head>
+<body>
+    <h1>Code 에러 디버그</h1>
+    
+    <button onclick="testDirectFetch()">1. 직접 Fetch 테스트</button>
+    <button onclick="testAuthSystem()">2. AuthSystem.login 테스트</button>
+    <button onclick="testApiClient()">3. api-client.js login 테스트</button>
+    
+    <div id="result">결과가 여기에 표시됩니다.</div>
+    
+    <script src="auth-system.js"></script>
+    <script src="api-client.js"></script>
+    <script>
+    const resultDiv = document.getElementById('result');
+    
+    function log(message, className = '') {
+        const div = document.createElement('div');
+        div.className = className;
+        div.textContent = new Date().toLocaleTimeString() + ' - ' + message;
+        resultDiv.appendChild(div);
+        console.log(message);
+    }
+    
+    function clearLog() {
+        resultDiv.innerHTML = '';
+    }
+    
+    // 1. 직접 Fetch 테스트
+    async function testDirectFetch() {
+        clearLog();
+        log('=== 직접 Fetch 테스트 ===');
+        
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'toqha1585@gmail.com',
+                    password: 'asdf1234*'
+                })
+            });
+            
+            log(`응답 상태: ${response.status} ${response.statusText}`);
+            
+            // 응답이 비어있는지 확인
+            const contentLength = response.headers.get('content-length');
+            log(`Content-Length: ${contentLength}`);
+            
+            if (response.status === 204 || contentLength === '0') {
+                log('응답 본문이 비어있습니다!', 'error');
+                return;
+            }
+            
+            const text = await response.text();
+            log(`응답 텍스트 (${text.length}자): ${text.substring(0, 100)}...`);
+            
+            if (text) {
+                try {
+                    const data = JSON.parse(text);
+                    log('JSON 파싱 성공:', 'success');
+                    log(JSON.stringify(data, null, 2));
+                } catch (e) {
+                    log('JSON 파싱 실패: ' + e.message, 'error');
+                }
+            }
+        } catch (error) {
+            log('Fetch 에러: ' + error.message, 'error');
+            log('스택: ' + error.stack, 'error');
+        }
+    }
+    
+    // 2. AuthSystem 테스트
+    async function testAuthSystem() {
+        clearLog();
+        log('=== AuthSystem.login 테스트 ===');
+        
+        try {
+            log('AuthSystem.login 호출 중...');
+            const result = await AuthSystem.login('toqha1585@gmail.com', 'asdf1234*');
+            
+            log('결과 타입: ' + typeof result);
+            log('결과 내용: ' + JSON.stringify(result, null, 2));
+            
+            // result가 undefined인지 확인
+            if (!result) {
+                log('결과가 undefined입니다!', 'error');
+                return;
+            }
+            
+            // 각 속성 확인
+            log('result.success: ' + result.success);
+            log('result.message: ' + result.message);
+            log('result.data: ' + JSON.stringify(result.data));
+            
+            if (result.success) {
+                log('로그인 성공!', 'success');
+            } else {
+                log('로그인 실패: ' + result.message, 'error');
+            }
+        } catch (error) {
+            log('AuthSystem 에러: ' + error.message, 'error');
+            log('스택: ' + error.stack, 'error');
+        }
+    }
+    
+    // 3. api-client.js 테스트
+    async function testApiClient() {
+        clearLog();
+        log('=== api-client.js login 테스트 ===');
+        
+        try {
+            log('login 함수 호출 중...');
+            const result = await login('toqha1585@gmail.com', 'asdf1234*');
+            
+            log('결과 타입: ' + typeof result);
+            log('결과 내용: ' + JSON.stringify(result, null, 2));
+            
+            // result가 undefined인지 확인
+            if (!result) {
+                log('결과가 undefined입니다!', 'error');
+                return;
+            }
+            
+            if (result.success) {
+                log('로그인 성공!', 'success');
+            } else {
+                log('로그인 실패: ' + result.message, 'error');
+            }
+        } catch (error) {
+            log('api-client 에러: ' + error.message, 'error');
+            log('스택: ' + error.stack, 'error');
+        }
+    }
+    </script>
+</body>
+</html>

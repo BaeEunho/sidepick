@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>사이드픽 전체 시스템 테스트</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth-system.js"></script>
+    <script src="data-system.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        .status-item {
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .status-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .meeting-item {
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 4px;
+        }
+        .booking-item {
+            background: #f9f9f9;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <h1>사이드픽 전체 시스템 테스트</h1>
+    
+    <!-- 시스템 상태 -->
+    <div class="test-section">
+        <h2>1. 시스템 상태</h2>
+        <div class="status-grid">
+            <div class="status-item">
+                <strong>인증 시스템</strong>
+                <span id="auth-status">확인 중...</span>
+            </div>
+            <div class="status-item">
+                <strong>데이터 시스템</strong>
+                <span id="data-status">확인 중...</span>
+            </div>
+            <div class="status-item">
+                <strong>현재 사용자</strong>
+                <span id="current-user">없음</span>
+            </div>
+            <div class="status-item">
+                <strong>정치 성향</strong>
+                <span id="political-type">미측정</span>
+            </div>
+        </div>
+        <button onclick="checkSystemStatus()">상태 새로고침</button>
+    </div>
+    
+    <!-- 테스트 계정 -->
+    <div class="test-section">
+        <h2>2. 테스트 계정 생성</h2>
+        <button onclick="createTestUser('progressive')">진보 성향 테스트 유저 생성</button>
+        <button onclick="createTestUser('conservative')">보수 성향 테스트 유저 생성</button>
+        <button onclick="AuthSystem.logout(); location.reload();">로그아웃</button>
+        <div id="test-user-result"></div>
+    </div>
+    
+    <!-- 미팅 관리 -->
+    <div class="test-section">
+        <h2>3. 미팅 현황</h2>
+        <div id="meetings-list"></div>
+        <button onclick="showMeetings()">미팅 목록 새로고침</button>
+        <button onclick="DataSystem.reset()">모든 데이터 초기화</button>
+    </div>
+    
+    <!-- 예약 관리 -->
+    <div class="test-section">
+        <h2>4. 예약 테스트</h2>
+        <button onclick="testBooking()">현재 사용자로 미팅 신청</button>
+        <div id="bookings-list"></div>
+    </div>
+    
+    <!-- 빠른 링크 -->
+    <div class="test-section">
+        <h2>5. 빠른 링크</h2>
+        <a href="index.html" target="_blank">메인 페이지</a> |
+        <a href="signup.html" target="_blank">회원가입</a> |
+        <a href="login.html" target="_blank">로그인</a> |
+        <a href="political-test.html" target="_blank">정치 성향 테스트</a> |
+        <a href="meeting-schedule.html" target="_blank">미팅 일정</a> |
+        <a href="mypage.html" target="_blank">마이페이지</a>
+    </div>
+
+    <script>
+        // 시스템 상태 확인
+        function checkSystemStatus() {
+            // 인증 시스템
+            document.getElementById('auth-status').innerHTML = 
+                window.AuthSystem ? '<span class="success">✓ 정상</span>' : '<span class="error">✗ 로드 실패</span>';
+            
+            // 데이터 시스템
+            document.getElementById('data-status').innerHTML = 
+                window.DataSystem ? '<span class="success">✓ 정상</span>' : '<span class="error">✗ 로드 실패</span>';
+            
+            // 현재 사용자
+            const userEmail = sessionStorage.getItem('userEmail');
+            const userProfile = sessionStorage.getItem('userProfile');
+            if (userEmail && userProfile) {
+                const profile = JSON.parse(userProfile);
+                document.getElementById('current-user').innerHTML = 
+                    `${profile.name} (${userEmail})`;
+            } else {
+                document.getElementById('current-user').innerHTML = '로그인 안됨';
+            }
+            
+            // 정치 성향
+            const politicalType = sessionStorage.getItem('politicalType');
+            document.getElementById('political-type').innerHTML = politicalType || '미측정';
+        }
+        
+        // 테스트 사용자 생성
+        async function createTestUser(orientation) {
+            const resultDiv = document.getElementById('test-user-result');
+            const timestamp = Date.now();
+            
+            const testUser = {
+                email: `test_${orientation}_${timestamp}@example.com`,
+                password: 'test1234!',
+                name: orientation === 'progressive' ? '진보테스터' : '보수테스터',
+                phone: '010-' + Math.floor(1000 + Math.random() * 9000) + '-' + Math.floor(1000 + Math.random() * 9000),
+                birthdate: '1990-01-01',
+                gender: Math.random() > 0.5 ? 'male' : 'female'
+            };
+            
+            try {
+                // 회원가입
+                const signupResult = await AuthSystem.signup(testUser);
+                if (!signupResult.success) {
+                    resultDiv.innerHTML = `<span class="error">회원가입 실패: ${signupResult.message}</span>`;
+                    return;
+                }
+                
+                // 정치 성향 저장
+                const politicalType = orientation === 'progressive' ? 'MPOS' : 'MCOS';
+                const testResult = {
+                    politicalType: politicalType,
+                    axisScores: {
+                        economic: orientation === 'progressive' ? 80 : 20,
+                        social: orientation === 'progressive' ? 75 : 25,
+                        cultural: orientation === 'progressive' ? 70 : 30,
+                        participation: orientation === 'progressive' ? 85 : 15
+                    },
+                    userAnswers: [],
+                    testCompletedAt: new Date().toISOString()
+                };
+                
+                await AuthSystem.savePoliticalType(politicalType, testResult);
+                
+                resultDiv.innerHTML = `
+                    <span class="success">✓ 테스트 유저 생성 완료</span><br>
+                    이메일: ${testUser.email}<br>
+                    비밀번호: ${testUser.password}<br>
+                    성향: ${orientation === 'progressive' ? '진보' : '보수'} (${politicalType})
+                `;
+                
+                // 상태 새로고침
+                checkSystemStatus();
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">오류: ${error.message}</span>`;
+            }
+        }
+        
+        // 미팅 목록 표시
+        function showMeetings() {
+            const meetingsDiv = document.getElementById('meetings-list');
+            const meetings = DataSystem.getMeetings();
+            
+            let html = '<h3>현재 미팅 목록</h3>';
+            meetings.forEach(meeting => {
+                html += `
+                    <div class="meeting-item">
+                        <strong>${meeting.title}</strong> (${meeting.orientation})<br>
+                        날짜: ${meeting.date} ${meeting.time}<br>
+                        장소: ${meeting.location}<br>
+                        참가자: 남성 ${meeting.currentParticipants.male}/4, 여성 ${meeting.currentParticipants.female}/4<br>
+                        상태: ${meeting.status}
+                    </div>
+                `;
+            });
+            
+            meetingsDiv.innerHTML = html;
+        }
+        
+        // 예약 테스트
+        function testBooking() {
+            const userEmail = sessionStorage.getItem('userEmail');
+            const userGender = sessionStorage.getItem('userGender');
+            const politicalType = sessionStorage.getItem('politicalType');
+            
+            if (!userEmail) {
+                alert('먼저 로그인하거나 테스트 유저를 생성하세요.');
+                return;
+            }
+            
+            if (!politicalType) {
+                alert('정치 성향 테스트를 먼저 완료하세요.');
+                return;
+            }
+            
+            // 성향 판단
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            const orientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+            
+            // 미팅 찾기
+            const meetings = DataSystem.getMeetings(orientation);
+            if (meetings.length === 0) {
+                alert('해당 성향의 미팅이 없습니다.');
+                return;
+            }
+            
+            // 신청
+            const result = DataSystem.applyForMeeting(meetings[0].id, userEmail, userGender);
+            
+            if (result.success) {
+                alert(result.message);
+                showBookings();
+                showMeetings();
+            } else {
+                alert('신청 실패: ' + result.message);
+            }
+        }
+        
+        // 예약 목록 표시
+        function showBookings() {
+            const bookingsDiv = document.getElementById('bookings-list');
+            const userEmail = sessionStorage.getItem('userEmail');
+            
+            if (!userEmail) {
+                bookingsDiv.innerHTML = '<p>로그인이 필요합니다.</p>';
+                return;
+            }
+            
+            const bookings = DataSystem.getUserBookings(userEmail);
+            
+            let html = '<h3>내 예약 목록</h3>';
+            if (bookings.length === 0) {
+                html += '<p>예약 내역이 없습니다.</p>';
+            } else {
+                bookings.forEach(booking => {
+                    html += `
+                        <div class="booking-item">
+                            예약번호: ${booking.id}<br>
+                            미팅: ${booking.meetingTitle}<br>
+                            날짜: ${booking.meetingDate} ${booking.meetingTime}<br>
+                            상태: ${booking.status}<br>
+                            <button onclick="DataSystem.cancelBooking('${booking.id}'); showBookings(); showMeetings();">
+                                예약 취소
+                            </button>
+                        </div>
+                    `;
+                });
+            }
+            
+            bookingsDiv.innerHTML = html;
+        }
+        
+        // 페이지 로드 시 실행
+        checkSystemStatus();
+        showMeetings();
+        showBookings();
+    </script>
+</body>
+</html>

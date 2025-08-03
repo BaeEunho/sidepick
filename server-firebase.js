@@ -209,7 +209,9 @@ app.post('/api/auth/login', async (req, res) => {
     try {
         // 사용자 조회
         const userDoc = await collections.users.doc(email).get();
-        
+        console.log(userDoc)
+        console.log(password)
+        console.log(email)
         if (!userDoc.exists) {
             return res.status(401).json({ 
                 success: false, 

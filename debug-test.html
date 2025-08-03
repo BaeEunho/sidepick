@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>디버그 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .debug-info {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>사이드픽 디버그 테스트</h1>
+    
+    <div class="debug-info">
+        <h2>1. JavaScript 파일 로드 테스트</h2>
+        <div id="js-test">확인 중...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>2. SessionStorage 테스트</h2>
+        <div id="storage-test">확인 중...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>3. API 연결 테스트</h2>
+        <div id="api-test">확인 중...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>4. 콘솔 에러</h2>
+        <div id="console-errors">확인 중...</div>
+    </div>
+    
+    <div class="debug-info">
+        <h2>5. 현재 경로</h2>
+        <div id="current-path"></div>
+    </div>
+
+    <script>
+        // 에러 캐처
+        window.errorLog = [];
+        window.onerror = function(msg, url, lineNo, columnNo, error) {
+            window.errorLog.push({
+                message: msg,
+                source: url,
+                lineno: lineNo,
+                colno: columnNo,
+                error: error
+            });
+            return false;
+        };
+
+        document.addEventListener('DOMContentLoaded', function() {
+            // 1. JS 파일 로드 테스트
+            const jsTest = document.getElementById('js-test');
+            try {
+                // auth-check.js가 로드되었는지 확인
+                if (typeof AuthManager !== 'undefined') {
+                    jsTest.innerHTML = '<span class="success">✓ auth-check.js 로드됨</span>';
+                } else {
+                    jsTest.innerHTML = '<span class="error">✗ auth-check.js 로드 실패</span>';
+                }
+            } catch (e) {
+                jsTest.innerHTML = '<span class="error">✗ 에러: ' + e.message + '</span>';
+            }
+
+            // 2. SessionStorage 테스트
+            const storageTest = document.getElementById('storage-test');
+            try {
+                sessionStorage.setItem('test', 'value');
+                const value = sessionStorage.getItem('test');
+                if (value === 'value') {
+                    storageTest.innerHTML = '<span class="success">✓ SessionStorage 정상 작동</span>';
+                    // 현재 저장된 데이터 표시
+                    const keys = Object.keys(sessionStorage);
+                    if (keys.length > 0) {
+                        storageTest.innerHTML += '<br><br>저장된 데이터:<pre>' + 
+                            JSON.stringify(Object.fromEntries(keys.map(k => [k, sessionStorage.getItem(k)])), null, 2) + 
+                            '</pre>';
+                    }
+                }
+            } catch (e) {
+                storageTest.innerHTML = '<span class="error">✗ SessionStorage 에러: ' + e.message + '</span>';
+            }
+
+            // 3. API 테스트
+            const apiTest = document.getElementById('api-test');
+            apiTest.innerHTML = '<span class="success">✓ 데모 모드 (API 서버 불필요)</span>';
+
+            // 4. 콘솔 에러
+            const consoleErrors = document.getElementById('console-errors');
+            if (window.errorLog.length > 0) {
+                consoleErrors.innerHTML = '<span class="error">발견된 에러:</span><pre>' + 
+                    JSON.stringify(window.errorLog, null, 2) + '</pre>';
+            } else {
+                consoleErrors.innerHTML = '<span class="success">✓ 콘솔 에러 없음</span>';
+            }
+
+            // 5. 현재 경로
+            document.getElementById('current-path').innerHTML = 
+                '<strong>URL:</strong> ' + window.location.href + '<br>' +
+                '<strong>경로:</strong> ' + window.location.pathname;
+        });
+
+        // auth-check.js 로드
+        const script = document.createElement('script');
+        script.src = 'auth-check.js';
+        script.onerror = function() {
+            document.getElementById('js-test').innerHTML = '<span class="error">✗ auth-check.js 파일을 찾을 수 없음</span>';
+        };
+        document.head.appendChild(script);
+    </script>
+</body>
+</html>

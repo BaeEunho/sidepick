@@ -71,13 +71,13 @@ window.AuthManager = {
             navCta.innerHTML = `
                 <span class="user-name">${userState.profile.name}님</span>
                 <a href="political-test.html?logged_in=true" class="nav-btn">성향 테스트 받기</a>
-                <button onclick="logout()" class="btn-logout">로그아웃</button>
+                <button onclick="logout()" class="btn-logout-simple">로그아웃</button>
             `;
         } else {
             navCta.innerHTML = `
                 <span class="user-name">${userState.profile.name}님</span>
                 <a href="mypage.html" class="nav-btn">마이페이지</a>
-                <button onclick="logout()" class="btn-logout">로그아웃</button>
+                <button onclick="logout()" class="btn-logout-simple">로그아웃</button>
             `;
         }
     },

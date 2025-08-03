@@ -1,7 +1,16 @@
 // 페이지 로드 시 실행
 document.addEventListener('DOMContentLoaded', function() {
-    // 미팅 정보 로드
-    loadMeetingInfo();
+    // URL에서 bookingId 가져오기
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('bookingId');
+    
+    if (bookingId && window.DataSystem) {
+        // 실제 예약 데이터 로드
+        loadBookingInfo(bookingId);
+    } else {
+        // 기존 방식 (세션 스토리지)
+        loadMeetingInfo();
+    }
     
     // 사용자 정보 로드
     loadUserInfo();
@@ -10,7 +19,28 @@ document.addEventListener('DOMContentLoaded', function() {
     setupFormValidation();
 });
 
-// 미팅 정보 로드
+// 실제 예약 정보 로드
+function loadBookingInfo(bookingId) {
+    const bookings = window.DataSystem.getBookingsDB();
+    const booking = bookings[bookingId];
+    
+    if (!booking) {
+        alert('예약 정보를 찾을 수 없습니다.');
+        window.location.href = 'meeting-schedule.html';
+        return;
+    }
+    
+    // 미팅 정보 표시
+    document.getElementById('meeting-title').textContent = booking.meetingTitle;
+    document.getElementById('meeting-date').textContent = booking.meetingDate;
+    document.getElementById('meeting-time').textContent = booking.meetingTime;
+    document.getElementById('meeting-location').textContent = booking.meetingLocation;
+    
+    // 예약 ID 저장 (결제 페이지로 전달용)
+    sessionStorage.setItem('currentBookingId', bookingId);
+}
+
+// 미팅 정보 로드 (기존 방식)
 function loadMeetingInfo() {
     const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting'));
     

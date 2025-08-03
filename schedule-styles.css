@@ -274,8 +274,26 @@
 }
 
 .apply-btn.waiting {
-    background-color: var(--orange);
-    cursor: wait;
+    background-color: #F59E0B;
+    cursor: pointer;
+    animation: pulse 2s infinite;
+}
+
+.apply-btn.waiting:hover {
+    background-color: #D97706;
+    transform: translateY(-2px);
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.4);
+    }
+    70% {
+        box-shadow: 0 0 0 10px rgba(245, 158, 11, 0);
+    }
+    100% {
+        box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+    }
 }
 
 .apply-btn.notify-btn {
@@ -294,6 +312,11 @@
 .apply-btn.confirmed:hover {
     background-color: var(--primary-blue);
     transform: none;
+}
+
+.apply-btn:disabled {
+    opacity: 0.7;
+    cursor: not-allowed;
 }
 
 /* 안내사항 박스 */

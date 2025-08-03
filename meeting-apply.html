@@ -181,14 +181,15 @@
             // URL 파라미터에서 모임 타입 가져오기
             const urlParams = new URLSearchParams(window.location.search);
             const meetingType = urlParams.get('type');
+            const orientation = urlParams.get('orientation');
             
             // 모임 타입에 따라 정보 업데이트 (필요한 경우)
-            updateMeetingInfo(meetingType);
+            updateMeetingInfo(meetingType, orientation);
         });
         
         
         // 모임 정보 업데이트 함수
-        function updateMeetingInfo(type) {
+        function updateMeetingInfo(type, orientation) {
             const meetingData = {
                 'progressive': {
                     title: '진보 개혁형 × 사회 복지형',
@@ -210,16 +211,51 @@
                     location: '강남역 파티룸',
                     age: '23-30세',
                     status: '남성 1/4, 여성 4/4'
+                },
+                'conservative': {
+                    title: '보수 전통형 × 시장 경제형',
+                    date: '12월 14일 (토) 15:00',
+                    location: '강남역 파티룸',
+                    age: '27-35세',
+                    status: '남성 3/4, 여성 2/4'
                 }
             };
             
+            // type이 있으면 상세 정보 사용
             if (type && meetingData[type]) {
                 const data = meetingData[type];
                 document.querySelector('.meeting-info-card h2').textContent = data.title;
-                document.querySelector('.info-value:nth-of-type(1)').textContent = data.date;
-                document.querySelector('.info-value:nth-of-type(2)').textContent = data.location;
-                document.querySelector('.info-value:nth-of-type(4)').textContent = data.age;
-                document.querySelector('.info-value:nth-of-type(5)').textContent = data.status;
+                
+                // info-value 요소들을 더 정확하게 선택
+                const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
+                if (infoValues.length >= 5) {
+                    infoValues[0].textContent = data.date;
+                    infoValues[1].textContent = data.location;
+                    infoValues[3].textContent = data.age;
+                    infoValues[4].textContent = data.status;
+                }
+            } else if (orientation) {
+                // orientation만 있는 경우 일반적인 제목 사용
+                const orientationTitles = {
+                    'progressive': '진보 성향 모임',
+                    'conservative': '보수 성향 모임'
+                };
+                
+                if (orientationTitles[orientation]) {
+                    document.querySelector('.meeting-info-card h2').textContent = orientationTitles[orientation];
+                }
+                
+                // orientation에 해당하는 데이터가 있으면 사용
+                if (meetingData[orientation]) {
+                    const data = meetingData[orientation];
+                    const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
+                    if (infoValues.length >= 5) {
+                        infoValues[0].textContent = data.date;
+                        infoValues[1].textContent = data.location;
+                        infoValues[3].textContent = data.age;
+                        infoValues[4].textContent = data.status;
+                    }
+                }
             }
         }
 
@@ -285,25 +321,23 @@
                 console.log('서버 응답 상태:', response.status);
                 
                 if (!response.ok) {
+                    const errorData = await response.json();
+                    console.error('서버 오류 응답:', errorData);
+                    
+                    // 서버에서 명시적인 에러 메시지가 있으면 표시
+                    if (errorData.message) {
+                        alert(errorData.message);
+                        return;
+                    }
+                    
                     throw new Error(`서버 오류: ${response.status}`);
                 }
                 
                 const result = await response.json();
                 console.log('서버 응답 데이터:', result);
                 
-                // 성공 시 sessionStorage 업데이트 (백업용)
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                appliedMeetings[orientation] = {
-                    appliedAt: new Date().toISOString(),
-                    status: 'pending',
-                    formData: formData,
-                    meetingId: meetingId,
-                    title: meetingTitle,
-                    date: meetingDate,
-                    location: meetingLocation,
-                    applicationId: result.data?.bookingId || result.bookingId // 서버에서 반환한 신청 ID
-                };
-                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                // sessionStorage에서 appliedMeetings 제거 (서버에서 관리)
+                sessionStorage.removeItem('appliedMeetings');
                 
                 // 성공 메시지 표시
                 alert('신청이 접수되었습니다!\n\n💳 무통장 입금 안내\n은행: 국민은행\n계좌: 123-456-789012\n예금주: (주)사이드픽\n금액: 45,000원\n\n⚠️ 24시간 이내 입금 부탁드립니다.\n입금 확인 후 참가 확정 문자를 보내드리겠습니다.');

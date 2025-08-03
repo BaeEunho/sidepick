@@ -6,6 +6,7 @@
     <title>정치 성향 테스트 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="test-styles.css">
+    <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
     <script src="political-test-script.js" defer></script>
@@ -89,19 +90,19 @@
                     <span class="scale-label-right">그렇지 않다</span>
                 </div>
                 <div class="answer-scale">
-                    <button class="answer-btn scale-1" onclick="selectAnswer(5)">
+                    <button class="answer-btn scale-1" onclick="selectAnswer(5, this)">
                         <span class="answer-dot"></span>
                     </button>
-                    <button class="answer-btn scale-2" onclick="selectAnswer(4)">
+                    <button class="answer-btn scale-2" onclick="selectAnswer(4, this)">
                         <span class="answer-dot"></span>
                     </button>
-                    <button class="answer-btn scale-3" onclick="selectAnswer(3)">
+                    <button class="answer-btn scale-3" onclick="selectAnswer(3, this)">
                         <span class="answer-dot"></span>
                     </button>
-                    <button class="answer-btn scale-4" onclick="selectAnswer(2)">
+                    <button class="answer-btn scale-4" onclick="selectAnswer(2, this)">
                         <span class="answer-dot"></span>
                     </button>
-                    <button class="answer-btn scale-5" onclick="selectAnswer(1)">
+                    <button class="answer-btn scale-5" onclick="selectAnswer(1, this)">
                         <span class="answer-dot"></span>
                     </button>
                 </div>

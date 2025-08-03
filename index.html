@@ -52,7 +52,7 @@
         .container {
             max-width: 1200px;
             margin: 0 auto;
-            padding: 0 20px;
+            padding: 20px;
         }
 
         /* 헤더 */
@@ -150,19 +150,29 @@
         }
 
         .btn-logout-simple {
-            padding: 0.5rem 1.5rem;
-            border: 1px solid var(--gray-dark);
-            background: transparent;
-            color: var(--gray-dark);
-            border-radius: 5px;
-            font-weight: 500;
+            padding: 0.6rem 1.8rem;
+            border: 2px solid #e74c3c;
+            background: #fff;
+            color: #e74c3c;
+            border-radius: 25px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-logout-simple:hover {
-            background: var(--gray-dark);
-            color: var(--white);
+            background: #e74c3c;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .btn-logout-simple:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
         }
 
         /* 히어로 섹션 */
@@ -1179,17 +1189,26 @@
         .mobile-logout-btn {
             width: 100%;
             padding: 0.8rem;
-            background: var(--gray-light);
-            color: var(--gray-dark);
-            border: none;
-            border-radius: 8px;
-            font-weight: 500;
+            background: #fff;
+            color: #e74c3c;
+            border: 2px solid #e74c3c;
+            border-radius: 25px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
         }
 
         .mobile-logout-btn:hover {
-            background: var(--gray-300);
+            background: #e74c3c;
+            color: #fff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+        }
+        
+        .mobile-logout-btn:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(231, 76, 60, 0.3);
         }
 
         /* 푸터 */
@@ -1343,7 +1362,9 @@
             }
         }
     </style>
+    <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -1808,7 +1829,7 @@
                 <div class="meeting-card">
                     <div class="meeting-header conservative">
                         <h3 class="meeting-title">보수 성향 소개팅</h3>
-                        <p class="meeting-date">8월 9일 (토) 오후 3시</p>
+                        <p class="meeting-date">8월 16일 (토) 오후 3시</p>
                     </div>
                     <div class="meeting-body">
                         <div class="meeting-info">
@@ -2324,6 +2345,7 @@
                 
                 if (response.ok) {
                     const data = await response.json();
+                    console.log('서버에서 받은 모임 데이터:', data);
                     
                     // 성향별로 모임 정보 정리
                     const meetingsByOrientation = {
@@ -2333,34 +2355,41 @@
                     
                     if (data.meetings && data.meetings.length > 0) {
                         data.meetings.forEach(meeting => {
-                            meetingsByOrientation[meeting.orientation] = {
-                                status: meeting.status,
-                                meetingId: meeting.id
-                            };
+                            // cancelled 상태는 무시
+                            if (meeting.status !== 'cancelled') {
+                                meetingsByOrientation[meeting.orientation] = {
+                                    status: meeting.status,
+                                    meetingId: meeting.id
+                                };
+                            }
                         });
                     }
+                    
+                    console.log('정리된 모임 데이터:', meetingsByOrientation);
                     
                     // 버튼 업데이트
                     updateButtonForMeeting('conservative', meetingsByOrientation.conservative);
                     updateButtonForMeeting('progressive', meetingsByOrientation.progressive);
                 } else {
-                    // 서버 오류 시 로컬 데이터 폴백
-                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                    updateButtonForMeeting('conservative', appliedMeetings.conservative);
-                    updateButtonForMeeting('progressive', appliedMeetings.progressive);
+                    // 서버 오류 시 버튼 초기화
+                    updateButtonForMeeting('conservative', null);
+                    updateButtonForMeeting('progressive', null);
                 }
             } catch (error) {
                 console.error('모임 상태 조회 실패:', error);
-                // 오류 시 로컬 데이터 사용
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                updateButtonForMeeting('conservative', appliedMeetings.conservative);
-                updateButtonForMeeting('progressive', appliedMeetings.progressive);
+                // 오류 시 버튼 초기화
+                updateButtonForMeeting('conservative', null);
+                updateButtonForMeeting('progressive', null);
             }
         }
         
         // 개별 미팅 버튼 업데이트
         function updateButtonForMeeting(orientation, applicationData) {
-            const button = document.querySelector(`.meeting-card:has(.${orientation}) .btn-apply`);
+            // meeting-header 클래스를 가진 요소를 찾고, 그 부모의 버튼을 찾음
+            const meetingHeader = document.querySelector(`.meeting-header.${orientation}`);
+            if (!meetingHeader) return;
+            
+            const button = meetingHeader.parentElement.querySelector('.btn-apply');
             if (!button) return;
             
             if (applicationData) {
@@ -2391,13 +2420,13 @@
                         }
                     };
                 } else if (status === 'cancelled') {
-                    button.textContent = '취소됨';
-                    button.style.background = '#e74c3c';
-                    button.style.cursor = 'not-allowed';
-                    button.disabled = true;
-                    
+                    // 취소된 경우 다시 신청 가능
+                    button.textContent = '참가 신청하기';
+                    button.style.background = '';
+                    button.style.cursor = '';
+                    button.disabled = false;
                     button.onclick = function() {
-                        alert('취소된 소개팅입니다.');
+                        handleMeetingApply(orientation);
                     };
                 } else {
                     // 기타 상태인 경우
@@ -2478,6 +2507,16 @@
                 
                 if (response.ok) {
                     alert('모임 신청이 취소되었습니다.');
+                    
+                    // sessionStorage에서 해당 모임 정보를 완전히 삭제
+                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                    for (const orientation in appliedMeetings) {
+                        if (appliedMeetings[orientation].meetingId === meetingId) {
+                            delete appliedMeetings[orientation];
+                            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                            break;
+                        }
+                    }
                     
                     // 버튼 상태 즉시 업데이트
                     updateMeetingButtons();

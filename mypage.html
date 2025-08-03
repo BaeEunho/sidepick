@@ -6,7 +6,9 @@
     <title>마이페이지 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="mypage-styles.css">
+    <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
     <script src="political-test-script.js"></script>
     <script src="mypage-script.js?v=4" defer></script>
 </head>
@@ -117,6 +119,10 @@
                 
                 <div class="test-info">
                     <p class="test-date">테스트 완료일: <span id="test-date">-</span></p>
+                    <div id="retake-test-section" style="display: none; margin-top: 15px;">
+                        <p class="retake-message">회원가입 후 1개월이 지나면 테스트를 다시 받을 수 있습니다.</p>
+                        <button id="retake-test-btn" class="retake-test-btn" onclick="retakePoliticalTest()">테스트 다시 받기</button>
+                    </div>
                 </div>
             </div>
 

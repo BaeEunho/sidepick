@@ -24,6 +24,23 @@
     background-color: #4338CA;
 }
 
+/* 로그아웃 버튼 */
+.btn-logout {
+    background-color: #EF4444;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s;
+    margin-left: 1rem;
+}
+
+.btn-logout:hover {
+    background-color: #DC2626;
+}
+
 /* 자동 새로고침 토글 */
 .auto-refresh-toggle {
     display: inline-flex;
@@ -186,6 +203,22 @@
     color: #374151;
     border-bottom: 1px solid #E5E7EB;
     font-size: 14px;
+}
+
+.users-table th.sortable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.2s;
+}
+
+.users-table th.sortable:hover {
+    background-color: #F3F4F6;
+}
+
+.sort-icon {
+    font-size: 12px;
+    color: #9CA3AF;
+    margin-left: 4px;
 }
 
 .users-table td {

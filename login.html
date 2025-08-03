@@ -6,6 +6,7 @@
     <title>로그인 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth-styles.css">
+    <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
 </head>
@@ -69,7 +70,9 @@
                 // 실제 서버 API 호출
                 const response = await login(email, password);
                 
-                if (response.success) {
+                console.log('로그인 응답:', response);
+                
+                if (response && response.success) {
                     // 로그인 데이터 동기화
                     syncAuthData(response.data.user, response.data.token);
                     
@@ -83,20 +86,23 @@
                     });
                     
                     // 정치 성향 테스트 완료 여부 확인
-                    if (response.data.user.political_type) {
+                    if (response.data && response.data.user && response.data.user.political_type) {
                         // 정치 성향 타입 정보 저장
                         const politicalType = response.data.user.political_type;
                         const typeInfo = getPoliticalTypeInfo(politicalType);
-                        
-                        sessionStorage.setItem('politicalType', politicalType);
-                        sessionStorage.setItem('userType', JSON.stringify({
+
+                        const typeData = {
                             code: politicalType,
                             title: typeInfo.title,
                             orientation: typeInfo.orientation
-                        }));
+                        }
+                        
+                        sessionStorage.setItem('politicalType', politicalType);
+                        sessionStorage.setItem("userEmail", response.data.user.email)
+                        sessionStorage.setItem('userType', JSON.stringify(typeData));
                         
                         // AuthManager 테스트 완료 상태 설정
-                        AuthManager.setTestComplete();
+                        AuthManager.setTestComplete(typeData);
                         
                         alert('로그인되었습니다.');
                         window.location.href = 'index.html';
@@ -105,56 +111,13 @@
                         window.location.href = 'political-test.html';
                     }
                 } else {
-                    alert(response.message || '로그인에 실패했습니다.');
+                    alert((response && response.message) || '로그인에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('로그인 오류:', error);
+                console.error('에러 스택:', error.stack);
                 
-                // 서버 연결 실패 시 데모 모드로 동작
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    console.log('서버 연결 실패 - 데모 모드로 진행');
-                    
-                    // 데모 모드: 가입된 사용자 확인
-                    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-                    if (!registeredUsers.includes(email)) {
-                        alert('[데모 모드] 등록되지 않은 이메일입니다.\n회원가입을 먼저 진행해주세요.');
-                        return;
-                    }
-                    
-                    // 데모용 사용자 프로필
-                    const demoProfile = {
-                        name: '홍길동',
-                        email: email,
-                        phone: '010-1234-5678',
-                        birthdate: '1995-01-01',
-                        gender: 'male'
-                    };
-                    
-                    // AuthManager를 통해 로그인 처리
-                    AuthManager.login(email, demoProfile);
-                    
-                    // 테스트 완료 여부 확인 (데모에서는 localStorage에서 확인)
-                    const savedPoliticalType = localStorage.getItem(`politicalType_${email}`);
-                    if (savedPoliticalType) {
-                        const typeInfo = getPoliticalTypeInfo(savedPoliticalType);
-                        
-                        sessionStorage.setItem('politicalType', savedPoliticalType);
-                        sessionStorage.setItem('userType', JSON.stringify({
-                            code: savedPoliticalType,
-                            title: typeInfo.title,
-                            orientation: typeInfo.orientation
-                        }));
-                        
-                        AuthManager.setTestComplete();
-                        alert('[데모 모드] 로그인되었습니다.');
-                        window.location.href = 'index.html';
-                    } else {
-                        alert('[데모 모드] 로그인되었습니다.\n정치 성향 테스트를 진행해주세요.');
-                        window.location.href = 'political-test.html';
-                    }
-                } else {
-                    alert(error.message || '로그인 중 오류가 발생했습니다.');
-                }
+                alert(error.message || '로그인 중 오류가 발생했습니다.');
             }
         }
         
@@ -183,6 +146,27 @@
             
             return orientationMap[code] || { title: '알 수 없음', orientation: 'unknown' };
         }
+        
+        // 비밀번호 찾기 링크 핸들러
+        document.addEventListener('DOMContentLoaded', function() {
+            const forgotLink = document.querySelector('.forgot-link');
+            if (forgotLink) {
+                forgotLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const email = prompt('비밀번호 재설정 링크를 받을 이메일 주소를 입력해주세요:');
+                    if (email && email.trim()) {
+                        // 이메일 유효성 검사
+                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                        if (emailRegex.test(email)) {
+                            alert(`${email}로 비밀번호 재설정 링크를 발송했습니다.\n(데모 모드: 실제 이메일은 발송되지 않습니다)`);
+                        } else {
+                            alert('올바른 이메일 주소를 입력해주세요.');
+                        }
+                    }
+                });
+            }
+        });
     </script>
 </body>
 </html>

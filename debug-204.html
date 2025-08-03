@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>204 응답 디버그</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 20px; background: #f0f0f0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <h1>204 응답 디버그</h1>
+    
+    <button onclick="testLogin()">로그인 테스트 (상세 로그)</button>
+    
+    <div id="result">결과가 여기에 표시됩니다.</div>
+    
+    <script>
+    async function testLogin() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '=== 로그인 테스트 시작 ===\n\n';
+        
+        const email = 'toqha1585@gmail.com';
+        const password = 'asdf1234*';
+        
+        try {
+            console.log('Fetch 시작...');
+            resultDiv.innerHTML += '1. Fetch 요청 시작\n';
+            
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ email, password })
+            });
+            
+            console.log('Response:', response);
+            resultDiv.innerHTML += `\n2. 응답 수신\n`;
+            resultDiv.innerHTML += `   - Status: ${response.status}\n`;
+            resultDiv.innerHTML += `   - StatusText: ${response.statusText}\n`;
+            resultDiv.innerHTML += `   - OK: ${response.ok}\n`;
+            resultDiv.innerHTML += `   - Headers:\n`;
+            
+            // 헤더 출력
+            for (const [key, value] of response.headers.entries()) {
+                resultDiv.innerHTML += `     ${key}: ${value}\n`;
+            }
+            
+            // 응답 본문 확인
+            resultDiv.innerHTML += `\n3. 응답 본문 읽기 시도\n`;
+            
+            const contentType = response.headers.get('content-type');
+            resultDiv.innerHTML += `   Content-Type: ${contentType}\n`;
+            
+            if (response.status === 204) {
+                resultDiv.innerHTML += `   ⚠️ 204 No Content 응답 - 본문이 없습니다!\n`;
+                resultDiv.innerHTML += `   이것이 문제입니다. 서버가 본문을 반환하지 않고 있습니다.\n`;
+            } else {
+                const text = await response.text();
+                resultDiv.innerHTML += `   응답 텍스트 길이: ${text.length}\n`;
+                resultDiv.innerHTML += `   응답 내용:\n${text}\n`;
+                
+                if (text) {
+                    try {
+                        const data = JSON.parse(text);
+                        resultDiv.innerHTML += `\n4. JSON 파싱 성공:\n${JSON.stringify(data, null, 2)}\n`;
+                    } catch (e) {
+                        resultDiv.innerHTML += `\n4. JSON 파싱 실패: ${e.message}\n`;
+                    }
+                }
+            }
+            
+        } catch (error) {
+            console.error('에러:', error);
+            resultDiv.innerHTML += `\n❌ 에러 발생:\n`;
+            resultDiv.innerHTML += `   메시지: ${error.message}\n`;
+            resultDiv.innerHTML += `   스택: ${error.stack}\n`;
+        }
+    }
+    </script>
+</body>
+</html>

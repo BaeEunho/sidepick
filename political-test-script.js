@@ -866,18 +866,40 @@ function showQuestion() {
     document.querySelector('.progress-fill').style.width = `${progress}%`;
     document.querySelector('.progress-text').textContent = `${Math.round(progress)}%`;
     
+    // 모든 답변 버튼에서 selected 클래스 제거 (배경색 초기화)
+    const answerButtons = document.querySelectorAll('.answer-btn');
+    answerButtons.forEach(btn => {
+        btn.classList.remove('selected');
+    });
+    
+    // 이전에 선택한 답변이 있으면 표시
+    if (answers[currentQuestion] !== undefined && answers[currentQuestion] !== null) {
+        const previousAnswer = answers[currentQuestion];
+        // 답변 값에 따라 올바른 버튼 찾기 (5→scale-1, 4→scale-2, 3→scale-3, 2→scale-4, 1→scale-5)
+        const scaleClass = `scale-${6 - previousAnswer}`;
+        const selectedButton = document.querySelector(`.answer-btn.${scaleClass}`);
+        if (selectedButton) {
+            selectedButton.classList.add('selected');
+        }
+    }
+    
     // 이전 버튼 활성화/비활성화
     document.querySelector('.prev-btn').disabled = currentQuestion === 0;
 }
 
 // 답변 선택 - 디바운싱 추가
 let isProcessing = false;
-function selectAnswer(answerIndex) {
+function selectAnswer(answerIndex, button) {
     // 이미 처리 중이면 무시
     if (isProcessing) return;
     
     isProcessing = true;
     answers[currentQuestion] = answerIndex;
+    
+    // 선택한 버튼에 selected 클래스 추가
+    if (button) {
+        button.classList.add('selected');
+    }
     
     // 짧은 지연 후 다음 질문으로 이동
     setTimeout(() => {
@@ -1208,9 +1230,17 @@ async function savePoliticalTypeToServer(politicalType) {
     const userEmail = sessionStorage.getItem('userEmail');
     
     try {
+        // 테스트 결과 데이터 수집
+        const testResult = {
+            politicalType: politicalType,
+            axisScores: JSON.parse(sessionStorage.getItem('axisScores') || '{}'),
+            userAnswers: JSON.parse(sessionStorage.getItem('userAnswers') || '[]'),
+            testCompletedAt: new Date().toISOString()
+        };
+        
         // api-client.js의 savePoliticalType 함수 사용
         if (typeof savePoliticalType === 'function') {
-            const response = await savePoliticalType(politicalType);
+            const response = await savePoliticalType(politicalType, testResult);
             
             if (response.success) {
                 console.log('정치 성향이 서버에 저장되었습니다.');

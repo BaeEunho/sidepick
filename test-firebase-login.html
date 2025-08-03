@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Firebase 로그인 테스트</title>
+    <script src="auth-system.js"></script>
+</head>
+<body>
+    <h1>Firebase 로그인 테스트</h1>
+    
+    <div>
+        <h2>로그인 테스트</h2>
+        <input type="email" id="email" value="toqha1585@gmail.com" placeholder="이메일">
+        <input type="password" id="password" value="asdf1234*" placeholder="비밀번호">
+        <button onclick="testLogin()">로그인</button>
+        <button onclick="checkFirebase()">Firebase 확인</button>
+    </div>
+    
+    <div>
+        <h2>계정 생성</h2>
+        <button onclick="createAccount()">toqha1585@gmail.com 계정 생성</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px; padding: 20px; background: #f0f0f0;">
+        결과가 여기에 표시됩니다.
+    </div>
+    
+    <script>
+    async function testLogin() {
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        const resultDiv = document.getElementById('result');
+        
+        resultDiv.innerHTML = '로그인 시도 중...';
+        
+        try {
+            const result = await AuthSystem.login(email, password);
+            console.log('로그인 결과:', result);
+            
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: green;">로그인 성공!</h3>
+                    <p>이메일: ${result.data.user.email}</p>
+                    <p>이름: ${result.data.user.name}</p>
+                    <p>모드: ${result.offline ? '오프라인' : '온라인'}</p>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">로그인 실패</h3>
+                    <p>${result.message}</p>
+                `;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <h3 style="color: red;">오류 발생</h3>
+                <p>${error.message}</p>
+                <pre>${error.stack}</pre>
+            `;
+        }
+    }
+    
+    async function createAccount() {
+        const resultDiv = document.getElementById('result');
+        resultDiv.innerHTML = '계정 생성 중...';
+        
+        try {
+            const userData = {
+                email: 'toqha1585@gmail.com',
+                password: 'asdf1234*',
+                name: '테스트 유저',
+                phone: '010-1234-5678',
+                birthdate: '1990-01-01',
+                gender: 'male',
+                marketingAgree: false
+            };
+            
+            const result = await AuthSystem.signup(userData);
+            console.log('회원가입 결과:', result);
+            
+            if (result.success) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: green;">계정 생성 성공!</h3>
+                    <p>이메일: ${result.data.user.email}</p>
+                    <p>비밀번호: asdf1234*</p>
+                    <p>모드: ${result.offline ? '오프라인' : '온라인'}</p>
+                    <pre>${JSON.stringify(result.data, null, 2)}</pre>
+                `;
+            } else {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">계정 생성 실패</h3>
+                    <p>${result.message}</p>
+                `;
+            }
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <h3 style="color: red;">오류 발생</h3>
+                <p>${error.message}</p>
+                <pre>${error.stack}</pre>
+            `;
+        }
+    }
+    
+    // 서버 상태 확인
+    async function checkServer() {
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: 'test@test.com', password: 'test' })
+            });
+            console.log('서버 응답:', response.status);
+            return true;
+        } catch (error) {
+            console.error('서버 연결 실패:', error);
+            return false;
+        }
+    }
+    
+    // Firebase 직접 확인
+    async function checkFirebase() {
+        const resultDiv = document.getElementById('result');
+        const email = 'toqha1585@gmail.com';
+        const password = 'asdf1234*';
+        
+        resultDiv.innerHTML = 'Firebase 직접 확인 중...';
+        
+        try {
+            // 서버에 직접 요청
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            const data = await response.json();
+            console.log('Firebase 응답:', data);
+            
+            resultDiv.innerHTML = `
+                <h3>Firebase 직접 응답</h3>
+                <p>상태 코드: ${response.status}</p>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+            `;
+            
+            // 로컬 스토리지 확인
+            const localUsers = AuthSystem.getUsersDB();
+            const localUser = localUsers[email];
+            
+            resultDiv.innerHTML += `
+                <h3>로컬 스토리지 정보</h3>
+                <p>사용자 존재: ${localUser ? '예' : '아니오'}</p>
+                ${localUser ? `<pre>${JSON.stringify(localUser, null, 2)}</pre>` : ''}
+            `;
+            
+        } catch (error) {
+            resultDiv.innerHTML = `
+                <h3 style="color: red;">Firebase 확인 실패</h3>
+                <p>${error.message}</p>
+            `;
+        }
+    }
+    
+    // 페이지 로드 시 서버 상태 확인
+    window.onload = async function() {
+        const serverUp = await checkServer();
+        const resultDiv = document.getElementById('result');
+        if (!serverUp) {
+            resultDiv.innerHTML += '<p style="color: orange;">⚠️ 서버 연결 실패 - 오프라인 모드로 작동합니다.</p>';
+        } else {
+            resultDiv.innerHTML += '<p style="color: green;">✓ 서버 연결 성공</p>';
+        }
+        
+        // 로컬 사용자 확인
+        const users = AuthSystem.getUsersDB();
+        console.log('로컬 스토리지 사용자:', users);
+    };
+    </script>
+</body>
+</html>

@@ -4,13 +4,19 @@ let filteredUsers = [];
 let currentPage = 1;
 const itemsPerPage = 10;
 let refreshInterval;
+let currentSort = { field: 'joinedDate', order: 'desc' };
 
 // 페이지 로드 시 데이터 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    // 관리자 인증 확인
+    if (window.AdminAuth) {
+        window.AdminAuth.protectPage();
+    }
+    
     // 초기 로드
     refreshData();
     
-    // 자동 새로고침 설정
+    // 자동 새로고침 설정 (기본적으로 OFF)
     setupAutoRefresh();
     
     // 페이지 이탈 시 인터벌 정리
@@ -20,6 +26,14 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// 관리자 로그아웃
+function logoutAdmin() {
+    if (window.AdminAuth) {
+        window.AdminAuth.logout();
+        window.location.href = 'admin-login.html';
+    }
+}
 
 // 데이터 로드
 async function loadData() {
@@ -32,8 +46,10 @@ async function loadData() {
         loadFromLocalStorage();
     }
     
+    // 초기 정렬 적용
+    sortTable(currentSort.field);
+    
     updateStats();
-    displayUsers();
 }
 
 // 서버에서 데이터 로드
@@ -578,4 +594,85 @@ window.onclick = function(event) {
     if (event.target === modal) {
         modal.style.display = 'none';
     }
+}
+
+// 테이블 정렬
+function sortTable(field) {
+    // 같은 필드를 다시 클릭하면 정렬 순서 반전
+    if (currentSort.field === field) {
+        currentSort.order = currentSort.order === 'asc' ? 'desc' : 'asc';
+    } else {
+        currentSort.field = field;
+        currentSort.order = 'asc';
+    }
+    
+    // 정렬 수행
+    filteredUsers.sort((a, b) => {
+        let aValue = a[field];
+        let bValue = b[field];
+        
+        // 특수 처리가 필요한 필드들
+        if (field === 'joinedDate') {
+            aValue = new Date(a.joinedDate || a.signupDate || 0);
+            bValue = new Date(b.joinedDate || b.signupDate || 0);
+        } else if (field === 'age') {
+            // 생년월일에서 나이 계산
+            aValue = calculateAge(a.birthdate);
+            bValue = calculateAge(b.birthdate);
+        } else if (field === 'politicalType') {
+            aValue = a.political_type || a.politicalType || '';
+            bValue = b.political_type || b.politicalType || '';
+        }
+        
+        // null/undefined 처리
+        if (aValue === null || aValue === undefined) aValue = '';
+        if (bValue === null || bValue === undefined) bValue = '';
+        
+        // 정렬
+        let comparison = 0;
+        if (aValue < bValue) {
+            comparison = -1;
+        } else if (aValue > bValue) {
+            comparison = 1;
+        }
+        
+        return currentSort.order === 'asc' ? comparison : -comparison;
+    });
+    
+    // 정렬 아이콘 업데이트
+    updateSortIcons();
+    
+    // 첫 페이지로 이동하고 테이블 다시 표시
+    currentPage = 1;
+    displayUsers();
+}
+
+// 정렬 아이콘 업데이트
+function updateSortIcons() {
+    // 모든 정렬 아이콘 초기화
+    document.querySelectorAll('.sort-icon').forEach(icon => {
+        icon.textContent = '↕';
+    });
+    
+    // 현재 정렬 필드의 아이콘 업데이트
+    const th = document.querySelector(`th[onclick="sortTable('${currentSort.field}')"]`);
+    if (th) {
+        const icon = th.querySelector('.sort-icon');
+        if (icon) {
+            icon.textContent = currentSort.order === 'asc' ? '↑' : '↓';
+        }
+    }
+}
+
+// 나이 계산 함수
+function calculateAge(birthdate) {
+    if (!birthdate) return 0;
+    const today = new Date();
+    const birth = new Date(birthdate);
+    let age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+        age--;
+    }
+    return age;
 }

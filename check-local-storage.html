@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로컬 스토리지 확인</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .container { max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px; cursor: pointer; }
+        #result { margin-top: 20px; padding: 20px; background: #f0f0f0; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>로컬 스토리지 확인</h1>
+        
+        <button onclick="checkLocalStorage()">로컬 스토리지 확인</button>
+        <button onclick="clearLocalUsers()">로컬 사용자 초기화</button>
+        <button onclick="syncFromFirebase()">Firebase에서 동기화</button>
+        
+        <div id="result">결과가 여기에 표시됩니다.</div>
+    </div>
+    
+    <script>
+    const resultDiv = document.getElementById('result');
+    
+    function checkLocalStorage() {
+        resultDiv.innerHTML = '=== 로컬 스토리지 확인 ===\n\n';
+        
+        // sidepick_users 확인
+        const users = localStorage.getItem('sidepick_users');
+        if (users) {
+            const usersObj = JSON.parse(users);
+            resultDiv.innerHTML += `sidepick_users:\n${JSON.stringify(usersObj, null, 2)}\n\n`;
+            resultDiv.innerHTML += `저장된 사용자 수: ${Object.keys(usersObj).length}\n`;
+            resultDiv.innerHTML += `사용자 이메일 목록: ${Object.keys(usersObj).join(', ')}\n`;
+        } else {
+            resultDiv.innerHTML += 'sidepick_users: 없음\n';
+        }
+        
+        // 현재 사용자 확인
+        const currentUser = localStorage.getItem('sidepick_current_user');
+        if (currentUser) {
+            resultDiv.innerHTML += `\nsidepick_current_user:\n${JSON.stringify(JSON.parse(currentUser), null, 2)}\n`;
+        } else {
+            resultDiv.innerHTML += '\nsidepick_current_user: 없음\n';
+        }
+    }
+    
+    function clearLocalUsers() {
+        if (confirm('정말로 로컬 사용자 데이터를 초기화하시겠습니까?')) {
+            localStorage.removeItem('sidepick_users');
+            localStorage.removeItem('sidepick_current_user');
+            resultDiv.innerHTML = '로컬 사용자 데이터가 초기화되었습니다.';
+        }
+    }
+    
+    async function syncFromFirebase() {
+        resultDiv.innerHTML = 'Firebase에서 사용자 정보를 가져오는 중...\n';
+        
+        try {
+            // toqha1585@gmail.com 계정 정보 가져오기
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'toqha1585@gmail.com',
+                    password: 'asdf1234*'
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                resultDiv.innerHTML += '\nFirebase 로그인 성공!\n';
+                resultDiv.innerHTML += `사용자 정보:\n${JSON.stringify(data.data.user, null, 2)}\n`;
+                
+                // 로컬 스토리지에 저장
+                const users = JSON.parse(localStorage.getItem('sidepick_users') || '{}');
+                
+                // 간단한 해시 함수
+                function hashPassword(password) {
+                    let hash = 0;
+                    for (let i = 0; i < password.length; i++) {
+                        const char = password.charCodeAt(i);
+                        hash = ((hash << 5) - hash) + char;
+                        hash = hash & hash;
+                    }
+                    return Math.abs(hash).toString(16);
+                }
+                
+                users['toqha1585@gmail.com'] = {
+                    email: data.data.user.email,
+                    password: hashPassword('asdf1234*'),
+                    name: data.data.user.name,
+                    phone: data.data.user.phone,
+                    birthdate: data.data.user.birthdate,
+                    gender: data.data.user.gender,
+                    politicalType: data.data.user.political_type,
+                    marketingAgree: data.data.user.marketingAgree,
+                    signupDate: new Date().toISOString()
+                };
+                
+                localStorage.setItem('sidepick_users', JSON.stringify(users));
+                resultDiv.innerHTML += '\n✓ 로컬 스토리지에 저장되었습니다!';
+            } else {
+                resultDiv.innerHTML += '\n✗ Firebase 로그인 실패: ' + data.message;
+            }
+        } catch (error) {
+            resultDiv.innerHTML += '\n✗ 오류: ' + error.message;
+        }
+    }
+    
+    // 페이지 로드 시 자동 확인
+    window.onload = checkLocalStorage;
+    </script>
+</body>
+</html>

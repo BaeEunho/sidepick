@@ -102,9 +102,95 @@ function startAttendanceUpdates() {
     setInterval(fetchAttendanceFromServer, 5000);
 }
 
-// 신청 내역 초기화 (ID별로 상태 관리)
-if (!sessionStorage.getItem('appliedMeetings')) {
-    sessionStorage.setItem('appliedMeetings', JSON.stringify({}));
+// 사용자 모임 신청 정보를 저장할 전역 변수
+let userMeetingInfo = {
+    progressive: null,
+    conservative: null
+};
+
+// 서버에서 사용자의 모임 신청 정보 가져오기
+async function fetchUserMeetingInfo() {
+    try {
+        const userEmail = sessionStorage.getItem('userEmail');
+        if (!userEmail) return;
+        
+        // 전역 변수 초기화
+        userMeetingInfo = {
+            progressive: null,
+            conservative: null
+        };
+        
+        // 먼저 로컬 DataSystem에서 확인
+        if (window.DataSystem) {
+            const bookings = window.DataSystem.getUserBookings(userEmail);
+            bookings.forEach(booking => {
+                if (booking.status !== 'cancelled') {
+                    const meetings = window.DataSystem.getMeetings();
+                    const meeting = meetings.find(m => m.id === booking.meetingId);
+                    if (meeting) {
+                        userMeetingInfo[meeting.orientation] = {
+                            status: booking.status,
+                            meetingId: booking.meetingId
+                        };
+                    }
+                }
+            });
+        }
+        
+        // 세션 스토리지에서도 확인 (이전 버전 호환성)
+        const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+        Object.keys(appliedMeetings).forEach(orientation => {
+            const meetingData = appliedMeetings[orientation];
+            if (meetingData && meetingData.status !== 'cancelled') {
+                userMeetingInfo[orientation] = {
+                    status: meetingData.status,
+                    meetingId: meetingData.meetingId
+                };
+            }
+        });
+        
+        // 서버에서도 확인 (있을 경우)
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : '';
+                
+            try {
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.meetings && data.meetings.length > 0) {
+                        data.meetings.forEach(meeting => {
+                            // cancelled 상태는 무시
+                            if (meeting.status !== 'cancelled') {
+                                userMeetingInfo[meeting.orientation] = {
+                                    status: meeting.status,
+                                    meetingId: meeting.id
+                                };
+                            }
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log('서버 연결 실패, 로컬 데이터만 사용');
+            }
+        }
+        
+        // UI 업데이트
+        const userGender = sessionStorage.getItem('userGender');
+        if (userGender) {
+            updateMeetingAvailability(userGender);
+        }
+    } catch (error) {
+        console.error('사용자 모임 정보 조회 실패:', error);
+    }
 }
 
 // 알림 모달 표시
@@ -194,6 +280,11 @@ function getOrientationFromCode(code) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOMContentLoaded 이벤트 발생');
     
+    // DataSystem 초기화
+    if (window.DataSystem) {
+        window.DataSystem.initializeMeetings();
+    }
+    
     // 참석 인원 업데이트 시작 (AuthManager와 독립적으로 실행)
     try {
         startAttendanceUpdates();
@@ -225,10 +316,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayUserGender(userGender);
             }
             
-            // 성별에 따른 신청 가능 여부 표시
-            if (userGender) {
-                updateMeetingAvailability(userGender);
-            }
+            // 사용자의 모임 신청 정보 가져오기
+            fetchUserMeetingInfo().then(() => {
+                // 성별에 따른 신청 가능 여부 표시
+                if (userGender) {
+                    updateMeetingAvailability(userGender);
+                }
+            });
         } else {
             // 비로그인 또는 테스트 미완료 사용자도 일정 조회 가능
             // 기본 상태로 모든 모임 표시
@@ -393,47 +487,67 @@ function updateParticipantCounts() {
 
 // 소개팅 신청 기능
 function applyMeeting(button) {
+    // 중복 클릭 방지
+    if (button.disabled || button.classList.contains('processing')) {
+        return;
+    }
+    
+    // 버튼 비활성화 및 처리 중 표시
+    button.disabled = true;
+    button.classList.add('processing');
+    const originalText = button.textContent;
+    button.textContent = '처리 중...';
+    
     const meetingCard = button.closest('.meeting-card');
-    const meetingId = meetingCard.querySelector('h4').textContent;
+    const meetingIdElement = meetingCard.getAttribute('data-meeting-id');
     const isProgressive = meetingCard.closest('#progressive-meetings') !== null;
     const meetingOrientation = isProgressive ? 'progressive' : 'conservative';
     
+    const userEmail = sessionStorage.getItem('userEmail');
     const userGender = sessionStorage.getItem('userGender');
     const userType = sessionStorage.getItem('politicalType');
     const userOrientation = getOrientationFromCode(userType);
     
+    // 로그인 확인
+    if (!userEmail) {
+        alert('로그인이 필요합니다.');
+        button.disabled = false;
+        button.classList.remove('processing');
+        button.textContent = originalText;
+        window.location.href = 'login.html';
+        return;
+    }
+    
     // 1. 성향 일치 여부 확인
     if (userOrientation !== meetingOrientation) {
         alert(`${userOrientation === 'progressive' ? '진보' : '보수'} 성향의 회원님은 ${meetingOrientation === 'progressive' ? '진보' : '보수'} 성향 소개팅에만 참여하실 수 있습니다.`);
+        button.disabled = false;
+        button.classList.remove('processing');
+        button.textContent = originalText;
         return;
     }
     
-    // 2. 이미 신청한 경우 체크 (입금 상태 포함)
-    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-    if (appliedMeetings[meetingOrientation]) {
-        const status = appliedMeetings[meetingOrientation].status;
-        if (status === 'pending') {
-            alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
-        } else if (status === 'confirmed') {
-            alert('이미 신청하신 소개팅입니다.\n참가가 확정되었습니다.');
+    // 실제 DataSystem을 사용한 미팅 신청
+    if (window.DataSystem) {
+        const meetings = window.DataSystem.getMeetings(meetingOrientation);
+        if (meetings.length > 0) {
+            const meeting = meetings[0]; // 현재는 각 성향별로 하나씩만 있음
+            const result = window.DataSystem.applyForMeeting(meeting.id, userEmail, userGender);
+            
+            if (result.success) {
+                alert(result.message);
+                window.location.href = `booking-confirm.html?bookingId=${result.bookingId}`;
+            } else {
+                alert(result.message);
+                button.disabled = false;
+                button.classList.remove('processing');
+                button.textContent = originalText;
+            }
+            return;
         }
-        return;
     }
     
-    // 3. 확정된 참가자 수만 체크 (입금 완료자만)
-    const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
-    const currentCount = confirmedCounts[meetingOrientation]?.[userGender] || 0;
-    
-    // 성별별 자리 확인
-    if (currentCount >= 4) {
-        // 해당 성별 마감 시 알림 대기
-        if (confirm(`현재 ${userGender === 'male' ? '남성' : '여성'} 자리가 모두 찼습니다.\n다음 일정 알림을 받으시겠습니까?`)) {
-            showAlarmModal();
-        }
-        return;
-    }
-    
-    // 미팅 정보 수집
+    // 폴백: 기존 방식
     const meetingTitle = meetingCard.querySelector('h4').textContent;
     const meetingDate = meetingCard.querySelector('.day').textContent + '일';
     const meetingMonth = meetingCard.querySelector('.month').textContent;
@@ -463,7 +577,6 @@ function applyMeeting(button) {
 // 성별에 따른 신청 가능 여부 업데이트
 function updateMeetingAvailability(userGender) {
     const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
-    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
     const userType = sessionStorage.getItem('politicalType');
     const userOrientation = getOrientationFromCode(userType);
     
@@ -480,23 +593,49 @@ function updateMeetingAvailability(userGender) {
         
         const currentCount = confirmedCounts[userOrientation]?.[userGender] || 0;
         
-        // 이미 신청한 경우
-        if (appliedMeetings[meetingOrientation]) {
-            const status = appliedMeetings[meetingOrientation].status;
+        // 이미 신청한 경우 (전역 변수에서 확인)
+        if (userMeetingInfo[meetingOrientation]) {
+            const status = userMeetingInfo[meetingOrientation].status;
             if (status === 'pending') {
-                applyBtn.textContent = '입금 대기중';
+                applyBtn.textContent = '결제 진행하기';
                 applyBtn.classList.add('waiting');
-            } else if (status === 'confirmed') {
+                applyBtn.classList.remove('confirmed', 'notify-btn');
+                applyBtn.disabled = false;
+                // 결제 에러 후 재신청 가능하도록 처리
+                applyBtn.onclick = () => {
+                    // 기존 신청 정보로 결제 페이지로 이동
+                    const meetingInfo = {
+                        id: userMeetingInfo[meetingOrientation].meetingId,
+                        title: card.querySelector('h4').textContent,
+                        date: card.querySelector('.month').textContent + ' ' + 
+                              card.querySelector('.day').textContent + '일 ' + 
+                              card.querySelector('.weekday').textContent,
+                        location: card.querySelector('.location').textContent,
+                        time: card.querySelector('.time').textContent,
+                        fee: 45000,
+                        userType: userType,
+                        orientation: meetingOrientation
+                    };
+                    sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
+                    window.location.href = `booking-confirm.html?reapply=true`;
+                };
+            } else if (status === 'confirmed' || status === 'paid') {
                 applyBtn.textContent = '참가 확정';
                 applyBtn.classList.add('confirmed');
+                applyBtn.disabled = true;
+                applyBtn.onclick = null;
             }
-            applyBtn.onclick = () => applyMeeting(applyBtn);
         } 
         // 해당 성별이 마감된 경우
         else if (currentCount >= 4) {
             applyBtn.textContent = '알림 받기';
             applyBtn.classList.add('notify-btn');
             applyBtn.onclick = () => showAlarmModal();
+        } else {
+            // 신청 가능한 상태로 초기화
+            applyBtn.textContent = '신청하기';
+            applyBtn.classList.remove('waiting', 'confirmed', 'notify-btn');
+            applyBtn.onclick = () => applyMeeting(applyBtn);
         }
         
         // 성별별 자리 상태 표시

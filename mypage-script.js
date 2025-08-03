@@ -62,18 +62,37 @@ async function refreshData() {
 // 서버와 데이터 동기화
 async function syncWithServer() {
     const authToken = localStorage.getItem('authToken');
-    if (!authToken) return;
+    const userEmail = sessionStorage.getItem('userEmail');
+    if (!authToken && !userEmail) return;
     
     try {
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : '';
+            
         // 서버에서 사용자 정보 가져오기
-        const response = await fetch('http://localhost:3000/api/user/profile', {
+        const response = await fetch(`${API_URL}/api/user/profile`, {
             headers: {
-                'Authorization': `Bearer ${authToken}`
+                'Authorization': `Bearer ${authToken || ''}`
             }
         });
         
         if (response.ok) {
             const data = await response.json();
+            
+            // 프로필 정보 업데이트
+            if (data.profile) {
+                const userProfile = {
+                    name: data.profile.name,
+                    email: data.profile.email,
+                    phone: data.profile.phone,
+                    birthdate: data.profile.birthdate,
+                    gender: data.profile.gender,
+                    marketingAgree: data.profile.marketingAgree
+                };
+                sessionStorage.setItem('userProfile', JSON.stringify(userProfile));
+            }
+            
             // 서버 데이터로 sessionStorage 업데이트
             if (data.politicalType) {
                 sessionStorage.setItem('politicalType', data.politicalType);
@@ -82,6 +101,11 @@ async function syncWithServer() {
                 if (window.resultTypes && window.resultTypes[data.politicalType]) {
                     sessionStorage.setItem('testResultDetail', JSON.stringify(window.resultTypes[data.politicalType]));
                     sessionStorage.setItem('userType', JSON.stringify(window.resultTypes[data.politicalType]));
+                }
+                
+                // 테스트 완료일 업데이트
+                if (data.testCompletedAt) {
+                    sessionStorage.setItem('testCompletedAt', data.testCompletedAt);
                 }
             }
             
@@ -95,16 +119,22 @@ async function syncWithServer() {
                         meetingId: meeting.id,
                         title: meeting.title,
                         date: meeting.date,
-                        location: meeting.location
+                        location: meeting.location,
+                        time: meeting.time,
+                        bookingId: meeting.bookingId
                     };
                 });
                 sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
             }
+            
+            return data;
         }
     } catch (error) {
         console.error('서버 동기화 실패:', error);
         // 서버 연결 실패 시에도 로컬 데이터로 계속 진행
     }
+    
+    return null;
 }
 
 // 동기화 상태 표시 함수
@@ -236,11 +266,14 @@ function loadPoliticalType() {
             }).join('');
         }
         
-        // 테스트 완료일 표시
+        // 테스트 완료일 표시 및 재검사 가능 여부 체크
         if (testCompletedAt) {
             const date = new Date(testCompletedAt);
             const dateStr = `${date.getFullYear()}년 ${date.getMonth() + 1}월 ${date.getDate()}일`;
             document.getElementById('test-date').textContent = dateStr;
+            
+            // 재검사 가능 여부 체크 (1개월 후)
+            checkRetakeEligibility(date);
         }
     } else {
         // resultTypes가 없는 경우 기본 정보만 표시
@@ -265,6 +298,55 @@ function loadPoliticalType() {
 // 예정된 소개팅 로드
 async function loadUpcomingMeetings() {
     const upcomingDiv = document.getElementById('upcoming-meetings');
+    const userEmail = sessionStorage.getItem('userEmail');
+    
+    // DataSystem 사용하여 실제 예약 내역 로드
+    if (window.DataSystem && userEmail) {
+        const bookings = window.DataSystem.getUserBookings(userEmail);
+        const activeBookings = bookings.filter(b => b.status !== 'cancelled');
+        
+        if (activeBookings.length > 0) {
+            let html = '';
+            activeBookings.forEach(booking => {
+                const statusText = {
+                    'pending': '입금 대기중',
+                    'paid': '입금 확인중',
+                    'confirmed': '참가 확정'
+                }[booking.status] || booking.status;
+                
+                const statusClass = booking.status === 'confirmed' ? 'confirmed' : 'pending';
+                
+                html += `
+                    <div class="meeting-item">
+                        <div class="meeting-header">
+                            <h4>${booking.meetingTitle}</h4>
+                            <div class="meeting-status ${statusClass}">
+                                ${statusText}
+                            </div>
+                        </div>
+                        <div class="meeting-details">
+                            <span class="detail-item">${booking.meetingDate}</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-item">${booking.meetingTime}</span>
+                            <span class="detail-separator">•</span>
+                            <span class="detail-item">${booking.meetingLocation}</span>
+                        </div>
+                        ${booking.status === 'pending' ? `
+                            <div class="payment-notice">
+                                <div class="payment-compact">
+                                    <span class="bank-info">신한은행 110-386-140132 (배은호)</span>
+                                    <span class="amount">${booking.price.toLocaleString()}원</span>
+                                </div>
+                                <span class="warning-text">입금 기한: ${new Date(booking.paymentDeadline).toLocaleDateString()}</span>
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            upcomingDiv.innerHTML = html;
+            return;
+        }
+    }
     const userState = AuthManager.getUserState();
     
     try {
@@ -284,29 +366,29 @@ async function loadUpcomingMeetings() {
             const data = await response.json();
             
             if (data.meetings && data.meetings.length > 0) {
-                // 가장 최근 모임 표시
-                const latestMeeting = data.meetings[0];
+                // 취소되지 않은 모임만 필터링
+                const activeMeetings = data.meetings.filter(meeting => meeting.status !== 'cancelled');
                 
-                // 상태 텍스트 변환
-                let statusText, statusClass;
-                switch(latestMeeting.status) {
-                    case 'paid':
-                    case 'confirmed':
-                        statusText = '참가 확정';
-                        statusClass = 'confirmed';
-                        break;
-                    case 'pending':
-                        statusText = '입금 대기중';
-                        statusClass = 'pending';
-                        break;
-                    case 'cancelled':
-                        statusText = '취소됨';
-                        statusClass = 'cancelled';
-                        break;
-                    default:
-                        statusText = '입금 대기중';
-                        statusClass = 'pending';
-                }
+                if (activeMeetings.length > 0) {
+                    // 가장 최근 활성 모임 표시
+                    const latestMeeting = activeMeetings[0];
+                    
+                    // 상태 텍스트 변환
+                    let statusText, statusClass;
+                    switch(latestMeeting.status) {
+                        case 'paid':
+                        case 'confirmed':
+                            statusText = '참가 확정';
+                            statusClass = 'confirmed';
+                            break;
+                        case 'pending':
+                            statusText = '입금 대기중';
+                            statusClass = 'pending';
+                            break;
+                        default:
+                            statusText = '입금 대기중';
+                            statusClass = 'pending';
+                    }
         
                 upcomingDiv.innerHTML = `
                     <div class="meeting-item">
@@ -336,6 +418,9 @@ async function loadUpcomingMeetings() {
                         ` : ''}
                     </div>
                 `;
+                } else {
+                    upcomingDiv.innerHTML = '<p class="no-meeting">예정된 소개팅이 없습니다.</p>';
+                }
             } else {
                 upcomingDiv.innerHTML = '<p class="no-meeting">예정된 소개팅이 없습니다.</p>';
             }
@@ -352,7 +437,7 @@ async function loadUpcomingMeetings() {
         
         const userMeeting = appliedMeetings[userOrientation];
         
-        if (userMeeting) {
+        if (userMeeting && userMeeting.status !== 'cancelled') {
             const meetingInfo = {
                 progressive: {
                     date: '8월 23일 (토)',
@@ -361,7 +446,7 @@ async function loadUpcomingMeetings() {
                     title: '진보 성향 소개팅'
                 },
                 conservative: {
-                    date: '8월 9일 (토)',
+                    date: '8월 16일 (토)',
                     time: '오후 3시 - 5시',
                     location: '강남역 파티룸',
                     title: '보수 성향 소개팅'
@@ -413,14 +498,319 @@ async function loadUpcomingMeetings() {
 }
 
 
+// 재검사 가능 여부 체크
+function checkRetakeEligibility(testDate) {
+    // 회원가입 날짜 가져오기
+    const userEmail = sessionStorage.getItem('userEmail');
+    let signupDate = testDate; // 기본값은 테스트 날짜
+    
+    // AuthSystem에서 실제 회원가입 날짜 가져오기
+    if (window.AuthSystem && userEmail) {
+        const users = window.AuthSystem.getUsersDB();
+        const user = users[userEmail];
+        if (user && user.signupDate) {
+            signupDate = new Date(user.signupDate);
+        }
+    }
+    
+    // Firebase Timestamp 처리
+    if (signupDate && signupDate._seconds) {
+        signupDate = new Date(signupDate._seconds * 1000);
+    }
+    
+    // signupDate가 유효한 Date 객체가 아닌 경우 처리
+    if (!(signupDate instanceof Date) || isNaN(signupDate.getTime())) {
+        // testDate도 Firebase Timestamp일 수 있음
+        if (testDate && testDate._seconds) {
+            signupDate = new Date(testDate._seconds * 1000);
+        } else {
+            signupDate = new Date(testDate);
+        }
+    }
+    
+    const currentDate = new Date();
+    
+    // 1개월 후 날짜 계산
+    const oneMonthLater = new Date(signupDate);
+    oneMonthLater.setMonth(oneMonthLater.getMonth() + 1);
+    
+    const retakeSection = document.getElementById('retake-test-section');
+    const retakeBtn = document.getElementById('retake-test-btn');
+    
+    if (retakeSection) {
+        retakeSection.style.display = 'block';
+        
+        if (currentDate >= oneMonthLater) {
+            // 1개월이 지났으면 버튼 활성화
+            retakeBtn.disabled = false;
+            retakeBtn.textContent = '테스트 다시 받기';
+            document.querySelector('.retake-message').textContent = '정치 성향 테스트를 다시 받을 수 있습니다.';
+        } else {
+            // 아직 1개월이 안 지났으면 버튼 비활성화
+            retakeBtn.disabled = true;
+            
+            // 날짜 차이 계산 (밀리초 단위)
+            const timeDiff = oneMonthLater.getTime() - currentDate.getTime();
+            const daysLeft = Math.max(1, Math.ceil(timeDiff / (1000 * 60 * 60 * 24)));
+            
+            // NaN 체크
+            if (isNaN(daysLeft)) {
+                document.querySelector('.retake-message').textContent = '재검사 가능 날짜를 계산할 수 없습니다.';
+                console.error('날짜 계산 오류:', { signupDate, oneMonthLater, currentDate });
+            } else {
+                document.querySelector('.retake-message').textContent = `${daysLeft}일 후에 테스트를 다시 받을 수 있습니다.`;
+            }
+        }
+    }
+}
+
+// 정치 성향 테스트 다시 받기
+function retakePoliticalTest() {
+    if (confirm('정치 성향 테스트를 다시 받으시겠습니까?\n기존 테스트 결과는 삭제됩니다.')) {
+        // 기존 테스트 결과 삭제
+        sessionStorage.removeItem('politicalType');
+        sessionStorage.removeItem('userType');
+        sessionStorage.removeItem('testResultDetail');
+        sessionStorage.removeItem('axisScores');
+        sessionStorage.removeItem('userAnswers');
+        sessionStorage.removeItem('testCompletedAt');
+        
+        // 로컬 스토리지에서도 삭제 (사용자별)
+        const userEmail = sessionStorage.getItem('userEmail');
+        if (userEmail) {
+            localStorage.removeItem(`politicalType_${userEmail}`);
+            localStorage.removeItem(`testCompletedAt_${userEmail}`);
+        }
+        
+        // 테스트 페이지로 이동
+        window.location.href = 'political-test.html';
+    }
+}
+
 // 비밀번호 변경
-function changePassword() {
-    alert('비밀번호 변경 기능은 준비 중입니다.');
+async function changePassword() {
+    // 비밀번호 변경 모달 생성
+    const modalHtml = `
+        <div id="password-change-modal" class="modal" style="display: block;">
+            <div class="modal-content">
+                <span class="close" onclick="closePasswordModal()">&times;</span>
+                <h2>비밀번호 변경</h2>
+                <form id="password-change-form">
+                    <div class="form-group">
+                        <label for="current-password">현재 비밀번호</label>
+                        <input type="password" id="current-password" name="currentPassword" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="new-password">새 비밀번호</label>
+                        <input type="password" id="new-password" name="newPassword" 
+                               pattern=".{6,}" title="6자 이상 입력해주세요" required>
+                        <small>6자 이상 입력해주세요</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm-password">새 비밀번호 확인</label>
+                        <input type="password" id="confirm-password" name="confirmPassword" required>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="closePasswordModal()">취소</button>
+                        <button type="submit" class="btn-primary">변경</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // 폼 제출 이벤트
+    document.getElementById('password-change-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const currentPassword = formData.get('currentPassword');
+        const newPassword = formData.get('newPassword');
+        const confirmPassword = formData.get('confirmPassword');
+        
+        // 비밀번호 확인
+        if (newPassword !== confirmPassword) {
+            alert('새 비밀번호가 일치하지 않습니다.');
+            return;
+        }
+        
+        try {
+            const authToken = localStorage.getItem('authToken');
+            const userEmail = sessionStorage.getItem('userEmail');
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : '';
+                
+            const response = await fetch(`${API_URL}/api/user/change-password`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken || ''}`
+                },
+                body: JSON.stringify({
+                    email: userEmail,
+                    currentPassword: currentPassword,
+                    newPassword: newPassword
+                })
+            });
+            
+            if (response.ok) {
+                alert('비밀번호가 성공적으로 변경되었습니다.');
+                closePasswordModal();
+            } else {
+                const error = await response.json();
+                alert(error.message || '비밀번호 변경에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('비밀번호 변경 오류:', error);
+            
+            // 데모 모드에서는 AuthSystem 사용
+            if (window.AuthSystem) {
+                const userEmail = sessionStorage.getItem('userEmail');
+                const users = window.AuthSystem.getUsersDB();
+                const user = users[userEmail];
+                
+                if (user) {
+                    // AuthSystem의 hashPassword 함수 사용
+                    const hashedCurrentPassword = window.AuthSystem.hashPassword(currentPassword);
+                    
+                    if (user.password === hashedCurrentPassword) {
+                        // 새 비밀번호도 해시화해서 저장
+                        user.password = window.AuthSystem.hashPassword(newPassword);
+                        window.AuthSystem.saveUsersDB(users);
+                        alert('비밀번호가 변경되었습니다.');
+                        closePasswordModal();
+                    } else {
+                        alert('현재 비밀번호가 올바르지 않습니다.');
+                    }
+                } else {
+                    alert('사용자 정보를 찾을 수 없습니다.');
+                }
+            } else {
+                alert('비밀번호 변경 중 오류가 발생했습니다.');
+            }
+        }
+    });
+}
+
+// 비밀번호 변경 모달 닫기
+function closePasswordModal() {
+    const modal = document.getElementById('password-change-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 // 프로필 수정
-function updateProfile() {
-    alert('프로필 수정 기능은 준비 중입니다.');
+async function updateProfile() {
+    // 프로필 수정 모달 생성
+    const modalHtml = `
+        <div id="profile-edit-modal" class="modal" style="display: block;">
+            <div class="modal-content">
+                <span class="close" onclick="closeProfileModal()">&times;</span>
+                <h2>프로필 수정</h2>
+                <form id="profile-edit-form">
+                    <div class="form-group">
+                        <label for="edit-name">이름</label>
+                        <input type="text" id="edit-name" name="name" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-phone">전화번호</label>
+                        <input type="tel" id="edit-phone" name="phone" pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}" 
+                               placeholder="010-1234-5678" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-birthdate">생년월일</label>
+                        <input type="date" id="edit-birthdate" name="birthdate" required>
+                    </div>
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="edit-marketing" name="marketingAgree">
+                            마케팅 정보 수신 동의
+                        </label>
+                    </div>
+                    <div class="button-group">
+                        <button type="button" class="btn-secondary" onclick="closeProfileModal()">취소</button>
+                        <button type="submit" class="btn-primary">저장</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    `;
+    
+    // 모달 추가
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // 현재 프로필 정보 로드
+    const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+    document.getElementById('edit-name').value = userProfile.name || '';
+    document.getElementById('edit-phone').value = userProfile.phone || '';
+    document.getElementById('edit-birthdate').value = userProfile.birthdate || '';
+    document.getElementById('edit-marketing').checked = userProfile.marketingAgree || false;
+    
+    // 폼 제출 이벤트
+    document.getElementById('profile-edit-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(e.target);
+        const updateData = {
+            name: formData.get('name'),
+            phone: formData.get('phone'),
+            birthdate: formData.get('birthdate'),
+            marketingAgree: formData.get('marketingAgree') === 'on'
+        };
+        
+        try {
+            const authToken = localStorage.getItem('authToken');
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : '';
+                
+            const response = await fetch(`${API_URL}/api/user/profile`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${authToken || ''}`
+                },
+                body: JSON.stringify(updateData)
+            });
+            
+            if (response.ok) {
+                // 세션 스토리지 업데이트
+                const currentProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+                const updatedProfile = { ...currentProfile, ...updateData };
+                sessionStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+                
+                alert('프로필이 성공적으로 수정되었습니다.');
+                closeProfileModal();
+                refreshData(); // 화면 새로고침
+            } else {
+                const error = await response.json();
+                alert(error.message || '프로필 수정에 실패했습니다.');
+            }
+        } catch (error) {
+            console.error('프로필 수정 오류:', error);
+            // 데모 모드에서는 로컬만 업데이트
+            const currentProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+            const updatedProfile = { ...currentProfile, ...updateData };
+            sessionStorage.setItem('userProfile', JSON.stringify(updatedProfile));
+            
+            alert('프로필이 수정되었습니다. (데모 모드)');
+            closeProfileModal();
+            refreshData();
+        }
+    });
+}
+
+// 프로필 수정 모달 닫기
+function closeProfileModal() {
+    const modal = document.getElementById('profile-edit-modal');
+    if (modal) {
+        modal.remove();
+    }
 }
 
 // 회원 탈퇴
@@ -1123,6 +1513,10 @@ window.resultTypes = {
     }
 };
 
+// 전역으로 모달 닫기 함수 노출
+window.closeProfileModal = closeProfileModal;
+window.closePasswordModal = closePasswordModal;
+
 // 모임 신청 취소 함수
 async function cancelMeeting(meetingId) {
     const confirmMessage = `정말로 모임 신청을 취소하시겠습니까?\n\n⚠️ 취소 시 재신청이 필요합니다.`;
@@ -1146,6 +1540,16 @@ async function cancelMeeting(meetingId) {
         
         if (response.ok) {
             alert('모임 신청이 취소되었습니다.');
+            
+            // sessionStorage에서 해당 모임 정보를 완전히 삭제
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            for (const orientation in appliedMeetings) {
+                if (appliedMeetings[orientation].meetingId === meetingId) {
+                    delete appliedMeetings[orientation];
+                    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                    break;
+                }
+            }
             
             // 페이지 새로고침하여 최신 상태 반영
             refreshData();

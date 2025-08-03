@@ -318,6 +318,38 @@ app.post('/api/meetings/apply', async (req, res) => {
         
         const user = userDoc.data();
         
+        // 이미 신청한 모임인지 확인 (cancelled 제외)
+        // Firestore 복합 쿼리 제한으로 인해 먼저 전체를 가져온 후 필터링
+        const allBookings = await collections.bookings
+            .where('userEmail', '==', user.email)
+            .where('orientation', '==', orientation)
+            .get();
+        
+        console.log(`=== 중복 신청 체크 ===`);
+        console.log(`사용자: ${user.email}`);
+        console.log(`성향: ${orientation}`);
+        console.log(`전체 신청 건수: ${allBookings.size}`);
+        
+        // cancelled가 아닌 신청만 필터링
+        const activeBookings = [];
+        allBookings.forEach(doc => {
+            const data = doc.data();
+            console.log(`- Booking ID: ${doc.id}, Status: ${data.status}, MeetingId: ${data.meetingId}`);
+            if (data.status !== 'cancelled') {
+                activeBookings.push(doc);
+            }
+        });
+        
+        console.log(`활성 신청 건수: ${activeBookings.length}`);
+        
+        if (activeBookings.length > 0) {
+            console.log('이미 신청한 모임이 있음');
+            return res.status(400).json({
+                success: false,
+                message: '이미 신청하신 모임이 있습니다.'
+            });
+        }
+        
         // 모임 신청 정보 저장
         const bookingId = collections.bookings.doc().id;
         const booking = {

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인증 시스템 테스트</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth-system.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+    <style>
+        body {
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .test-section h2 {
+            margin-bottom: 15px;
+            color: #2563eb;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            max-width: 300px;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 20px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #1d4ed8;
+        }
+        .result {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 4px;
+        }
+        .success {
+            color: green;
+        }
+        .error {
+            color: red;
+        }
+        .user-list {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .user-item {
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+    </style>
+</head>
+<body>
+    <h1>사이드픽 인증 시스템 테스트</h1>
+    
+    <!-- 현재 상태 -->
+    <div class="test-section">
+        <h2>현재 상태</h2>
+        <div id="current-status">확인 중...</div>
+    </div>
+    
+    <!-- 회원가입 테스트 -->
+    <div class="test-section">
+        <h2>회원가입 테스트</h2>
+        <form id="signup-form">
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" id="signup-email" value="test@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>비밀번호</label>
+                <input type="password" id="signup-password" value="test1234!" required>
+            </div>
+            <div class="form-group">
+                <label>이름</label>
+                <input type="text" id="signup-name" value="테스트유저" required>
+            </div>
+            <div class="form-group">
+                <label>전화번호</label>
+                <input type="tel" id="signup-phone" value="010-1234-5678" required>
+            </div>
+            <div class="form-group">
+                <label>생년월일</label>
+                <input type="date" id="signup-birthdate" value="1990-01-01" required>
+            </div>
+            <div class="form-group">
+                <label>성별</label>
+                <select id="signup-gender" required>
+                    <option value="male">남성</option>
+                    <option value="female">여성</option>
+                </select>
+            </div>
+            <button type="submit">회원가입</button>
+        </form>
+        <div id="signup-result" class="result"></div>
+    </div>
+    
+    <!-- 로그인 테스트 -->
+    <div class="test-section">
+        <h2>로그인 테스트</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label>이메일</label>
+                <input type="email" id="login-email" value="test@example.com" required>
+            </div>
+            <div class="form-group">
+                <label>비밀번호</label>
+                <input type="password" id="login-password" value="test1234!" required>
+            </div>
+            <button type="submit">로그인</button>
+        </form>
+        <div id="login-result" class="result"></div>
+    </div>
+    
+    <!-- 사용자 관리 -->
+    <div class="test-section">
+        <h2>사용자 관리</h2>
+        <button onclick="showAllUsers()">모든 사용자 보기</button>
+        <button onclick="logout()">로그아웃</button>
+        <button onclick="AuthSystem.reset()">초기화 (모든 데이터 삭제)</button>
+        <div id="user-list" class="user-list"></div>
+    </div>
+
+    <script>
+        // 현재 상태 표시
+        function updateStatus() {
+            const statusDiv = document.getElementById('current-status');
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userEmail = sessionStorage.getItem('userEmail');
+            const userProfile = sessionStorage.getItem('userProfile');
+            const politicalType = sessionStorage.getItem('politicalType');
+            
+            let statusHTML = '<h3>세션 상태</h3>';
+            statusHTML += `<p>로그인 여부: ${isLoggedIn === 'true' ? '<span class="success">로그인됨</span>' : '<span class="error">로그아웃</span>'}</p>`;
+            statusHTML += `<p>이메일: ${userEmail || '없음'}</p>`;
+            statusHTML += `<p>정치 성향: ${politicalType || '미측정'}</p>`;
+            
+            if (userProfile) {
+                const profile = JSON.parse(userProfile);
+                statusHTML += '<h4>프로필 정보</h4>';
+                statusHTML += `<p>이름: ${profile.name}</p>`;
+                statusHTML += `<p>성별: ${profile.gender === 'male' ? '남성' : '여성'}</p>`;
+            }
+            
+            statusDiv.innerHTML = statusHTML;
+        }
+        
+        // 회원가입
+        document.getElementById('signup-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('signup-result');
+            
+            const userData = {
+                email: document.getElementById('signup-email').value,
+                password: document.getElementById('signup-password').value,
+                name: document.getElementById('signup-name').value,
+                phone: document.getElementById('signup-phone').value,
+                birthdate: document.getElementById('signup-birthdate').value,
+                gender: document.getElementById('signup-gender').value
+            };
+            
+            try {
+                const result = await signup(userData);
+                if (result.success) {
+                    resultDiv.innerHTML = '<span class="success">회원가입 성공!</span>';
+                    updateStatus();
+                } else {
+                    resultDiv.innerHTML = `<span class="error">회원가입 실패: ${result.message}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">오류: ${error.message}</span>`;
+            }
+        });
+        
+        // 로그인
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const resultDiv = document.getElementById('login-result');
+            
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            
+            try {
+                const result = await login(email, password);
+                if (result.success) {
+                    resultDiv.innerHTML = '<span class="success">로그인 성공!</span>';
+                    updateStatus();
+                } else {
+                    resultDiv.innerHTML = `<span class="error">로그인 실패: ${result.message}</span>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<span class="error">오류: ${error.message}</span>`;
+            }
+        });
+        
+        // 모든 사용자 보기
+        function showAllUsers() {
+            const users = AuthSystem.getUsersDB();
+            const userListDiv = document.getElementById('user-list');
+            
+            if (Object.keys(users).length === 0) {
+                userListDiv.innerHTML = '<p>등록된 사용자가 없습니다.</p>';
+                return;
+            }
+            
+            let html = '<h3>등록된 사용자 목록</h3>';
+            for (const email in users) {
+                const user = users[email];
+                html += `<div class="user-item">
+                    <strong>${user.name}</strong> (${email})<br>
+                    성별: ${user.gender === 'male' ? '남성' : '여성'}, 
+                    가입일: ${new Date(user.signupDate).toLocaleDateString()},
+                    정치성향: ${user.politicalType || '미측정'}
+                </div>`;
+            }
+            userListDiv.innerHTML = html;
+        }
+        
+        // 페이지 로드 시 상태 업데이트
+        updateStatus();
+    </script>
+</body>
+</html>

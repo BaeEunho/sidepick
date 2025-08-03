@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 디버그</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; }
+        .container { max-width: 600px; margin: 0 auto; }
+        input { width: 100%; padding: 10px; margin: 10px 0; }
+        button { padding: 10px 20px; margin: 10px 0; cursor: pointer; }
+        #result { margin-top: 20px; padding: 20px; background: #f0f0f0; white-space: pre-wrap; }
+        .success { color: green; }
+        .error { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>로그인 디버그 페이지</h1>
+        
+        <div>
+            <h2>1. 직접 서버 API 테스트</h2>
+            <button onclick="testDirectAPI()">서버 API 직접 호출</button>
+        </div>
+        
+        <div>
+            <h2>2. AuthSystem 테스트</h2>
+            <button onclick="testAuthSystem()">AuthSystem.login() 호출</button>
+        </div>
+        
+        <div>
+            <h2>3. api-client.js 테스트</h2>
+            <button onclick="testApiClient()">login() 함수 호출</button>
+        </div>
+        
+        <div>
+            <h2>4. 실제 로그인 폼 테스트</h2>
+            <form onsubmit="testLoginForm(event)">
+                <input type="email" id="email" value="toqha1585@gmail.com" placeholder="이메일">
+                <input type="password" id="password" value="asdf1234*" placeholder="비밀번호">
+                <button type="submit">로그인</button>
+            </form>
+        </div>
+        
+        <div id="result">결과가 여기에 표시됩니다.</div>
+    </div>
+    
+    <script src="auth-system.js"></script>
+    <script src="api-client.js"></script>
+    <script>
+    const resultDiv = document.getElementById('result');
+    
+    function log(message, type = '') {
+        resultDiv.innerHTML += `<div class="${type}">${new Date().toLocaleTimeString()} - ${message}</div>\n`;
+        console.log(message);
+    }
+    
+    function clearLog() {
+        resultDiv.innerHTML = '';
+    }
+    
+    // 1. 직접 서버 API 테스트
+    async function testDirectAPI() {
+        clearLog();
+        log('=== 직접 서버 API 테스트 시작 ===');
+        
+        try {
+            const response = await fetch('http://localhost:3000/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: 'toqha1585@gmail.com',
+                    password: 'asdf1234*'
+                })
+            });
+            
+            log(`응답 상태: ${response.status}`);
+            const data = await response.json();
+            log(`응답 데이터: ${JSON.stringify(data, null, 2)}`);
+            
+            if (data.success) {
+                log('✓ 서버 API 로그인 성공!', 'success');
+            } else {
+                log('✗ 서버 API 로그인 실패: ' + data.message, 'error');
+            }
+        } catch (error) {
+            log('✗ 서버 API 오류: ' + error.message, 'error');
+        }
+    }
+    
+    // 2. AuthSystem 테스트
+    async function testAuthSystem() {
+        clearLog();
+        log('=== AuthSystem 테스트 시작 ===');
+        
+        try {
+            log('AuthSystem 존재 여부: ' + (window.AuthSystem ? 'Yes' : 'No'));
+            
+            if (window.AuthSystem) {
+                const result = await window.AuthSystem.login('toqha1585@gmail.com', 'asdf1234*');
+                log(`AuthSystem 결과: ${JSON.stringify(result, null, 2)}`);
+                
+                if (result.success) {
+                    log('✓ AuthSystem 로그인 성공!', 'success');
+                } else {
+                    log('✗ AuthSystem 로그인 실패: ' + result.message, 'error');
+                }
+            }
+        } catch (error) {
+            log('✗ AuthSystem 오류: ' + error.message, 'error');
+            log('스택: ' + error.stack);
+        }
+    }
+    
+    // 3. api-client.js 테스트
+    async function testApiClient() {
+        clearLog();
+        log('=== api-client.js 테스트 시작 ===');
+        
+        try {
+            log('login 함수 존재 여부: ' + (typeof login === 'function' ? 'Yes' : 'No'));
+            
+            const result = await login('toqha1585@gmail.com', 'asdf1234*');
+            log(`login() 결과: ${JSON.stringify(result, null, 2)}`);
+            
+            if (result.success) {
+                log('✓ api-client 로그인 성공!', 'success');
+            } else {
+                log('✗ api-client 로그인 실패: ' + result.message, 'error');
+            }
+        } catch (error) {
+            log('✗ api-client 오류: ' + error.message, 'error');
+            log('스택: ' + error.stack);
+        }
+    }
+    
+    // 4. 로그인 폼 테스트
+    async function testLoginForm(event) {
+        event.preventDefault();
+        clearLog();
+        log('=== 로그인 폼 테스트 시작 ===');
+        
+        const email = document.getElementById('email').value;
+        const password = document.getElementById('password').value;
+        
+        log(`이메일: ${email}`);
+        log(`비밀번호: ${password.replace(/./g, '*')}`);
+        
+        try {
+            // login.html과 동일한 로직
+            const response = await login(email, password);
+            log(`로그인 응답: ${JSON.stringify(response, null, 2)}`);
+            
+            if (response.success) {
+                log('✓ 로그인 성공!', 'success');
+                
+                // 데이터 동기화
+                syncAuthData(response.data.user, response.data.token);
+                
+                // sessionStorage 확인
+                log('\nsessionStorage 상태:');
+                log('isLoggedIn: ' + sessionStorage.getItem('isLoggedIn'));
+                log('userEmail: ' + sessionStorage.getItem('userEmail'));
+                log('politicalType: ' + sessionStorage.getItem('politicalType'));
+            } else {
+                log('✗ 로그인 실패: ' + response.message, 'error');
+            }
+        } catch (error) {
+            log('✗ 로그인 오류: ' + error.message, 'error');
+            log('스택: ' + error.stack);
+        }
+    }
+    
+    // 페이지 로드 시 환경 체크
+    window.onload = function() {
+        log('=== 환경 체크 ===');
+        log('현재 URL: ' + window.location.href);
+        log('API_BASE_URL: ' + (window.API_BASE_URL || 'Not defined'));
+        log('AuthSystem: ' + (window.AuthSystem ? 'Loaded' : 'Not loaded'));
+        log('login 함수: ' + (typeof login === 'function' ? 'Available' : 'Not available'));
+        log('\n테스트할 버튼을 클릭하세요.');
+    };
+    </script>
+</body>
+</html>

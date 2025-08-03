@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>최소 테스트</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+            <div class="auth-buttons">
+                <a href="login.html" class="btn-login">로그인</a>
+                <a href="signup.html" class="btn-signup">회원가입</a>
+            </div>
+        </nav>
+    </header>
+
+    <main style="margin-top: 100px; padding: 20px;">
+        <h1>최소 테스트 페이지</h1>
+        <p>이 페이지가 정상적으로 보이면 기본 구조는 문제없습니다.</p>
+        
+        <div style="margin-top: 20px; padding: 20px; background: #f0f0f0; border-radius: 8px;">
+            <h2>테스트 버튼들</h2>
+            <button onclick="alert('버튼 작동함')">기본 테스트</button>
+            <button onclick="testLogin()">로그인 테스트</button>
+            <button onclick="testAuth()">인증 상태 확인</button>
+        </div>
+        
+        <div id="test-result" style="margin-top: 20px; padding: 20px; background: #e0e0e0; border-radius: 8px;">
+            결과가 여기에 표시됩니다.
+        </div>
+    </main>
+
+    <script>
+        function testLogin() {
+            const result = document.getElementById('test-result');
+            result.innerHTML = '로그인 페이지로 이동: <a href="login.html">login.html</a>';
+        }
+        
+        function testAuth() {
+            const result = document.getElementById('test-result');
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const userEmail = sessionStorage.getItem('userEmail');
+            
+            result.innerHTML = `
+                <strong>인증 상태:</strong><br>
+                로그인 여부: ${isLoggedIn || '없음'}<br>
+                이메일: ${userEmail || '없음'}<br>
+                <br>
+                <button onclick="sessionStorage.setItem('isLoggedIn', 'true'); sessionStorage.setItem('userEmail', 'test@test.com'); location.reload();">
+                    테스트 로그인 설정
+                </button>
+                <button onclick="sessionStorage.clear(); location.reload();">
+                    로그아웃
+                </button>
+            `;
+        }
+    </script>
+    
+    <!-- auth-check.js는 의도적으로 제외 -->
+</body>
+</html>

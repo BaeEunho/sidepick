@@ -312,13 +312,13 @@
 .answer-btn.scale-1:hover .answer-dot,
 .answer-btn.scale-2:hover .answer-dot {
     border-color: var(--primary-blue);
-    background-color: rgba(37, 99, 235, 0.1);
+    background-color: rgba(37, 99, 235, 0.8);
 }
 
 .answer-btn.scale-4:hover .answer-dot,
 .answer-btn.scale-5:hover .answer-dot {
     border-color: var(--coral);
-    background-color: rgba(255, 111, 97, 0.1);
+    background-color: rgba(255, 111, 97, 0.8);
 }
 
 /* 선택된 상태 */
@@ -326,17 +326,25 @@
 .answer-btn.scale-2.selected .answer-dot {
     background-color: var(--primary-blue);
     border-color: var(--primary-blue);
+    box-shadow: 0 0 0 12px rgba(37, 99, 235, 0.3);
 }
 
 .answer-btn.scale-3.selected .answer-dot {
     background-color: var(--gray-500);
     border-color: var(--gray-500);
+    box-shadow: 0 0 0 12px rgba(107, 114, 128, 0.3);
 }
 
 .answer-btn.scale-4.selected .answer-dot,
 .answer-btn.scale-5.selected .answer-dot {
     background-color: var(--coral);
     border-color: var(--coral);
+    box-shadow: 0 0 0 12px rgba(255, 111, 97, 0.3);
+}
+
+/* 선택된 버튼 전체 배경 */
+.answer-btn.selected {
+    background-color: rgba(255, 111, 97, 0.8);
 }
 
 .navigation {

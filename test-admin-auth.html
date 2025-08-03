@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin 인증 테스트</title>
+    <script src="admin-auth.js"></script>
+</head>
+<body>
+    <h1>Admin 인증 테스트</h1>
+    
+    <button onclick="checkAuth()">인증 상태 확인</button>
+    <button onclick="clearSession()">세션 초기화</button>
+    <button onclick="testProtect()">protectPage 테스트</button>
+    
+    <div id="result" style="margin-top: 20px; padding: 20px; background: #f0f0f0;"></div>
+    
+    <script>
+    const resultDiv = document.getElementById('result');
+    
+    function checkAuth() {
+        resultDiv.innerHTML = '<h3>인증 상태 확인</h3>';
+        
+        const isAuth = AdminAuth.isAuthenticated();
+        resultDiv.innerHTML += `<p>인증됨: ${isAuth ? 'Yes' : 'No'}</p>`;
+        
+        const sessionData = sessionStorage.getItem('sidepick_admin_session');
+        resultDiv.innerHTML += `<p>세션 데이터: ${sessionData ? 'Exists' : 'None'}</p>`;
+        
+        if (sessionData) {
+            try {
+                const session = JSON.parse(sessionData);
+                resultDiv.innerHTML += `<pre>${JSON.stringify(session, null, 2)}</pre>`;
+            } catch (e) {
+                resultDiv.innerHTML += `<p>세션 파싱 에러: ${e.message}</p>`;
+            }
+        }
+        
+        const admin = AdminAuth.getCurrentAdmin();
+        resultDiv.innerHTML += `<p>현재 관리자: ${admin ? admin.email : 'None'}</p>`;
+    }
+    
+    function clearSession() {
+        sessionStorage.clear();
+        resultDiv.innerHTML = '<p>세션이 초기화되었습니다.</p>';
+    }
+    
+    function testProtect() {
+        resultDiv.innerHTML = '<p>protectPage() 호출 중... 리다이렉트되지 않으면 문제가 있습니다.</p>';
+        AdminAuth.protectPage();
+    }
+    
+    // 페이지 로드 시 자동 확인
+    window.onload = checkAuth;
+    </script>
+</body>
+</html>

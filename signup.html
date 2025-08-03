@@ -6,6 +6,7 @@
     <title>회원가입 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth-styles.css">
+    <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
 </head>
@@ -66,7 +67,7 @@
                     <div class="form-group">
                         <label for="password">비밀번호</label>
                         <input type="password" id="password" name="password" placeholder="8자 이상, 영문+숫자+특수문자" required onkeyup="checkPassword()">
-                        <span class="input-hint" id="password-hint">8자 이상, 영문, 숫자, 특수문자(@$!%*#?&)를 포함해주세요</span>
+                        <span class="input-hint" id="password-hint">8자 이상, 영문, 숫자, 특수문자(@$!%*#?&^)를 포함해주세요</span>
                         <span class="error-message" id="password-error"></span>
                     </div>
 
@@ -200,9 +201,9 @@
             const passwordConfirm = document.getElementById('password-confirm').value;
             
             // 비밀번호 규칙 검사: 8자 이상, 영문+숫자+특수문자 조합
-            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$/;
+            const passwordRegex = /^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&^])[A-Za-z\d@$!%*#?&^]{8,}$/;
             if (!passwordRegex.test(password)) {
-                alert('비밀번호는 8자 이상, 영문, 숫자, 특수문자(@$!%*#?&)를 포함해야 합니다.');
+                alert('비밀번호는 8자 이상, 영문, 숫자, 특수문자(@$!%*#?&^)를 포함해야 합니다.');
                 document.getElementById('password').focus();
                 return;
             }
@@ -259,40 +260,14 @@
                     });
                     
                     alert('회원가입이 완료되었습니다. 정치 성향 테스트를 진행해주세요.');
-                    window.location.href = 'political-test.html';
+                    window.location.href = 'political-test.html?signup=true';
                 } else {
                     alert(response.message || '회원가입 중 오류가 발생했습니다.');
                 }
             } catch (error) {
                 console.error('회원가입 오류:', error);
                 
-                // 서버 연결 실패 시 데모 모드로 동작
-                if (error.message.includes('Failed to fetch') || error.message.includes('NetworkError')) {
-                    console.log('서버 연결 실패 - 데모 모드로 진행');
-                    
-                    // 데모 모드: 로컬 스토리지만 사용
-                    const profileData = {
-                        name: signupData.name,
-                        email: signupData.email,
-                        phone: signupData.phone,
-                        birthdate: signupData.birthdate,
-                        gender: signupData.gender,
-                        marketingAgree: signupData.marketingAgree
-                    };
-                    
-                    // AuthManager를 통해 로그인 처리
-                    AuthManager.login(profileData.email, profileData);
-                    
-                    // 가입한 이메일 저장
-                    const registeredUsers = JSON.parse(localStorage.getItem('registeredUsers') || '[]');
-                    registeredUsers.push(profileData.email);
-                    localStorage.setItem('registeredUsers', JSON.stringify(registeredUsers));
-                    
-                    alert('회원가입이 완료되었습니다. (데모 모드)\n정치 성향 테스트를 진행해주세요.');
-                    window.location.href = 'political-test.html';
-                } else {
-                    alert(error.message || '회원가입 중 오류가 발생했습니다.');
-                }
+                alert(error.message || '회원가입 중 오류가 발생했습니다.');
             }
         }
 
@@ -514,7 +489,7 @@
             // 숫자 체크
             const hasNumber = /\d/.test(password);
             // 특수문자 체크
-            const hasSpecial = /[@$!%*#?&]/.test(password);
+            const hasSpecial = /[@$!%*#?&^]/.test(password);
             
             const errors = [];
             if (!hasLength) errors.push('8자 이상');
