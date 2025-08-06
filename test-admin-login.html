@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 로그인 테스트</title>
+    <script src="admin-auth.js"></script>
+</head>
+<body>
+    <h1>관리자 로그인 테스트</h1>
+    <button onclick="testAdminLogin()">테스트 실행</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>테스트 중...</p>';
+            
+            try {
+                // 테스트용 비밀번호 - 실제로는 사용자가 변경한 비밀번호를 사용해야 함
+                const email = 'clsrna3@naver.com';
+                const password = prompt('변경된 비밀번호를 입력하세요:');
+                
+                if (!password) {
+                    resultDiv.innerHTML = '<p style="color: red;">비밀번호를 입력해주세요.</p>';
+                    return;
+                }
+                
+                console.log('로그인 시도:', email);
+                const result = await AdminAuth.login(email, password);
+                console.log('로그인 결과:', result);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = '<p style="color: green;">로그인 성공! ' + result.message + '</p>';
+                    
+                    // 세션 확인
+                    const isAuth = AdminAuth.isAuthenticated();
+                    const adminInfo = AdminAuth.getCurrentAdmin();
+                    
+                    resultDiv.innerHTML += `
+                        <p>인증 상태: ${isAuth ? '인증됨' : '인증 안됨'}</p>
+                        <p>관리자 정보: ${JSON.stringify(adminInfo, null, 2)}</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = '<p style="color: red;">로그인 실패: ' + result.message + '</p>';
+                }
+            } catch (error) {
+                console.error('테스트 오류:', error);
+                resultDiv.innerHTML = '<p style="color: red;">오류 발생: ' + error.message + '</p>';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -193,8 +193,19 @@ window.AuthManager = {
     // 로그아웃
     logout: function() {
         if (confirm('로그아웃 하시겠습니까?')) {
-            // 세션 스토리지 초기화
-            sessionStorage.clear();
+            // 로그인 관련 정보만 삭제 (테스트 결과는 유지)
+            sessionStorage.removeItem('isLoggedIn');
+            sessionStorage.removeItem('userEmail');
+            sessionStorage.removeItem('userProfile');
+            sessionStorage.removeItem('userGender');
+            sessionStorage.removeItem('appliedMeetings');
+            
+            // 로컬 스토리지의 토큰과 자동 로그인 정보도 삭제
+            localStorage.removeItem('authToken');
+            localStorage.removeItem('rememberMe');
+            
+            // 정치 성향 테스트 결과는 유지
+            // politicalType, userType, testResultDetail, axisScores, userAnswers, testCompletedAt 등은 삭제하지 않음
             
             // 메인 페이지로 이동
             window.location.href = 'index.html';
@@ -223,6 +234,41 @@ window.logout = AuthManager.logout;
 
 // 페이지 로드 시 자동 실행
 document.addEventListener('DOMContentLoaded', () => {
+    // 자동 로그인 체크
+    const rememberMe = localStorage.getItem('rememberMe');
+    if (rememberMe && !sessionStorage.getItem('isLoggedIn')) {
+        try {
+            const rememberData = JSON.parse(rememberMe);
+            
+            // 만료 시간 확인
+            if (rememberData.expiry && new Date().getTime() < rememberData.expiry) {
+                // 세션 복원
+                if (window.syncAuthData) {
+                    syncAuthData({
+                        email: rememberData.email,
+                        name: rememberData.name,
+                        token: rememberData.token
+                    }, rememberData.token);
+                }
+                
+                // AuthManager로 로그인 처리
+                AuthManager.login(rememberData.email, {
+                    name: rememberData.name,
+                    email: rememberData.email
+                });
+                
+                console.log('자동 로그인 성공');
+            } else {
+                // 만료된 데이터 삭제
+                localStorage.removeItem('rememberMe');
+                console.log('자동 로그인 데이터 만료됨');
+            }
+        } catch (error) {
+            console.error('자동 로그인 실패:', error);
+            localStorage.removeItem('rememberMe');
+        }
+    }
+    
     // index.html인 경우 특별 처리
     const currentPage = window.location.pathname.split('/').pop();
     

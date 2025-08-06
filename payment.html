@@ -319,6 +319,31 @@
             };
             sessionStorage.setItem('paymentInfo', JSON.stringify(paymentInfo));
             
+            // 필요한 정보가 없으면 기본값 설정
+            if (!sessionStorage.getItem('selectedMeeting')) {
+                const politicalType = sessionStorage.getItem('politicalType');
+                const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+                const isProgressive = progressiveCodes.includes(politicalType);
+                
+                const defaultMeeting = {
+                    title: isProgressive ? '진보 성향 소개팅' : '보수 성향 소개팅',
+                    date: isProgressive ? '8월 23일 (토)' : '8월 30일 (토)',
+                    time: '오후 3시 - 5시',
+                    location: '강남역 파티룸'
+                };
+                sessionStorage.setItem('selectedMeeting', JSON.stringify(defaultMeeting));
+            }
+            
+            if (!sessionStorage.getItem('participantInfo')) {
+                const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+                const participantInfo = {
+                    name: userProfile.name || '참가자',
+                    email: sessionStorage.getItem('userEmail'),
+                    phone: userProfile.phone || '연락처 없음'
+                };
+                sessionStorage.setItem('participantInfo', JSON.stringify(participantInfo));
+            }
+            
             // 완료 페이지로 이동
             window.location.href = 'payment-complete.html';
         });

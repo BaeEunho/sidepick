@@ -15,7 +15,7 @@ const DataSystem = {
                     id: 'meeting_prog_001',
                     title: '진보 개혁형 × 사회 복지형',
                     orientation: 'progressive',
-                    date: '2024-12-07',
+                    date: '2025-08-23',
                     time: '15:00',
                     location: '강남역 파티룸',
                     ageRange: '25-32세',
@@ -28,7 +28,7 @@ const DataSystem = {
                     id: 'meeting_cons_001',
                     title: '보수 전통형 × 시장 경제형',
                     orientation: 'conservative',
-                    date: '2024-12-14',
+                    date: '2025-08-30',
                     time: '15:00',
                     location: '강남역 파티룸',
                     ageRange: '27-35세',
@@ -102,6 +102,16 @@ const DataSystem = {
             );
             if (existingBooking) {
                 return { success: false, message: '이미 신청한 미팅입니다.' };
+            }
+            
+            // 같은 성향의 다른 미팅에 이미 신청했는지 확인
+            const sameOrientationBooking = Object.values(bookings).find(b => {
+                if (b.userEmail !== userEmail || b.status === 'cancelled') return false;
+                const bookingMeeting = Object.values(meetings).find(m => m.id === b.meetingId);
+                return bookingMeeting && bookingMeeting.orientation === meeting.orientation;
+            });
+            if (sameOrientationBooking) {
+                return { success: false, message: `이미 ${meeting.orientation === 'progressive' ? '진보' : '보수'} 성향 모임에 신청하셨습니다.` };
             }
             
             // 최근 신청 확인 (2초 이내 동일 사용자의 신청 방지)

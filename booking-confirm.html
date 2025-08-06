@@ -7,9 +7,9 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="booking-confirm-styles.css">
     <script src="auth-system.js"></script>
-    <script src="data-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
+    <script src="data-system.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -21,11 +21,11 @@
             <ul class="nav-menu">
                 <li><a href="index.html#intro">서비스 소개</a></li>
                 <li><a href="index.html#test">성향 테스트</a></li>
-                <li><a href="index.html#meeting">오프라인 소개팅</a></li>
-                <li><a href="index.html#faq">자주 묻는 질문</a></li>
+                <li><a href="meeting-schedule.html">소개팅 일정</a></li>
+                <li><a href="index.html#faq">FAQ</a></li>
             </ul>
-            <div class="nav-cta">
-                <a href="political-test.html?logged_in=true" class="nav-btn">성향 테스트 받기</a>
+            <div class="auth-buttons">
+                <!-- AuthManager가 자동으로 채워줌 -->
             </div>
         </nav>
     </header>
@@ -35,25 +35,21 @@
         <div class="container">
             <div class="booking-header">
                 <h1>예약 확인</h1>
-                <p>선택하신 소개팅 정보를 확인하고 참가자 정보를 입력해주세요</p>
+                <p>선택하신 모임 정보를 확인하고 결제를 진행해주세요</p>
             </div>
-
+            
             <div class="booking-content">
-                <!-- 선택한 소개팅 정보 -->
+                <!-- 모임 정보 -->
                 <div class="selected-meeting-info">
-                    <h2>선택하신 소개팅</h2>
+                    <h2>선택한 소개팅 정보</h2>
                     <div class="meeting-detail-card">
                         <div class="detail-row">
-                            <span class="label">소개팅명</span>
-                            <span class="value" id="meeting-title">-</span>
+                            <span class="label">모임 이름</span>
+                            <span class="value" id="meeting-title">로딩 중...</span>
                         </div>
                         <div class="detail-row">
                             <span class="label">날짜</span>
                             <span class="value" id="meeting-date">-</span>
-                        </div>
-                        <div class="detail-row">
-                            <span class="label">시간</span>
-                            <span class="value" id="meeting-time">-</span>
                         </div>
                         <div class="detail-row">
                             <span class="label">장소</span>
@@ -66,84 +62,57 @@
                     </div>
                 </div>
 
-                <!-- 참가자 정보 입력 -->
+                <!-- 참가자 정보 -->
                 <div class="participant-form-section">
                     <h2>참가자 정보</h2>
-                    <p class="info-auto-fill">📢 프로필 정보가 자동으로 입력되었습니다. 수정이 필요한 경우 변경해주세요.</p>
-                    <form id="participant-form" class="participant-form">
+                    <div class="info-auto-fill">
+                        ℹ️ 회원 정보로 자동 입력되었습니다
+                    </div>
+                    
+                    <form class="participant-form">
                         <div class="form-row">
                             <div class="form-group">
-                                <label for="participant-name">이름</label>
-                                <input type="text" id="participant-name" name="name" readonly class="auto-filled">
-                                <span class="error-message" id="name-error"></span>
+                                <label for="applicant-name">이름</label>
+                                <input type="text" id="applicant-name" class="auto-filled" readonly>
                             </div>
-                        </div>
-
-                        <div class="form-row">
                             <div class="form-group">
-                                <label for="participant-phone">휴대폰 번호 <span class="required">*</span></label>
-                                <input type="tel" id="participant-phone" name="phone" required placeholder="010-0000-0000">
-                                <span class="error-message" id="phone-error"></span>
+                                <label for="applicant-phone">연락처</label>
+                                <input type="tel" id="applicant-phone" class="auto-filled" readonly>
                             </div>
                         </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="participant-email">이메일</label>
-                                <input type="email" id="participant-email" name="email" readonly class="auto-filled">
-                                <span class="error-message" id="email-error"></span>
-                            </div>
-                        </div>
-
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="participant-birth">생년월일</label>
-                                <input type="date" id="participant-birth" name="birth" readonly class="auto-filled">
-                                <span class="form-hint">만 20세 이상 회원만 참가 가능합니다</span>
-                            </div>
-                        </div>
-
-                        <div class="user-type-info-box">
-                            <h3>내 정치 성향</h3>
-                            <div class="type-display">
-                                <span id="user-type-icon">-</span>
-                                <span id="user-type-name">-</span>
-                                <span id="user-gender">-</span>
-                            </div>
-                        </div>
-
-                        <!-- 환불 규정 동의 -->
-                        <div class="terms-section">
-                            <h3>환불 규정 확인</h3>
-                            <div class="terms-list">
-                                <div class="checkbox-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" name="terms" id="terms-refund" required>
-                                        <span>[필수] 환불 규정을 확인하였으며 이에 동의합니다</span>
-                                    </label>
-                                    <a href="refund.html" target="_blank" class="view-link">보기</a>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- 안내사항 -->
-                        <div class="notice-section">
-                            <h3>예약 전 안내사항</h3>
-                            <ul>
-                                <li>소개팅은 남녀 각 4명씩, 총 8명으로 진행됩니다</li>
-                                <li>편안한 분위기에서 대화를 나눌 수 있습니다</li>
-                                <li>소개팅 3일 전까지 취소 시 전액 환불됩니다</li>
-                                <li>당일 불참 시 환불이 불가합니다</li>
-                                <li>상대방을 존중하는 매너있는 대화를 부탁드립니다</li>
-                            </ul>
-                        </div>
-
-                        <!-- 버튼 -->
-                        <div class="button-group">
-                            <button type="button" class="btn-secondary" onclick="history.back()">이전으로</button>
-                            <button type="submit" class="btn-primary">결제 진행하기</button>
+                        <div class="form-group">
+                            <label for="applicant-email">이메일</label>
+                            <input type="email" id="applicant-email" class="auto-filled" readonly>
                         </div>
                     </form>
+
+                    <!-- 약관 동의 -->
+                    <div class="terms-section">
+                        <h3>약관 동의</h3>
+                        <div class="checkbox-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" id="agree-checkbox" required>
+                                <span>환불 정책을 확인했으며, 이에 동의합니다 (필수)</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- 안내사항 -->
+                    <div class="notice-section">
+                        <h3>📌 환불 정책 안내</h3>
+                        <ul>
+                            <li>모임 3일 전까지: 100% 환불</li>
+                            <li>모임 2일 전: 70% 환불</li>
+                            <li>모임 1일 전: 50% 환불</li>
+                            <li>모임 당일: 환불 불가</li>
+                        </ul>
+                    </div>
+
+                    <!-- 버튼 영역 -->
+                    <div class="button-group">
+                        <button class="btn-secondary" onclick="history.back()">이전으로</button>
+                        <button class="btn-primary" id="proceed-payment" onclick="proceedToPayment()">결제 진행하기</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -187,6 +156,122 @@
         </div>
     </footer>
 
-    <script src="booking-confirm-script.js"></script>
+    <script>
+        // 페이지 로드 시 정보 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            // URL에서 bookingId 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('bookingId');
+            
+            let bookingInfo = null;
+            let userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+            
+            if (bookingId && window.DataSystem) {
+                // 실제 예약 데이터 로드
+                const bookings = window.DataSystem.getBookingsDB();
+                const booking = bookings[bookingId];
+                
+                if (booking) {
+                    bookingInfo = {
+                        meetingId: booking.meetingId,
+                        title: booking.meetingTitle,
+                        date: booking.meetingDate,
+                        location: booking.meetingLocation
+                    };
+                    // 예약 ID 저장 (결제 페이지로 전달용)
+                    sessionStorage.setItem('currentBookingId', bookingId);
+                }
+            } else {
+                // 기존 방식 - pendingBooking 먼저 확인, 없으면 selectedMeeting
+                const pendingBooking = sessionStorage.getItem('pendingBooking');
+                const selectedMeeting = sessionStorage.getItem('selectedMeeting');
+                
+                if (pendingBooking) {
+                    bookingInfo = JSON.parse(pendingBooking);
+                } else if (selectedMeeting) {
+                    // selectedMeeting에서 가져온 경우 형식 맞추기
+                    const meeting = JSON.parse(selectedMeeting);
+                    bookingInfo = {
+                        meetingId: meeting.id || meeting.meetingId || `meeting_${Date.now()}`,
+                        title: meeting.title,
+                        date: meeting.date,
+                        location: meeting.location,
+                        orientation: meeting.orientation
+                    };
+                    // pendingBooking에도 저장
+                    sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
+                } else {
+                    bookingInfo = {};
+                }
+            }
+            
+            if (!bookingInfo || !bookingInfo.meetingId) {
+                // 만약 아직도 정보가 없다면 appliedMeetings에서 시도
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                const orientation = sessionStorage.getItem('currentOrientation') || 'progressive';
+                
+                if (appliedMeetings[orientation]) {
+                    const meetingData = appliedMeetings[orientation];
+                    bookingInfo = {
+                        meetingId: meetingData.meetingId,
+                        title: meetingData.title || `${orientation === 'progressive' ? '진보' : '보수'} 성향 모임`,
+                        date: meetingData.date || '날짜 미정',
+                        location: meetingData.location || '장소 미정'
+                    };
+                } else {
+                    alert('예약 정보를 찾을 수 없습니다.');
+                    window.location.href = 'meeting-schedule.html';
+                    return;
+                }
+            }
+            
+            // 모임 정보 표시
+            document.getElementById('meeting-title').textContent = bookingInfo.title || '모임';
+            document.getElementById('meeting-date').textContent = bookingInfo.date || '날짜 미정';
+            document.getElementById('meeting-location').textContent = bookingInfo.location || '장소 미정';
+            
+            // 신청자 정보 표시 (input 필드에 값 설정)
+            document.getElementById('applicant-name').value = userProfile.name || '';
+            document.getElementById('applicant-phone').value = userProfile.phone || '';
+            document.getElementById('applicant-email').value = sessionStorage.getItem('userEmail') || '';
+            
+            // pendingBooking에 정보 저장 (결제 페이지를 위해)
+            sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
+        });
+
+        // 결제 진행하기
+        function proceedToPayment() {
+            const agreeCheckbox = document.getElementById('agree-checkbox');
+            
+            if (!agreeCheckbox.checked) {
+                alert('환불 정책에 동의해주세요.');
+                return;
+            }
+            
+            // 참가자 정보 저장
+            const participantInfo = {
+                name: document.getElementById('applicant-name').value,
+                phone: document.getElementById('applicant-phone').value,
+                email: document.getElementById('applicant-email').value,
+                timestamp: new Date().toISOString()
+            };
+            sessionStorage.setItem('participantInfo', JSON.stringify(participantInfo));
+            
+            // selectedMeeting 확인 및 업데이트
+            const bookingInfo = JSON.parse(sessionStorage.getItem('pendingBooking') || '{}');
+            const selectedMeeting = {
+                id: bookingInfo.meetingId || `meeting_${Date.now()}`,
+                title: bookingInfo.title || document.getElementById('meeting-title').textContent,
+                date: bookingInfo.date || document.getElementById('meeting-date').textContent,
+                time: bookingInfo.time || '15:00',
+                location: bookingInfo.location || document.getElementById('meeting-location').textContent,
+                orientation: bookingInfo.orientation || 'progressive'
+            };
+            sessionStorage.setItem('selectedMeeting', JSON.stringify(selectedMeeting));
+            
+            // 결제 페이지로 이동
+            window.location.href = 'payment.html';
+        }
+    </script>
 </body>
 </html>

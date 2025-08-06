@@ -120,13 +120,49 @@ function formatDateForGoogle(date) {
 }
 
 // 결제 완료 시 참가 확정 처리
-function confirmParticipation() {
+async function confirmParticipation() {
     const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting'));
     const userGender = sessionStorage.getItem('userGender');
+    const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo'));
+    const paymentInfo = JSON.parse(sessionStorage.getItem('paymentInfo'));
     
     if (!meetingInfo || !userGender) return;
     
-    // 신청 상태를 확정으로 변경
+    // 서버에 결제 완료 알림
+    try {
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        const authToken = localStorage.getItem('authToken');
+        
+        // 예약 확정 요청
+        const response = await fetch(`${API_URL}/api/meetings/confirm-payment`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken || ''}`
+            },
+            body: JSON.stringify({
+                meetingId: meetingInfo.id || meetingInfo.meetingId,
+                orientation: meetingInfo.orientation,
+                paymentInfo: {
+                    orderId: paymentInfo.orderId,
+                    method: paymentInfo.method || 'bank_transfer',
+                    amount: paymentInfo.amount || 45000,
+                    depositorName: participantInfo.name
+                }
+            })
+        });
+        
+        if (response.ok) {
+            console.log('서버에 결제 완료 알림 성공');
+        } else {
+            console.error('서버 응답 오류:', response.status);
+        }
+    } catch (error) {
+        console.error('서버 통신 오류:', error);
+        // 오류가 발생해도 로컬 처리는 계속 진행
+    }
+    
+    // 로컬 스토리지 업데이트 (백업용)
     const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
     if (appliedMeetings[meetingInfo.orientation]) {
         appliedMeetings[meetingInfo.orientation].status = 'confirmed';

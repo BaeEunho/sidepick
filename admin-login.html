@@ -175,18 +175,53 @@
             errorDiv.textContent = '';
             
             try {
-                const result = await AdminAuth.login(email, password);
+                console.log('관리자 로그인 시도:', email);
+                
+                // 직접 API 호출로 시도
+                const API_URL = '';  // 같은 도메인이므로 빈 문자열
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                
+                const result = await response.json();
+                console.log('로그인 결과:', result);
                 
                 if (result.success) {
+                    // 관리자 이메일 확인
+                    if (email !== 'clsrna3@naver.com') {
+                        errorDiv.textContent = '관리자 권한이 없습니다.';
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = '로그인';
+                        return;
+                    }
+                    
+                    // 관리자 세션 생성
+                    const userData = result.data.user;
+                    const session = {
+                        email: email,
+                        name: userData.name,
+                        loginTime: new Date().toISOString(),
+                        expires: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(),
+                        token: result.data.token
+                    };
+                    
+                    sessionStorage.setItem('sidepick_admin_session', JSON.stringify(session));
+                    if (result.data.token) {
+                        localStorage.setItem('adminAuthToken', result.data.token);
+                    }
+                    
                     // 로그인 성공
                     window.location.href = 'admin.html';
                 } else {
                     // 로그인 실패
-                    errorDiv.textContent = result.message;
+                    errorDiv.textContent = result.message || '이메일 또는 비밀번호가 일치하지 않습니다.';
                     submitBtn.disabled = false;
                     submitBtn.textContent = '로그인';
                 }
             } catch (error) {
+                console.error('로그인 오류:', error);
                 errorDiv.textContent = '로그인 중 오류가 발생했습니다.';
                 submitBtn.disabled = false;
                 submitBtn.textContent = '로그인';

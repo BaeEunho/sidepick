@@ -27,6 +27,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // 데이터 새로고침 함수
 async function refreshData() {
+    const now = new Date();
+    console.log(`\n[${now.toLocaleTimeString()}] 마이페이지 데이터 새로고침 시작`);
     showSyncStatus('loading', '데이터 동기화 중...');
     
     try {
@@ -51,6 +53,8 @@ async function refreshData() {
         
         // 성공 시 동기화 상태 숨기기
         hideSyncStatus();
+        
+        console.log('마이페이지 데이터 새로고침 완료\n');
         
     } catch (error) {
         console.error('데이터 새로고침 실패:', error);
@@ -364,6 +368,13 @@ async function loadUpcomingMeetings() {
         
         if (response.ok) {
             const data = await response.json();
+            console.log('=== 마이페이지: 서버에서 받은 모임 데이터 ===');
+            console.log('모임 수:', data.meetings ? data.meetings.length : 0);
+            if (data.meetings) {
+                data.meetings.forEach((meeting, idx) => {
+                    console.log(`모임 ${idx + 1}:`, meeting.title, '- 상태:', meeting.status);
+                });
+            }
             
             if (data.meetings && data.meetings.length > 0) {
                 // 취소되지 않은 모임만 필터링
@@ -372,6 +383,7 @@ async function loadUpcomingMeetings() {
                 if (activeMeetings.length > 0) {
                     // 가장 최근 활성 모임 표시
                     const latestMeeting = activeMeetings[0];
+                    console.log('표시할 최신 모임:', latestMeeting.title, '- 상태:', latestMeeting.status);
                     
                     // 상태 텍스트 변환
                     let statusText, statusClass;
@@ -446,7 +458,7 @@ async function loadUpcomingMeetings() {
                     title: '진보 성향 소개팅'
                 },
                 conservative: {
-                    date: '8월 16일 (토)',
+                    date: '8월 30일 (토)',
                     time: '오후 3시 - 5시',
                     location: '강남역 파티룸',
                     title: '보수 성향 소개팅'
@@ -603,8 +615,9 @@ async function changePassword() {
                     <div class="form-group">
                         <label for="new-password">새 비밀번호</label>
                         <input type="password" id="new-password" name="newPassword" 
-                               pattern=".{6,}" title="6자 이상 입력해주세요" required>
-                        <small>6자 이상 입력해주세요</small>
+                               pattern="^(?=.*[A-Za-z])(?=.*\d)(?=.*[@$!%*#?&])[A-Za-z\d@$!%*#?&]{8,}$" 
+                               title="8자 이상, 영문, 숫자, 특수문자 포함" required>
+                        <small>8자 이상, 영문, 숫자, 특수문자를 포함해주세요</small>
                     </div>
                     <div class="form-group">
                         <label for="confirm-password">새 비밀번호 확인</label>
@@ -651,47 +664,22 @@ async function changePassword() {
                     'Authorization': `Bearer ${authToken || ''}`
                 },
                 body: JSON.stringify({
-                    email: userEmail,
                     currentPassword: currentPassword,
                     newPassword: newPassword
                 })
             });
             
+            const data = await response.json();
+            
             if (response.ok) {
                 alert('비밀번호가 성공적으로 변경되었습니다.');
                 closePasswordModal();
             } else {
-                const error = await response.json();
-                alert(error.message || '비밀번호 변경에 실패했습니다.');
+                alert(data.message || '비밀번호 변경에 실패했습니다.');
             }
         } catch (error) {
             console.error('비밀번호 변경 오류:', error);
-            
-            // 데모 모드에서는 AuthSystem 사용
-            if (window.AuthSystem) {
-                const userEmail = sessionStorage.getItem('userEmail');
-                const users = window.AuthSystem.getUsersDB();
-                const user = users[userEmail];
-                
-                if (user) {
-                    // AuthSystem의 hashPassword 함수 사용
-                    const hashedCurrentPassword = window.AuthSystem.hashPassword(currentPassword);
-                    
-                    if (user.password === hashedCurrentPassword) {
-                        // 새 비밀번호도 해시화해서 저장
-                        user.password = window.AuthSystem.hashPassword(newPassword);
-                        window.AuthSystem.saveUsersDB(users);
-                        alert('비밀번호가 변경되었습니다.');
-                        closePasswordModal();
-                    } else {
-                        alert('현재 비밀번호가 올바르지 않습니다.');
-                    }
-                } else {
-                    alert('사용자 정보를 찾을 수 없습니다.');
-                }
-            } else {
-                alert('비밀번호 변경 중 오류가 발생했습니다.');
-            }
+            alert('비밀번호 변경 중 오류가 발생했습니다.');
         }
     });
 }

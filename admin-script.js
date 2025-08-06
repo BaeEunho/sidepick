@@ -56,7 +56,8 @@ async function loadData() {
 async function loadFromServer() {
     console.log('=== 관리자 페이지: 서버에서 데이터 로드 중 ===');
     try {
-        const response = await fetch('http://localhost:3000/api/admin/users');
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        const response = await fetch(`${API_URL}/api/admin/users`);
         console.log('서버 응답 상태:', response.status);
         
         if (response.ok) {
@@ -371,8 +372,13 @@ function filterUsers() {
         return true;
     });
     
-    currentPage = 1;
-    displayUsers();
+    // 현재 정렬 상태 유지
+    if (currentSort.field) {
+        sortTable(currentSort.field);
+    } else {
+        currentPage = 1;
+        displayUsers();
+    }
 }
 
 // 검색
@@ -383,13 +389,18 @@ function searchUsers() {
         filteredUsers = [...allUsers];
     } else {
         filteredUsers = allUsers.filter(user => 
-            user.name.toLowerCase().includes(searchTerm) ||
-            user.email.toLowerCase().includes(searchTerm)
+            (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+            (user.email && user.email.toLowerCase().includes(searchTerm))
         );
     }
     
-    currentPage = 1;
-    displayUsers();
+    // 현재 정렬 상태 유지
+    if (currentSort.field) {
+        sortTable(currentSort.field);
+    } else {
+        currentPage = 1;
+        displayUsers();
+    }
 }
 
 // 사용자 상세 정보 표시
@@ -557,10 +568,15 @@ function updateLastUpdateTime() {
 
 // 결제 상태 업데이트
 async function updatePaymentStatus(email, newStatus) {
-    console.log(`결제 상태 변경: ${email} → ${newStatus}`);
+    console.log(`=== 관리자: 결제 상태 변경 시작 ===`);
+    console.log(`대상: ${email}`);
+    console.log(`새 상태: ${newStatus}`);
     
     try {
-        const response = await fetch(`http://localhost:3000/api/admin/users/${email}/payment-status`, {
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        console.log(`API 호출: ${API_URL}/api/admin/users/${email}/payment-status`);
+        
+        const response = await fetch(`${API_URL}/api/admin/users/${email}/payment-status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json'
@@ -568,7 +584,12 @@ async function updatePaymentStatus(email, newStatus) {
             body: JSON.stringify({ status: newStatus })
         });
         
+        console.log('서버 응답 상태:', response.status);
+        
         if (response.ok) {
+            const result = await response.json();
+            console.log('서버 응답:', result);
+            
             // 성공 시 데이터 새로고침
             await refreshData();
             
@@ -576,6 +597,8 @@ async function updatePaymentStatus(email, newStatus) {
             showSyncStatus('success', '결제 상태가 업데이트되었습니다.');
             setTimeout(() => hideSyncStatus(), 2000);
         } else {
+            const error = await response.text();
+            console.error('서버 오류 응답:', error);
             throw new Error('결제 상태 업데이트 실패');
         }
     } catch (error) {

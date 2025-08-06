@@ -249,8 +249,14 @@ const AuthSystem = {
     
     // 로그아웃
     logout: function() {
-        sessionStorage.clear();
+        // 로그인 관련 정보만 삭제 (테스트 결과는 유지)
+        sessionStorage.removeItem('isLoggedIn');
+        sessionStorage.removeItem('userEmail');
+        sessionStorage.removeItem('userProfile');
+        sessionStorage.removeItem('userGender');
+        sessionStorage.removeItem('appliedMeetings');
         localStorage.removeItem(this.CURRENT_USER);
+        localStorage.removeItem('authToken');
     },
     
     // 현재 로그인한 사용자 가져오기

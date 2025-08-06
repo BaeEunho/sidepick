@@ -62,7 +62,7 @@
                     <div class="form-grid">
                         <div class="form-group">
                             <label for="name">이름</label>
-                            <input type="text" id="name" name="name" value="" readonly>
+                            <input type="text" id="name" name="name" value="" required>
                         </div>
                         <div class="form-group">
                             <label for="age">나이</label>
@@ -339,11 +339,19 @@
                 // sessionStorage에서 appliedMeetings 제거 (서버에서 관리)
                 sessionStorage.removeItem('appliedMeetings');
                 
-                // 성공 메시지 표시
-                alert('신청이 접수되었습니다!\n\n💳 무통장 입금 안내\n은행: 국민은행\n계좌: 123-456-789012\n예금주: (주)사이드픽\n금액: 45,000원\n\n⚠️ 24시간 이내 입금 부탁드립니다.\n입금 확인 후 참가 확정 문자를 보내드리겠습니다.');
+                // 예약 정보를 pendingBooking에 저장
+                const bookingInfo = {
+                    meetingId: meetingId,
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation,
+                    orientation: orientation,
+                    bookingId: result.data?.bookingId || `booking_${Date.now()}`
+                };
+                sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
                 
-                // 신청 완료 페이지로 이동
-                window.location.href = 'meeting-schedule.html';
+                // 예약 확인 페이지로 이동
+                window.location.href = 'booking-confirm.html';
                 
             } catch (error) {
                 console.error('신청 처리 중 오류:', error);
@@ -362,10 +370,20 @@
                 };
                 sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
                 
-                // 데모 모드 알림
-                alert('[데모 모드]\n신청이 로컬에 저장되었습니다.\n\n실제 서비스에서는 서버에 저장됩니다.\n\n💳 무통장 입금 안내\n은행: 국민은행\n계좌: 123-456-789012\n예금주: (주)사이드픽\n금액: 45,000원');
+                // 예약 정보를 pendingBooking에 저장 (데모 모드)
+                const bookingInfo = {
+                    meetingId: meetingId,
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation,
+                    orientation: orientation,
+                    bookingId: `demo_booking_${Date.now()}`,
+                    demoMode: true
+                };
+                sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
                 
-                window.location.href = 'meeting-schedule.html';
+                // 예약 확인 페이지로 이동
+                window.location.href = 'booking-confirm.html';
             }
         }
         

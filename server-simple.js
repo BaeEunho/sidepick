@@ -1,6 +1,5 @@
 // Firebase 기반 서버
 const express = require('express');
-const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
@@ -10,7 +9,19 @@ require('dotenv').config();
 const { admin, db, collections } = require('./firebase-config');
 
 const app = express();
-app.use(cors());
+// CORS 설정 - 모든 origin 허용
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*');
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Authorization');
+    
+    if (req.method === 'OPTIONS') {
+        res.sendStatus(200);
+    } else {
+        next();
+    }
+});
+
 app.use(express.json());
 app.use(express.static('.'));
 
@@ -78,28 +89,13 @@ app.post('/api/email/send-verification', async (req, res) => {
             `
         };
         
-        // 이메일 전송 (개발 환경에서는 스킵 가능)
-        if (process.env.EMAIL_USER && process.env.EMAIL_PASS && 
-            process.env.EMAIL_USER !== 'your-email@gmail.com') {
-            await transporter.sendMail(mailOptions);
-            console.log('이메일 발송 완료:', email);
-        } else {
-            console.log('이메일 설정 없음 - 개발 모드');
-            console.log(`인증 코드 (콘솔 출력): ${verificationCode}`);
-        }
-        
-        // 개발 모드인지 확인
-        const isDevMode = !process.env.EMAIL_USER || process.env.EMAIL_USER === 'your-email@gmail.com';
+        // 이메일 전송 (필수)
+        await transporter.sendMail(mailOptions);
+        console.log('이메일 발송 완료:', email);
         
         res.json({ 
             success: true, 
-            message: isDevMode 
-                ? `개발 모드: 인증 코드는 ${verificationCode} 입니다.`
-                : '인증 코드가 이메일로 발송되었습니다.',
-            // 개발 환경에서만 코드 직접 반환
-            ...(isDevMode && {
-                devCode: verificationCode
-            })
+            message: '인증 코드가 이메일로 발송되었습니다.'
         });
         
     } catch (error) {
@@ -156,6 +152,185 @@ app.post('/api/email/verify-code', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: '인증 확인에 실패했습니다.' 
+        });
+    }
+});
+
+// 비밀번호 재설정 요청 API
+app.post('/api/password/reset-request', async (req, res) => {
+    const { email } = req.body;
+    
+    try {
+        // 사용자 확인
+        const userDoc = await collections.users.doc(email).get();
+        if (!userDoc.exists) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '등록되지 않은 이메일입니다.' 
+            });
+        }
+        
+        // 6자리 인증 코드 생성
+        const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
+        
+        // Firestore에 인증 코드 저장 (5분 유효)
+        await collections.verificationCodes.doc(email).set({
+            code: verificationCode,
+            type: 'password_reset',
+            createdAt: admin.firestore.FieldValue.serverTimestamp(),
+            expiresAt: new Date(Date.now() + 5 * 60 * 1000)
+        });
+        
+        // 이메일 내용
+        const mailOptions = {
+            from: `"사이드픽" <${process.env.EMAIL_USER}>`,
+            to: email,
+            subject: '[사이드픽] 비밀번호 재설정 인증 코드',
+            html: `
+                <div style="font-family: 'Noto Sans KR', sans-serif; max-width: 600px; margin: 0 auto;">
+                    <div style="background-color: #4F46E5; padding: 30px; text-align: center;">
+                        <h1 style="color: white; margin: 0;">사이드픽</h1>
+                        <p style="color: white; margin: 10px 0 0 0;">정치 성향 기반 만남 서비스</p>
+                    </div>
+                    
+                    <div style="padding: 40px 30px; background-color: #f9fafb;">
+                        <h2 style="color: #111827; margin-bottom: 20px;">비밀번호 재설정</h2>
+                        
+                        <p style="color: #4b5563; line-height: 1.6;">
+                            안녕하세요!<br>
+                            비밀번호 재설정을 위한 인증 코드를 안내해드립니다.
+                        </p>
+                        
+                        <div style="background-color: white; border: 2px solid #e5e7eb; border-radius: 8px; padding: 30px; margin: 30px 0; text-align: center;">
+                            <p style="color: #6b7280; margin: 0 0 10px 0;">인증 코드</p>
+                            <h1 style="color: #4F46E5; letter-spacing: 8px; margin: 0;">${verificationCode}</h1>
+                        </div>
+                        
+                        <p style="color: #4b5563; line-height: 1.6;">
+                            위 인증 코드를 비밀번호 재설정 페이지에 입력해주세요.<br>
+                            인증 코드는 5분간 유효합니다.
+                        </p>
+                        
+                        <p style="color: #ef4444; font-size: 14px; margin-top: 20px;">
+                            * 본인이 요청하지 않은 경우 이 메일을 무시하세요.
+                        </p>
+                    </div>
+                </div>
+            `
+        };
+        
+        // 이메일 전송 (필수)
+        await transporter.sendMail(mailOptions);
+        console.log('비밀번호 재설정 이메일 발송 완료:', email);
+        
+        res.json({ 
+            success: true, 
+            message: '인증 코드가 이메일로 발송되었습니다.'
+        });
+        
+    } catch (error) {
+        console.error('비밀번호 재설정 이메일 발송 실패:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '이메일 발송에 실패했습니다.' 
+        });
+    }
+});
+
+// 비밀번호 재설정 인증 코드 확인 API
+app.post('/api/password/verify-reset-code', async (req, res) => {
+    const { email, code } = req.body;
+    
+    try {
+        const doc = await collections.verificationCodes.doc(email).get();
+        
+        if (!doc.exists) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '인증 코드가 존재하지 않습니다.' 
+            });
+        }
+        
+        const savedData = doc.data();
+        
+        // 유효 시간 확인
+        if (new Date() > savedData.expiresAt.toDate()) {
+            await collections.verificationCodes.doc(email).delete();
+            return res.status(400).json({ 
+                success: false, 
+                message: '인증 코드가 만료되었습니다.' 
+            });
+        }
+        
+        // 코드 확인
+        if (savedData.code !== code) {
+            return res.status(400).json({ 
+                success: false, 
+                message: '인증 코드가 일치하지 않습니다.' 
+            });
+        }
+        
+        // 인증 성공
+        await collections.verificationCodes.doc(email).delete();
+        
+        // 임시 토큰 생성 (비밀번호 재설정용)
+        const resetToken = jwt.sign(
+            { email, type: 'password_reset' },
+            JWT_SECRET,
+            { expiresIn: '15m' }
+        );
+        
+        res.json({ 
+            success: true, 
+            message: '인증이 완료되었습니다.',
+            resetToken: resetToken
+        });
+        
+    } catch (error) {
+        console.error('인증 확인 실패:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '인증 확인에 실패했습니다.' 
+        });
+    }
+});
+
+// 비밀번호 재설정 API
+app.post('/api/password/reset', async (req, res) => {
+    const { resetToken, newPassword } = req.body;
+    
+    try {
+        // 토큰 검증
+        const decoded = jwt.verify(resetToken, JWT_SECRET);
+        
+        if (decoded.type !== 'password_reset') {
+            return res.status(400).json({ 
+                success: false, 
+                message: '유효하지 않은 토큰입니다.' 
+            });
+        }
+        
+        // 비밀번호 해싱
+        const passwordHash = await bcrypt.hash(newPassword, 10);
+        
+        // 비밀번호 업데이트
+        await collections.users.doc(decoded.email).update({
+            password_hash: passwordHash,
+            updated_at: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('비밀번호 재설정 완료:', decoded.email);
+        
+        res.json({
+            success: true,
+            message: '비밀번호가 성공적으로 변경되었습니다.'
+        });
+        
+    } catch (error) {
+        console.error('비밀번호 재설정 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '비밀번호 재설정에 실패했습니다.' 
         });
     }
 });
@@ -568,6 +743,127 @@ app.delete('/api/auth/delete-account', async (req, res) => {
 });
 
 // 정치 성향 저장 API
+app.post('/api/user/political-type', async (req, res) => {
+    const { politicalType, testResult, testCompletedAt } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '인증이 필요합니다.' 
+        });
+    }
+    
+    try {
+        // JWT 토큰 검증
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // 사용자 정보 업데이트
+        await collections.users.doc(decoded.email).update({
+            political_type: politicalType,
+            test_completed_at: admin.firestore.FieldValue.serverTimestamp(),
+            test_result: testResult,
+            updated_at: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`정치 성향 저장 완료: ${decoded.email} - ${politicalType}`);
+        
+        res.json({
+            success: true,
+            message: '정치 성향이 저장되었습니다.'
+        });
+        
+    } catch (error) {
+        console.error('정치 성향 저장 오류:', error);
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: '유효하지 않은 토큰입니다.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: '정치 성향 저장 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 비밀번호 변경 API
+app.post('/api/user/change-password', async (req, res) => {
+    const { currentPassword, newPassword } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '인증이 필요합니다.' 
+        });
+    }
+    
+    try {
+        // JWT 토큰 검증
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // 사용자 정보 조회
+        const userDoc = await collections.users.doc(decoded.email).get();
+        
+        if (!userDoc.exists) {
+            return res.status(404).json({ 
+                success: false, 
+                message: '사용자를 찾을 수 없습니다.' 
+            });
+        }
+        
+        const user = userDoc.data();
+        
+        // 현재 비밀번호 확인
+        const isValidPassword = await bcrypt.compare(currentPassword, user.password_hash);
+        
+        if (!isValidPassword) {
+            return res.status(401).json({ 
+                success: false, 
+                message: '현재 비밀번호가 올바르지 않습니다.' 
+            });
+        }
+        
+        // 새 비밀번호 해싱
+        const newPasswordHash = await bcrypt.hash(newPassword, 10);
+        
+        // 비밀번호 업데이트
+        await collections.users.doc(decoded.email).update({
+            password_hash: newPasswordHash,
+            updated_at: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log('비밀번호 변경 완료:', decoded.email);
+        
+        res.json({
+            success: true,
+            message: '비밀번호가 성공적으로 변경되었습니다.'
+        });
+        
+    } catch (error) {
+        console.error('비밀번호 변경 오류:', error);
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: '유효하지 않은 토큰입니다.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: '비밀번호 변경 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 정치 성향 저장 API
 app.post('/api/auth/save-political-type', async (req, res) => {
     const { politicalType } = req.body;
     const authHeader = req.headers.authorization;
@@ -682,8 +978,11 @@ app.get('/api/user/meetings', async (req, res) => {
         const token = authHeader.replace('Bearer ', '');
         const decoded = jwt.verify(token, JWT_SECRET);
         
+        console.log(`\n=== 사용자 모임 조회: ${decoded.email} ===`);
+        
         const userDoc = await collections.users.doc(decoded.email).get();
         if (!userDoc.exists) {
+            console.log('사용자를 찾을 수 없음');
             return res.status(404).json({ 
                 success: false, 
                 message: '사용자를 찾을 수 없습니다.' 
@@ -697,21 +996,34 @@ app.get('/api/user/meetings', async (req, res) => {
         
         const userBookings = [];
         bookingsSnapshot.forEach(doc => {
-            userBookings.push(doc.data());
+            const booking = doc.data();
+            console.log(`Booking ${doc.id}:`, {
+                title: booking.meetingTitle,
+                status: booking.status,
+                updatedAt: booking.updatedAt
+            });
+            userBookings.push(booking);
         });
+        
+        console.log(`총 ${userBookings.length}개 모임 찾음`);
+        
+        const meetings = userBookings.map(booking => ({
+            id: booking.meetingId,
+            title: booking.meetingTitle || '모임',
+            date: booking.meetingDate || '12월 7일 (토)',
+            location: booking.meetingLocation || '강남역 파티룸',
+            time: '15:00',
+            orientation: booking.orientation,
+            status: booking.status,
+            appliedAt: booking.appliedAt
+        }));
+        
+        console.log('반환할 모임 데이터:', meetings.map(m => ({ title: m.title, status: m.status })));
+        console.log('=== 모임 조회 완료 ===\n');
         
         res.json({
             success: true,
-            meetings: userBookings.map(booking => ({
-                id: booking.meetingId,
-                title: booking.meetingTitle || '모임',
-                date: booking.meetingDate || '12월 7일 (토)',
-                location: booking.meetingLocation || '강남역 파티룸',
-                time: '15:00',
-                orientation: booking.orientation,
-                status: booking.status,
-                appliedAt: booking.appliedAt
-            }))
+            meetings: meetings
         });
         
     } catch (error) {
@@ -757,7 +1069,9 @@ app.put('/api/admin/users/:email/payment-status', async (req, res) => {
     const { email } = req.params;
     const { status } = req.body;
     
-    console.log(`=== 결제 상태 업데이트: ${email} → ${status} ===`);
+    console.log(`\n=== 결제 상태 업데이트 API 호출 ===`);
+    console.log(`대상 이메일: ${email}`);
+    console.log(`변경할 상태: ${status}`);
     
     try {
         // 사용자의 모든 booking 찾기
@@ -765,7 +1079,10 @@ app.put('/api/admin/users/:email/payment-status', async (req, res) => {
             .where('userEmail', '==', email)
             .get();
         
+        console.log(`찾은 booking 수: ${bookingsSnapshot.size}`);
+        
         if (bookingsSnapshot.empty) {
+            console.log('booking이 없음!');
             return res.status(404).json({ 
                 success: false, 
                 message: '모임 신청 내역이 없습니다.' 
@@ -774,16 +1091,32 @@ app.put('/api/admin/users/:email/payment-status', async (req, res) => {
         
         // 각 booking의 상태 업데이트
         const batch = db.batch();
+        let updateCount = 0;
+        
         bookingsSnapshot.forEach(doc => {
-            batch.update(doc.ref, { status: status });
+            const bookingData = doc.data();
+            console.log(`업데이트 전 booking ${doc.id}:`, {
+                meetingTitle: bookingData.meetingTitle,
+                현재상태: bookingData.status,
+                새상태: status
+            });
+            
+            batch.update(doc.ref, { 
+                status: status,
+                updatedAt: admin.firestore.FieldValue.serverTimestamp()
+            });
+            updateCount++;
         });
+        
         await batch.commit();
         
-        console.log(`${email} 사용자의 모든 booking 상태를 ${status}로 업데이트 완료`);
+        console.log(`${updateCount}개 booking의 상태를 ${status}로 업데이트 완료`);
+        console.log('=== 결제 상태 업데이트 완료 ===\n');
         
         res.json({
             success: true,
-            message: '결제 상태가 업데이트되었습니다.'
+            message: '결제 상태가 업데이트되었습니다.',
+            updatedCount: updateCount
         });
         
     } catch (error) {
@@ -982,6 +1315,112 @@ app.delete('/api/meetings/cancel/:meetingId', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: '모임 취소 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 결제 확정 API
+app.post('/api/meetings/confirm-payment', async (req, res) => {
+    const { meetingId, orientation, paymentInfo } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '인증이 필요합니다.' 
+        });
+    }
+    
+    try {
+        // JWT 토큰 검증
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userEmail = decoded.email;
+        
+        console.log(`결제 확정 요청: ${userEmail} - ${meetingId}`);
+        
+        // 해당 사용자의 pending 상태 booking 찾기
+        const bookingsSnapshot = await collections.bookings
+            .where('userEmail', '==', userEmail)
+            .where('meetingId', '==', meetingId)
+            .where('status', '==', 'pending')
+            .get();
+        
+        if (bookingsSnapshot.empty) {
+            console.log('대기 중인 예약을 찾을 수 없음');
+            return res.status(404).json({
+                success: false,
+                message: '대기 중인 예약을 찾을 수 없습니다.'
+            });
+        }
+        
+        // 첫 번째 매칭되는 booking 업데이트
+        const bookingDoc = bookingsSnapshot.docs[0];
+        const bookingId = bookingDoc.id;
+        
+        await collections.bookings.doc(bookingId).update({
+            status: 'confirmed',
+            paymentInfo: paymentInfo,
+            confirmedAt: admin.firestore.FieldValue.serverTimestamp(),
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`예약 확정 완료: ${bookingId}`);
+        
+        res.json({
+            success: true,
+            message: '예약이 확정되었습니다.',
+            data: { bookingId }
+        });
+        
+    } catch (error) {
+        console.error('결제 확정 오류:', error);
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: '유효하지 않은 토큰입니다.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: '결제 확정 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 임시 관리자 비밀번호 재설정 API (개발용)
+app.post('/api/admin/reset-password-temp', async (req, res) => {
+    const { adminEmail, newPassword } = req.body;
+    
+    // 특정 관리자 이메일만 허용
+    if (adminEmail !== 'clsrna3@naver.com') {
+        return res.status(403).json({
+            success: false,
+            message: '권한이 없습니다.'
+        });
+    }
+    
+    try {
+        const hashedPassword = await bcrypt.hash(newPassword, 10);
+        
+        await collections.users.doc(adminEmail).update({
+            password_hash: hashedPassword,
+            updated_at: admin.firestore.FieldValue.serverTimestamp()
+        });
+        
+        console.log(`관리자 비밀번호 재설정 완료: ${adminEmail}`);
+        
+        res.json({
+            success: true,
+            message: '비밀번호가 재설정되었습니다.'
+        });
+    } catch (error) {
+        console.error('비밀번호 재설정 오류:', error);
+        res.status(500).json({
+            success: false,
+            message: '비밀번호 재설정 중 오류가 발생했습니다.'
         });
     }
 });

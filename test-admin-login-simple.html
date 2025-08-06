@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>관리자 로그인 간단 테스트</title>
+</head>
+<body>
+    <h1>관리자 로그인 테스트</h1>
+    <p>이메일: clsrna3@naver.com</p>
+    <p>비밀번호: admin123!</p>
+    
+    <button onclick="testLogin()">로그인 테스트</button>
+    <div id="result"></div>
+    
+    <script>
+        async function testLogin() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '<p>테스트 중...</p>';
+            
+            try {
+                const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+                const response = await fetch(`${API_URL}/api/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email: 'clsrna3@naver.com',
+                        password: 'admin123!'
+                    })
+                });
+                
+                const result = await response.json();
+                console.log('로그인 결과:', result);
+                
+                if (result.success) {
+                    resultDiv.innerHTML = `
+                        <p style="color: green;">로그인 성공!</p>
+                        <p>이름: ${result.data.user.name}</p>
+                        <p>이메일: ${result.data.user.email}</p>
+                        <p>토큰: ${result.data.token ? '발급됨' : '없음'}</p>
+                        <p><a href="admin-login.html">관리자 로그인 페이지로 이동</a></p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p style="color: red;">로그인 실패: ${result.message}</p>`;
+                }
+            } catch (error) {
+                console.error('테스트 오류:', error);
+                resultDiv.innerHTML = `<p style="color: red;">오류 발생: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>

@@ -9,6 +9,109 @@
     <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
+    <style>
+        /* 비밀번호 찾기 모달 스타일 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 450px;
+            position: relative;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .modal-title {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 10px;
+            color: #1a1a1a;
+        }
+        
+        .modal-subtitle {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .modal-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .modal-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #333;
+        }
+        
+        .modal-form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        
+        .modal-form-group button {
+            background-color: #4F46E5;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .modal-form-group button:hover {
+            background-color: #4338CA;
+        }
+        
+        .modal-form-group button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        
+        .code-timer {
+            font-size: 12px;
+            color: #666;
+            margin-left: 10px;
+        }
+        
+        .success-message {
+            color: #10b981;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
     <!-- 헤더 -->
@@ -44,7 +147,7 @@
                             <input type="checkbox" name="remember">
                             <span>로그인 상태 유지</span>
                         </label>
-                        <a href="#" class="forgot-link">비밀번호 찾기</a>
+                        <a href="#" class="forgot-link" onclick="openPasswordResetModal(event)">비밀번호 찾기</a>
                     </div>
 
                     <button type="submit" class="auth-submit-btn">로그인</button>
@@ -59,12 +162,46 @@
         </div>
     </section>
 
+    <!-- 비밀번호 찾기 모달 -->
+    <div class="modal-overlay" id="passwordResetModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closePasswordResetModal()">&times;</span>
+            <h2 class="modal-title">비밀번호 찾기</h2>
+            <p class="modal-subtitle">가입하신 이메일로 인증번호를 발송해드립니다.</p>
+            
+            <div id="step1" style="display: block;">
+                <div class="modal-form-group">
+                    <label for="reset-email">이메일</label>
+                    <input type="email" id="reset-email" placeholder="가입하신 이메일 주소를 입력하세요">
+                    <button onclick="sendResetCode()">인증번호 발송</button>
+                </div>
+                <div id="email-error" class="error-message"></div>
+            </div>
+            
+            <div id="step2" style="display: none;">
+                <div class="modal-form-group">
+                    <label for="reset-code">인증번호</label>
+                    <input type="text" id="reset-code" placeholder="인증번호 6자리 입력" maxlength="6">
+                    <span class="code-timer" id="reset-timer"></span>
+                    <button onclick="verifyResetCode()">인증 확인</button>
+                </div>
+                <div id="code-error" class="error-message"></div>
+            </div>
+            
+            <div id="step3" style="display: none;">
+                <div class="success-message">이메일 인증이 완료되었습니다.</div>
+                <button onclick="goToPasswordReset()" style="width: 100%; margin-top: 20px; background-color: #4F46E5; color: white; border: none; padding: 12px; border-radius: 6px; cursor: pointer;">비밀번호 재설정하기</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         async function handleLogin(event) {
             event.preventDefault();
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
+            const remember = event.target.remember.checked;
             
             try {
                 // 실제 서버 API 호출
@@ -73,6 +210,18 @@
                 console.log('로그인 응답:', response);
                 
                 if (response && response.success) {
+                    // 로그인 상태 유지 설정
+                    if (remember) {
+                        // 로컬 스토리지에 로그인 정보 저장 (7일간 유지)
+                        const rememberData = {
+                            email: response.data.user.email,
+                            token: response.data.token,
+                            name: response.data.user.name,
+                            expiry: new Date().getTime() + (7 * 24 * 60 * 60 * 1000) // 7일
+                        };
+                        localStorage.setItem('rememberMe', JSON.stringify(rememberData));
+                    }
+                    
                     // 로그인 데이터 동기화
                     syncAuthData(response.data.user, response.data.token);
                     
@@ -147,24 +296,162 @@
             return orientationMap[code] || { title: '알 수 없음', orientation: 'unknown' };
         }
         
-        // 비밀번호 찾기 링크 핸들러
-        document.addEventListener('DOMContentLoaded', function() {
-            const forgotLink = document.querySelector('.forgot-link');
-            if (forgotLink) {
-                forgotLink.addEventListener('click', function(e) {
-                    e.preventDefault();
+        // 비밀번호 찾기 모달 관련 변수
+        let resetTimer;
+        let resetEmail = '';
+        let resetCode = '';
+        
+        // 모달 열기
+        function openPasswordResetModal(event) {
+            if (event) event.preventDefault();
+            document.getElementById('passwordResetModal').style.display = 'flex';
+            document.getElementById('step1').style.display = 'block';
+            document.getElementById('step2').style.display = 'none';
+            document.getElementById('step3').style.display = 'none';
+            document.getElementById('reset-email').value = '';
+            document.getElementById('reset-code').value = '';
+            document.getElementById('email-error').textContent = '';
+            document.getElementById('code-error').textContent = '';
+        }
+        
+        // 모달 닫기
+        function closePasswordResetModal() {
+            document.getElementById('passwordResetModal').style.display = 'none';
+            if (resetTimer) {
+                clearInterval(resetTimer);
+            }
+        }
+        
+        // 인증번호 발송
+        async function sendResetCode() {
+            const emailInput = document.getElementById('reset-email');
+            const email = emailInput.value.trim();
+            const errorDiv = document.getElementById('email-error');
+            
+            // 이메일 유효성 검사
+            if (!email) {
+                errorDiv.textContent = '이메일을 입력해주세요.';
+                return;
+            }
+            
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                errorDiv.textContent = '올바른 이메일 형식이 아닙니다.';
+                return;
+            }
+            
+            resetEmail = email;
+            errorDiv.textContent = '';
+            
+            try {
+                // 실제 서버 연결 시도
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : '';
                     
-                    const email = prompt('비밀번호 재설정 링크를 받을 이메일 주소를 입력해주세요:');
-                    if (email && email.trim()) {
-                        // 이메일 유효성 검사
-                        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                        if (emailRegex.test(email)) {
-                            alert(`${email}로 비밀번호 재설정 링크를 발송했습니다.\n(데모 모드: 실제 이메일은 발송되지 않습니다)`);
-                        } else {
-                            alert('올바른 이메일 주소를 입력해주세요.');
-                        }
-                    }
+                const response = await fetch(`${API_URL}/api/password/reset-request`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email })
                 });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 서버 응답 성공
+                    document.getElementById('step1').style.display = 'none';
+                    document.getElementById('step2').style.display = 'block';
+                    startResetTimer(300); // 5분 타이머
+                    
+                    alert(data.message || '인증번호가 발송되었습니다. 이메일을 확인해주세요.');
+                } else {
+                    errorDiv.textContent = data.message || '인증번호 발송에 실패했습니다.';
+                }
+            } catch (error) {
+                console.error('이메일 발송 실패:', error);
+                errorDiv.textContent = '이메일 발송에 실패했습니다. 다시 시도해주세요.';
+            }
+        }
+        
+        // 인증번호 확인
+        async function verifyResetCode() {
+            const codeInput = document.getElementById('reset-code');
+            const code = codeInput.value.trim();
+            const errorDiv = document.getElementById('code-error');
+            
+            if (!code) {
+                errorDiv.textContent = '인증번호를 입력해주세요.';
+                return;
+            }
+            
+            try {
+                // 실제 서버 연결 시도
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : '';
+                    
+                const response = await fetch(`${API_URL}/api/password/verify-reset-code`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: resetEmail, code })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // 서버에서 받은 resetToken 저장
+                    sessionStorage.setItem('resetToken', data.resetToken);
+                    completeVerification(data.resetToken);
+                } else {
+                    errorDiv.textContent = data.message || '인증번호가 일치하지 않습니다.';
+                }
+            } catch (error) {
+                console.error('인증 확인 실패:', error);
+                errorDiv.textContent = '인증 확인에 실패했습니다. 다시 시도해주세요.';
+            }
+        }
+        
+        // 인증 완료 처리
+        function completeVerification(token) {
+            clearInterval(resetTimer);
+            // 비밀번호 재설정 페이지로 바로 이동
+            window.location.href = 'password-reset.html?token=' + encodeURIComponent(token);
+        }
+        
+        // 비밀번호 재설정 페이지로 이동 (이 함수는 더 이상 사용하지 않음)
+        function goToPasswordReset() {
+            const token = sessionStorage.getItem('resetToken');
+            if (token) {
+                window.location.href = 'password-reset.html?token=' + encodeURIComponent(token);
+            }
+        }
+        
+        // 타이머 시작
+        function startResetTimer(seconds) {
+            const timerElement = document.getElementById('reset-timer');
+            let timeLeft = seconds;
+            
+            resetTimer = setInterval(() => {
+                const minutes = Math.floor(timeLeft / 60);
+                const secs = timeLeft % 60;
+                timerElement.textContent = `${minutes}:${secs.toString().padStart(2, '0')}`;
+                
+                if (timeLeft <= 0) {
+                    clearInterval(resetTimer);
+                    timerElement.textContent = '시간 만료';
+                    alert('인증 시간이 만료되었습니다. 다시 시도해주세요.');
+                    openPasswordResetModal();
+                }
+                
+                timeLeft--;
+            }, 1000);
+        }
+        
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('passwordResetModal');
+            if (event.target === modal) {
+                closePasswordResetModal();
             }
         });
     </script>

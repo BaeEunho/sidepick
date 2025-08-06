@@ -51,10 +51,11 @@
                     
                     <div class="form-group" id="email-verify-group" style="display: none;">
                         <label for="email-code">인증번호</label>
-                        <input type="text" id="email-code" name="email-code" placeholder="인증번호 6자리 입력" maxlength="6">
-                        <button type="button" class="verify-btn" onclick="verifyEmailCode()">확인</button>
-                        <span class="input-hint">이메일로 발송된 인증번호를 입력하세요</span>
-                        <span class="timer" id="email-timer"></span>
+                        <div style="position: relative;">
+                            <input type="text" id="email-code" name="email-code" placeholder="인증번호 6자리 입력" maxlength="6" style="padding-right: 100px;">
+                            <button type="button" class="verify-btn" onclick="verifyEmailCode()" style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); padding: 5px 15px; font-size: 14px;">확인</button>
+                        </div>
+                        <span class="input-hint">이메일로 발송된 인증번호를 입력하세요 <span class="timer" id="email-timer" style="color: #dc2626; font-weight: 500;"></span></span>
                         <span class="demo-hint" style="color: #4F46E5; font-size: 12px; display: none;" id="demo-code-hint"></span>
                     </div>
 
@@ -175,9 +176,8 @@
         async function handleSignup(event) {
             event.preventDefault();
             
-            // 인증 확인 (데모 모드일 경우 스킵 가능)
-            const isDemoMode = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-            if (!isDemoMode && !emailVerified) {
+            // 이메일 인증 확인
+            if (!emailVerified) {
                 alert('이메일 인증을 완료해주세요.');
                 return;
             }
@@ -322,14 +322,7 @@
                     // 타이머 시작 (5분)
                     startTimer('email', 300);
                     
-                    // 개발 모드인지 확인하여 적절한 메시지 표시
                     alert(data.message);
-                    
-                    // 개발 모드에서 인증 코드 자동 입력 (편의를 위해)
-                    if (data.devCode) {
-                        document.getElementById('email-code').value = data.devCode;
-                        console.log('개발 모드 인증 코드:', data.devCode);
-                    }
                     
                     // 이메일 입력 필드 비활성화
                     emailInput.readOnly = true;
@@ -338,24 +331,8 @@
                 }
                 
             } catch (error) {
-                // 서버 연결 실패 시 데모 모드로 작동
-                console.log('서버 연결 실패, 데모 모드로 작동');
-                
-                // 데모용 인증번호 발송
-                const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
-                sessionStorage.setItem('emailVerificationCode', verificationCode);
-                
-                // 인증번호 입력 필드 표시
-                document.getElementById('email-verify-group').style.display = 'block';
-                
-                // 타이머 시작 (3분)
-                startTimer('email', 180);
-                
-                // 데모 모드 힌트 표시
-                document.getElementById('demo-code-hint').textContent = `[테스트용] 인증번호: ${verificationCode}`;
-                document.getElementById('demo-code-hint').style.display = 'block';
-                
-                alert(`[테스트 모드]\n인증번호가 생성되었습니다.\n입력창 아래에서 확인하세요.`);
+                console.error('이메일 발송 실패:', error);
+                alert('이메일 발송에 실패했습니다. 다시 시도해주세요.');
                 
                 // 이메일 입력 필드 비활성화
                 emailInput.readOnly = true;
@@ -414,24 +391,8 @@
                 }
                 
             } catch (error) {
-                // 서버 연결 실패 시 데모 모드로 확인
-                console.log('서버 연결 실패, 데모 모드로 확인');
-                
-                const savedCode = sessionStorage.getItem('emailVerificationCode');
-                if (code === savedCode) {
-                    emailVerified = true;
-                    alert('[테스트 모드] 이메일 인증이 완료되었습니다.');
-                    
-                    clearInterval(emailTimer);
-                    document.getElementById('email-timer').textContent = '인증 완료';
-                    document.getElementById('demo-code-hint').style.display = 'none';
-                    codeInput.readOnly = true;
-                    verifyBtn.disabled = true;
-                    verifyBtn.textContent = '인증됨';
-                } else {
-                    alert('[테스트 모드] 인증번호가 일치하지 않습니다.');
-                    codeInput.focus();
-                }
+                console.error('인증 확인 실패:', error);
+                alert('인증 확인에 실패했습니다. 다시 시도해주세요.');
             } finally {
                 // 실패 시 버튼 다시 활성화
                 if (!emailVerified) {

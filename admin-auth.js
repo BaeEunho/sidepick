@@ -13,34 +13,54 @@ const AdminAuth = {
             return { success: false, message: '관리자 권한이 없습니다.' };
         }
         
-        // AuthSystem을 통해 일반 로그인 시도
-        if (window.AuthSystem) {
-            const loginResult = await window.AuthSystem.login(email, password);
+        try {
+            // 서버 API를 직접 호출하여 로그인
+            const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+            console.log('API_URL:', API_URL);
+            console.log('로그인 시도:', { email, password: password.substring(0, 3) + '***' });
             
-            if (!loginResult.success) {
-                return { success: false, message: '이메일 또는 비밀번호가 일치하지 않습니다.' };
+            const response = await fetch(`${API_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+            
+            console.log('응답 상태:', response.status);
+            const result = await response.json();
+            console.log('응답 결과:', result);
+            
+            if (!result.success) {
+                return { success: false, message: result.message || '이메일 또는 비밀번호가 일치하지 않습니다.' };
             }
             
             // 로그인 성공 시 관리자 세션 생성
-            const user = window.AuthSystem.getCurrentUser();
+            const userData = result.data.user;
             const session = {
                 email: email,
-                name: user.name,
+                name: userData.name,
                 loginTime: new Date().toISOString(),
-                expires: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString() // 2시간
+                expires: new Date(Date.now() + 2 * 60 * 60 * 1000).toISOString(), // 2시간
+                token: result.data.token
             };
             
             sessionStorage.setItem(this.ADMIN_SESSION_KEY, JSON.stringify(session));
             
+            // 토큰 저장 (API 호출용)
+            if (result.data.token) {
+                localStorage.setItem('adminAuthToken', result.data.token);
+            }
+            
             return { success: true, message: '관리자 로그인 성공' };
-        } else {
-            return { success: false, message: '인증 시스템을 로드할 수 없습니다.' };
+        } catch (error) {
+            console.error('관리자 로그인 오류:', error);
+            return { success: false, message: '로그인 중 오류가 발생했습니다.' };
         }
     },
     
     // 관리자 로그아웃
     logout: function() {
         sessionStorage.removeItem(this.ADMIN_SESSION_KEY);
+        localStorage.removeItem('adminAuthToken');
     },
     
     // 관리자 세션 확인
