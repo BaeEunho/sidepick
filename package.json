@@ -2,10 +2,10 @@
   "name": "sidepick",
   "version": "1.0.0",
   "description": "사이드픽 - 정치 성향 기반 소개팅 서비스",
-  "main": "server.js",
+  "main": "server-simple.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js",
+    "start": "node server-simple.js",
+    "dev": "nodemon server-simple.js",
     "client": "python -m http.server 8080",
     "test": "echo \"테스트 서버 실행: npm run start\""
   },
