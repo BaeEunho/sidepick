@@ -8,7 +8,7 @@ window.APP_CONFIG = {
     // 다른 도메인 배포: 'https://api.sidepick.co.kr' 또는 'https://sidepick-api.herokuapp.com'
     API_URL: window.location.hostname === 'localhost' 
         ? 'http://localhost:3000' 
-        : 'https://your-backend-url.com', // 여기에 실제 백엔드 URL 입력
+        : 'https://sidepick.onrender.com', // Render 백엔드 URL
     
     // 디버그 모드
     DEBUG: window.location.hostname === 'localhost',

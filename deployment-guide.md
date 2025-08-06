@@ -38,14 +38,14 @@ EMAIL_PASS=your-app-password
 const API_URL = process.env.REACT_APP_API_URL || 
                 (window.location.hostname === 'localhost' 
                     ? 'http://localhost:3000' 
-                    : 'https://your-backend-domain.com');
+                    : 'https://sidepick.onrender.com');
 ```
 
 #### 옵션 2: 설정 파일 사용
 `config.js` 파일 생성:
 ```javascript
 window.APP_CONFIG = {
-    API_URL: 'https://your-backend-domain.com'
+    API_URL: 'https://sidepick.onrender.com'
 };
 ```
 
