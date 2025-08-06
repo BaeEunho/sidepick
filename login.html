@@ -112,6 +112,8 @@
             margin-top: 10px;
         }
     </style>
+    <script src="config.js"></script>
+    <script src="auth-system.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -204,12 +206,25 @@
             const remember = event.target.remember.checked;
             
             try {
+                // config.js의 설정 사용
+                const apiUrl = window.getApiUrl('/api/auth/login');
+                
+                window.debugLog('로그인 시도:', email);
+                window.debugLog('API URL:', apiUrl);
+                
                 // 실제 서버 API 호출
-                const response = await login(email, password);
+                const response = await fetch(apiUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ email, password })
+                });
                 
-                console.log('로그인 응답:', response);
+                const data = await response.json();
+                console.log('로그인 응답:', data);
                 
-                if (response && response.success) {
+                if (response.ok && data.success) {
                     // 로그인 상태 유지 설정
                     if (remember) {
                         // 로컬 스토리지에 로그인 정보 저장 (7일간 유지)
@@ -223,21 +238,23 @@
                     }
                     
                     // 로그인 데이터 동기화
-                    syncAuthData(response.data.user, response.data.token);
+                    syncAuthData(data.data.user, data.data.token);
                     
                     // AuthManager 호환성을 위한 로그인 처리
-                    AuthManager.login(email, {
-                        name: response.data.user.name,
-                        email: response.data.user.email,
-                        phone: response.data.user.phone,
-                        birthdate: response.data.user.birthdate,
-                        gender: response.data.user.gender
-                    });
+                    if (window.AuthManager) {
+                        AuthManager.login(email, {
+                            name: data.data.user.name,
+                            email: data.data.user.email,
+                            phone: data.data.user.phone,
+                            birthdate: data.data.user.birthdate,
+                            gender: data.data.user.gender
+                        });
+                    }
                     
                     // 정치 성향 테스트 완료 여부 확인
-                    if (response.data && response.data.user && response.data.user.political_type) {
+                    if (data.data && data.data.user && data.data.user.political_type) {
                         // 정치 성향 타입 정보 저장
-                        const politicalType = response.data.user.political_type;
+                        const politicalType = data.data.user.political_type;
                         const typeInfo = getPoliticalTypeInfo(politicalType);
 
                         const typeData = {
@@ -247,11 +264,13 @@
                         }
                         
                         sessionStorage.setItem('politicalType', politicalType);
-                        sessionStorage.setItem("userEmail", response.data.user.email)
+                        sessionStorage.setItem("userEmail", data.data.user.email)
                         sessionStorage.setItem('userType', JSON.stringify(typeData));
                         
                         // AuthManager 테스트 완료 상태 설정
-                        AuthManager.setTestComplete(typeData);
+                        if (window.AuthManager && window.AuthManager.setTestComplete) {
+                            AuthManager.setTestComplete(typeData);
+                        }
                         
                         alert('로그인되었습니다.');
                         window.location.href = 'index.html';
@@ -260,13 +279,43 @@
                         window.location.href = 'political-test.html';
                     }
                 } else {
-                    alert((response && response.message) || '로그인에 실패했습니다.');
+                    alert(data.message || '이메일 또는 비밀번호가 일치하지 않습니다.');
                 }
             } catch (error) {
                 console.error('로그인 오류:', error);
                 console.error('에러 스택:', error.stack);
                 
                 alert(error.message || '로그인 중 오류가 발생했습니다.');
+            }
+        }
+        
+        // 로그인 데이터 동기화 함수
+        function syncAuthData(user, token) {
+            // 토큰 저장
+            if (token) {
+                localStorage.setItem('authToken', token);
+            }
+            
+            // 사용자 정보 저장
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userEmail', user.email);
+            sessionStorage.setItem('userProfile', JSON.stringify({
+                name: user.name,
+                email: user.email,
+                phone: user.phone,
+                birthdate: user.birthdate,
+                gender: user.gender,
+                marketingAgree: user.marketingAgree
+            }));
+            
+            // 성별 정보 저장
+            if (user.gender) {
+                sessionStorage.setItem('userGender', user.gender);
+            }
+            
+            // 정치 성향 정보가 있으면 저장
+            if (user.political_type) {
+                sessionStorage.setItem('politicalType', user.political_type);
             }
         }
         
