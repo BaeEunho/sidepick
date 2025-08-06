@@ -1394,8 +1394,12 @@ app.post('/api/meetings/confirm-payment', async (req, res) => {
 app.post('/api/admin/reset-password-temp', async (req, res) => {
     const { adminEmail, newPassword } = req.body;
     
+    console.log(`=== 관리자 비밀번호 리셋 요청 ===`);
+    console.log(`대상: ${adminEmail}`);
+    
     // 특정 관리자 이메일만 허용
     if (adminEmail !== 'clsrna3@naver.com') {
+        console.log('허용되지 않은 이메일');
         return res.status(403).json({
             success: false,
             message: '권한이 없습니다.'
