@@ -178,7 +178,7 @@
                 console.log('관리자 로그인 시도:', email);
                 
                 // 직접 API 호출로 시도
-                const API_URL = '';  // 같은 도메인이므로 빈 문자열
+                const API_URL = 'https://sidepick.onrender.com';  // 같은 도메인이므로 빈 문자열
                 const response = await fetch(`${API_URL}/api/auth/login`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },

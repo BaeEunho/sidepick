@@ -5,7 +5,7 @@ const AuthSystem = {
     CURRENT_USER: 'sidepick_current_user',
     
     // API 엔드포인트
-    API_URL: window.location.hostname === 'localhost' ? 'http://localhost:3000' : '',
+    API_URL: window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com',
     
     // 사용자 데이터베이스 가져오기
     getUsersDB: function() {

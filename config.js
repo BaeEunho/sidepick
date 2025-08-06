@@ -5,10 +5,10 @@ window.APP_CONFIG = {
     // API 서버 URL
     // 로컬 개발: 'http://localhost:3000'
     // 같은 도메인 배포: ''
-    // 다른 도메인 배포: 'https://api.sidepick.co.kr'
+    // 다른 도메인 배포: 'https://api.sidepick.co.kr' 또는 'https://sidepick-api.herokuapp.com'
     API_URL: window.location.hostname === 'localhost' 
         ? 'http://localhost:3000' 
-        : '',
+        : 'https://your-backend-url.com', // 여기에 실제 백엔드 URL 입력
     
     // 디버그 모드
     DEBUG: window.location.hostname === 'localhost',

@@ -56,7 +56,7 @@ async function loadData() {
 async function loadFromServer() {
     console.log('=== 관리자 페이지: 서버에서 데이터 로드 중 ===');
     try {
-        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/admin/users`);
         console.log('서버 응답 상태:', response.status);
         
@@ -573,7 +573,7 @@ async function updatePaymentStatus(email, newStatus) {
     console.log(`새 상태: ${newStatus}`);
     
     try {
-        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
         console.log(`API 호출: ${API_URL}/api/admin/users/${email}/payment-status`);
         
         const response = await fetch(`${API_URL}/api/admin/users/${email}/payment-status`, {

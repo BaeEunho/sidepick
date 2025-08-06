@@ -1,7 +1,7 @@
 // API 클라이언트 설정
 const API_BASE_URL = window.location.hostname === 'localhost' 
     ? 'http://localhost:3000/api' 
-    : '/api';
+    : 'https://sidepick.onrender.com/api';
 
 // API 호출 헬퍼 함수
 async function apiCall(endpoint, options = {}) {

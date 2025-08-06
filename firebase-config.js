@@ -4,7 +4,18 @@ const path = require('path');
 
 // Firebase 초기화
 try {
-  if (process.env.SERVICE_ACCOUNT_PATH) {
+  if (process.env.FIREBASE_SERVICE_ACCOUNT_BASE64) {
+    // Base64로 인코딩된 서비스 계정 사용 (Render 등 PaaS용)
+    const base64 = process.env.FIREBASE_SERVICE_ACCOUNT_BASE64;
+    const json = Buffer.from(base64, 'base64').toString('utf-8');
+    const serviceAccount = JSON.parse(json);
+    
+    admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+      databaseURL: `https://${serviceAccount.project_id}.firebaseio.com`
+    });
+    console.log('Firebase Admin SDK 초기화 완료 (Base64 환경변수 사용)');
+  } else if (process.env.SERVICE_ACCOUNT_PATH) {
     // 서비스 계정 파일 경로 사용
     const serviceAccountPath = path.resolve(process.env.SERVICE_ACCOUNT_PATH);
     const serviceAccount = require(serviceAccountPath);

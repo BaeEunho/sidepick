@@ -1452,9 +1452,13 @@ app.post('/api/admin/reset-password-temp', async (req, res) => {
 
 // 서버 시작
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`Firebase 서버가 포트 ${PORT}에서 실행 중입니다.`);
-    console.log(`http://localhost:${PORT}`);
+    if (process.env.NODE_ENV === 'production') {
+        console.log(`Production mode - Port ${PORT}`);
+    } else {
+        console.log(`http://localhost:${PORT}`);
+    }
     console.log('Firebase Firestore를 사용하여 데이터가 영구 저장됩니다.');
     console.log('이메일 인증 기능이 포함되어 있습니다.');
 });

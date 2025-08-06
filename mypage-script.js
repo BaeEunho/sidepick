@@ -72,7 +72,7 @@ async function syncWithServer() {
     try {
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
             
         // 서버에서 사용자 정보 가져오기
         const response = await fetch(`${API_URL}/api/user/profile`, {
@@ -358,7 +358,7 @@ async function loadUpcomingMeetings() {
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/user/meetings`, {
             headers: {
@@ -655,7 +655,7 @@ async function changePassword() {
             const userEmail = sessionStorage.getItem('userEmail');
             const API_URL = window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000' 
-                : '';
+                : 'https://sidepick.onrender.com';
                 
             const response = await fetch(`${API_URL}/api/user/change-password`, {
                 method: 'POST',
@@ -755,7 +755,7 @@ async function updateProfile() {
             const authToken = localStorage.getItem('authToken');
             const API_URL = window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000' 
-                : '';
+                : 'https://sidepick.onrender.com';
                 
             const response = await fetch(`${API_URL}/api/user/profile`, {
                 method: 'PUT',
@@ -825,7 +825,7 @@ async function deleteAccount() {
         const token = localStorage.getItem('authToken'); // localStorage에서 토큰 가져오기
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/auth/delete-account`, {
             method: 'DELETE',
             headers: {
@@ -1517,7 +1517,7 @@ async function cancelMeeting(meetingId) {
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/meetings/cancel/${meetingId}`, {
             method: 'DELETE',

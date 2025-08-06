@@ -22,7 +22,7 @@ async function fetchAttendanceFromServer() {
     try {
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
         console.log('API URL:', `${API_URL}/api/meetings/attendance`);
         
         const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -154,7 +154,7 @@ async function fetchUserMeetingInfo() {
         if (token) {
             const API_URL = window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000' 
-                : '';
+                : 'https://sidepick.onrender.com';
                 
             try {
                 const response = await fetch(`${API_URL}/api/user/meetings`, {

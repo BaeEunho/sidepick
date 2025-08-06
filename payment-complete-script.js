@@ -130,7 +130,7 @@ async function confirmParticipation() {
     
     // 서버에 결제 완료 알림
     try {
-        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
         const authToken = localStorage.getItem('authToken');
         
         // 예약 확정 요청

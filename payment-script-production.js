@@ -1,7 +1,7 @@
 // payment-script-production.js - 실제 운영 환경용
 const clientKey = 'live_ck_YOUR_LIVE_CLIENT_KEY'; // 실제 클라이언트 키로 교체
 const tossPayments = TossPayments(clientKey);
-const SERVER_URL = 'https://www.sidepick.co.kr'; // 실제 서버 URL
+const SERVER_URL = 'https://sidepick.onrender.com'; // 실제 서버 URL
 
 // 결제 처리 (실제 버전)
 async function processPayment(method) {

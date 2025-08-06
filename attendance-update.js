@@ -7,7 +7,7 @@ async function fetchAttendanceFromServer() {
     try {
         const API_URL = window.location.hostname === 'localhost' 
             ? 'http://localhost:3000' 
-            : '';
+            : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/meetings/attendance`);
         const data = await response.json();
         console.log('서버 응답:', data);

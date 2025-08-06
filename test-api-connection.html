@@ -156,7 +156,7 @@
             result.textContent = '테스트 중...';
             
             try {
-                const apiUrl = window.APP_CONFIG ? window.APP_CONFIG.API_URL : '';
+                const apiUrl = window.APP_CONFIG ? window.APP_CONFIG.API_URL : 'https://sidepick.onrender.com';
                 log(`API 연결 테스트 시작: ${apiUrl}`);
                 
                 // OPTIONS 요청 테스트 (CORS preflight)

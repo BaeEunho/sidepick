@@ -202,7 +202,7 @@
             function updateAttendance() {
                 console.log('참석 인원 업데이트 중...');
                 
-                fetch('http://localhost:3000/api/meetings/attendance')
+                fetch('https://sidepick.onrender.com/api/meetings/attendance')
                     .then(response => response.json())
                     .then(data => {
                         console.log('API 응답:', data);

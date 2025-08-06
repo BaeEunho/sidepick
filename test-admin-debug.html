@@ -79,7 +79,7 @@
             resultDiv.innerHTML = '<p>API 호출 중...</p>';
             
             try {
-                const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : '';
+                const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
                 console.log('직접 API 호출:', `${API_URL}/api/auth/login`);
                 
                 const response = await fetch(`${API_URL}/api/auth/login`, {
