@@ -28,6 +28,27 @@ app.use(express.static('.'));
 // JWT 비밀키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
 
+// API 상태 확인 엔드포인트
+app.get('/api', (req, res) => {
+    res.json({
+        status: 'ok',
+        message: '사이드픽 API 서버가 정상 작동 중입니다.',
+        timestamp: new Date().toISOString()
+    });
+});
+
+// API 상태 확인 엔드포인트 (더 자세한 정보)
+app.get('/api/status', (req, res) => {
+    res.json({
+        status: 'ok',
+        service: 'SidePick API',
+        version: '1.0.0',
+        environment: process.env.NODE_ENV || 'development',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
 // 이메일 전송 설정
 const transporter = nodemailer.createTransport({
     service: 'gmail',
