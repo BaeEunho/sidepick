@@ -35,6 +35,15 @@ try {
   }
 } catch (error) {
   console.error('Firebase 초기화 실패:', error);
+  console.error('에러 상세:', {
+    message: error.message,
+    stack: error.stack,
+    env: {
+      hasBase64: !!process.env.FIREBASE_SERVICE_ACCOUNT_BASE64,
+      hasPath: !!process.env.SERVICE_ACCOUNT_PATH,
+      nodeEnv: process.env.NODE_ENV
+    }
+  });
 }
 
 // Firestore 인스턴스
