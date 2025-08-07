@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting API Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 5px 0;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+    <script src="auth-system.js"></script>
+</head>
+<body>
+    <h1>Meeting API Test Page</h1>
+    
+    <div class="section">
+        <h2>1. Check Current State</h2>
+        <button onclick="checkAuthState()">Check Auth State</button>
+        <button onclick="checkSessionStorage()">Check SessionStorage</button>
+        <button onclick="checkToken()">Check JWT Token</button>
+        <div id="stateLog" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>2. Test API Connection</h2>
+        <button onclick="testAPIConnection()">Test API Health</button>
+        <button onclick="testAuthEndpoint()">Test Auth Endpoint</button>
+        <div id="apiLog" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. Test Meeting Apply</h2>
+        <label>Meeting ID: <input type="text" id="meetingId" value="test_meeting_123"></label>
+        <label>Orientation: 
+            <select id="orientation">
+                <option value="progressive">Progressive</option>
+                <option value="conservative">Conservative</option>
+            </select>
+        </label>
+        <button onclick="testMeetingApply()">Test Meeting Apply</button>
+        <div id="meetingLog" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+            logElement.innerHTML += `[${timestamp}] <span class="${className}">${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkAuthState() {
+            log('stateLog', '=== Checking Auth State ===', 'info');
+            
+            const userState = AuthManager.getUserState();
+            log('stateLog', `User State Type: ${userState.type}`);
+            
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            log('stateLog', `isLoggedIn: ${isLoggedIn}`);
+            
+            const userEmail = sessionStorage.getItem('userEmail');
+            log('stateLog', `userEmail: ${userEmail || 'Not found'}`);
+            
+            const politicalType = sessionStorage.getItem('politicalType');
+            log('stateLog', `politicalType: ${politicalType || 'Not found'}`);
+            
+            const authToken = localStorage.getItem('authToken');
+            log('stateLog', `authToken: ${authToken ? 'Present (' + authToken.length + ' chars)' : 'Not found'}`, authToken ? 'success' : 'error');
+        }
+
+        function checkSessionStorage() {
+            log('stateLog', '=== SessionStorage Contents ===', 'info');
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                const value = sessionStorage.getItem(key);
+                log('stateLog', `${key}: ${value.substring(0, 100)}...`);
+            }
+        }
+
+        function checkToken() {
+            log('stateLog', '=== JWT Token Analysis ===', 'info');
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                log('stateLog', 'No token found', 'error');
+                return;
+            }
+            
+            try {
+                const parts = token.split('.');
+                log('stateLog', `Token parts: ${parts.length}`);
+                
+                if (parts.length === 3) {
+                    const payload = JSON.parse(atob(parts[1]));
+                    log('stateLog', `Payload: ${JSON.stringify(payload, null, 2)}`);
+                    
+                    if (payload.exp) {
+                        const expDate = new Date(payload.exp * 1000);
+                        const isExpired = expDate < new Date();
+                        log('stateLog', `Expires: ${expDate.toLocaleString()}`, isExpired ? 'error' : 'success');
+                        log('stateLog', `Is Expired: ${isExpired}`, isExpired ? 'error' : 'success');
+                    }
+                }
+            } catch (error) {
+                log('stateLog', `Token parse error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAPIConnection() {
+            log('apiLog', '=== Testing API Connection ===', 'info');
+            const API_URL = 'https://sidepick.onrender.com';
+            
+            try {
+                log('apiLog', `Connecting to ${API_URL}/api/health`);
+                const response = await fetch(`${API_URL}/api/health`);
+                log('apiLog', `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('apiLog', `Response: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    log('apiLog', `Error: ${response.statusText}`, 'error');
+                }
+            } catch (error) {
+                log('apiLog', `Connection error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testAuthEndpoint() {
+            log('apiLog', '=== Testing Auth Endpoint ===', 'info');
+            const API_URL = 'https://sidepick.onrender.com';
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                log('apiLog', 'No auth token found', 'error');
+                return;
+            }
+            
+            try {
+                log('apiLog', `Testing /api/user/profile with token`);
+                const response = await fetch(`${API_URL}/api/user/profile`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log('apiLog', `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log('apiLog', `User profile: ${JSON.stringify(data)}`, 'success');
+                } else {
+                    const error = await response.text();
+                    log('apiLog', `Error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log('apiLog', `Request error: ${error.message}`, 'error');
+            }
+        }
+
+        async function testMeetingApply() {
+            log('meetingLog', '=== Testing Meeting Apply ===', 'info');
+            
+            const meetingId = document.getElementById('meetingId').value;
+            const orientation = document.getElementById('orientation').value;
+            const token = localStorage.getItem('authToken');
+            
+            if (!token) {
+                log('meetingLog', 'No auth token found', 'error');
+                return;
+            }
+            
+            const requestData = {
+                meetingId: meetingId,
+                orientation: orientation,
+                meetingInfo: {
+                    title: 'Test Meeting',
+                    date: '12월 14일',
+                    location: '강남역'
+                },
+                applicationData: {
+                    payment: 'bank'
+                }
+            };
+            
+            log('meetingLog', `Request data: ${JSON.stringify(requestData, null, 2)}`);
+            
+            try {
+                const response = await fetch('https://sidepick.onrender.com/api/meetings/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                log('meetingLog', `Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                log('meetingLog', `Response headers: ${JSON.stringify(Object.fromEntries(response.headers))}`);
+                
+                const responseText = await response.text();
+                log('meetingLog', `Response body: ${responseText}`);
+                
+                if (response.ok) {
+                    try {
+                        const data = JSON.parse(responseText);
+                        log('meetingLog', `Success: ${JSON.stringify(data)}`, 'success');
+                    } catch (e) {
+                        log('meetingLog', `Response is not JSON: ${responseText}`, 'warning');
+                    }
+                } else {
+                    log('meetingLog', `Error response: ${responseText}`, 'error');
+                }
+            } catch (error) {
+                log('meetingLog', `Request error: ${error.message}`, 'error');
+                log('meetingLog', `Error stack: ${error.stack}`, 'error');
+            }
+        }
+
+        // Auto-check on load
+        window.onload = function() {
+            checkAuthState();
+        };
+    </script>
+</body>
+</html>

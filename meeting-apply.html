@@ -272,6 +272,8 @@
             const meetingId = urlParams.get('meetingId') || `meeting-${Date.now()}`;
             const orientation = urlParams.get('orientation') || 'progressive';
             
+            console.log('Meeting application - orientation:', orientation);
+            
             // 사용자 정보 가져오기
             const userState = AuthManager.getUserState();
             const politicalType = sessionStorage.getItem('politicalType');
@@ -298,7 +300,10 @@
             console.log('Request Data:', requestData);
             console.log('User Email:', userState.profile?.email || sessionStorage.getItem('userEmail'));
             console.log('Political Type:', politicalType);
-            console.log('Auth Token:', localStorage.getItem('authToken'));
+            const authToken = localStorage.getItem('authToken');
+            console.log('Auth Token:', authToken ? `${authToken.substring(0, 20)}...` : 'NO TOKEN');
+            console.log('Token exists:', !!authToken);
+            console.log('API URL:', 'https://sidepick.onrender.com/api/meetings/apply');
             
             // 디버깅: 전송 데이터 확인
             console.log('모임 신청 데이터:', requestData);
@@ -321,8 +326,14 @@
                 console.log('서버 응답 상태:', response.status);
                 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    console.error('서버 오류 응답:', errorData);
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                        console.error('서버 오류 응답:', errorData);
+                    } catch (e) {
+                        console.error('응답 파싱 실패:', e);
+                        errorData = { message: `서버 오류: ${response.status} ${response.statusText}` };
+                    }
                     
                     // 서버에서 명시적인 에러 메시지가 있으면 표시
                     if (errorData.message) {
@@ -336,8 +347,20 @@
                 const result = await response.json();
                 console.log('서버 응답 데이터:', result);
                 
-                // sessionStorage에서 appliedMeetings 제거 (서버에서 관리)
-                sessionStorage.removeItem('appliedMeetings');
+                // appliedMeetings 업데이트 (서버 응답 반영)
+                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                appliedMeetings[orientation] = {
+                    appliedAt: new Date().toISOString(),
+                    status: 'pending',
+                    formData: formData,
+                    meetingId: meetingId,
+                    title: meetingTitle,
+                    date: meetingDate,
+                    location: meetingLocation,
+                    bookingId: result.data?.bookingId || `booking_${Date.now()}`
+                };
+                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                console.log('Saved appliedMeetings:', appliedMeetings);
                 
                 // 예약 정보를 pendingBooking에 저장
                 const bookingInfo = {
@@ -350,11 +373,21 @@
                 };
                 sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
                 
-                // 예약 확인 페이지로 이동
-                window.location.href = 'booking-confirm.html';
+                // 예약 확인 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
+                setTimeout(() => {
+                    window.location.href = 'booking-confirm.html';
+                }, 100);
                 
             } catch (error) {
                 console.error('신청 처리 중 오류:', error);
+                console.error('Error details:', {
+                    message: error.message,
+                    stack: error.stack,
+                    name: error.name
+                });
+                
+                // 사용자에게 더 자세한 에러 메시지 표시
+                alert(`모임 신청 중 오류가 발생했습니다.\n\n오류: ${error.message}\n\n문제가 계속되면 관리자에게 문의해주세요.`);
                 
                 // API 호출 실패 시 폴백: sessionStorage에만 저장 (데모 모드)
                 const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
@@ -369,6 +402,7 @@
                     demoMode: true // 데모 모드 표시
                 };
                 sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                console.log('Saved appliedMeetings (demo mode):', appliedMeetings);
                 
                 // 예약 정보를 pendingBooking에 저장 (데모 모드)
                 const bookingInfo = {
@@ -382,8 +416,10 @@
                 };
                 sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
                 
-                // 예약 확인 페이지로 이동
-                window.location.href = 'booking-confirm.html';
+                // 예약 확인 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
+                setTimeout(() => {
+                    window.location.href = 'booking-confirm.html';
+                }, 100);
             }
         }
         

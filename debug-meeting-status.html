@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug - Meeting Application Status</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        h2 {
+            margin-top: 0;
+            color: #333;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+        .success {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 3px;
+            margin-bottom: 10px;
+        }
+    </style>
+    <script src="auth-system.js"></script>
+</head>
+<body>
+    <h1>Meeting Application Status Debugger</h1>
+    
+    <div class="section">
+        <h2>Current SessionStorage State</h2>
+        <div id="sessionStorageContent"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Applied Meetings</h2>
+        <div id="appliedMeetingsContent"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Authentication State</h2>
+        <div id="authStateContent"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Actions</h2>
+        <button onclick="refreshData()">Refresh Data</button>
+        <button onclick="simulateApplication('progressive', 'pending')">Simulate Progressive (Pending)</button>
+        <button onclick="simulateApplication('progressive', 'confirmed')">Simulate Progressive (Paid)</button>
+        <button onclick="simulateApplication('conservative', 'pending')">Simulate Conservative (Pending)</button>
+        <button onclick="simulateApplication('conservative', 'confirmed')">Simulate Conservative (Paid)</button>
+        <button onclick="clearMeetingData()">Clear Meeting Data</button>
+        <button onclick="window.location.href='index.html'">Go to Main Page</button>
+    </div>
+    
+    <div class="section">
+        <h2>Log</h2>
+        <div id="logContent"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('logContent');
+            const entry = document.createElement('div');
+            entry.className = type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            entry.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            logDiv.appendChild(entry);
+        }
+
+        function refreshData() {
+            // Session Storage
+            const sessionStorageDiv = document.getElementById('sessionStorageContent');
+            const sessionData = {};
+            for (let i = 0; i < sessionStorage.length; i++) {
+                const key = sessionStorage.key(i);
+                try {
+                    sessionData[key] = JSON.parse(sessionStorage.getItem(key));
+                } catch (e) {
+                    sessionData[key] = sessionStorage.getItem(key);
+                }
+            }
+            sessionStorageDiv.innerHTML = '<pre>' + JSON.stringify(sessionData, null, 2) + '</pre>';
+            
+            // Applied Meetings
+            const appliedMeetingsDiv = document.getElementById('appliedMeetingsContent');
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetingsDiv.innerHTML = '<pre>' + JSON.stringify(appliedMeetings, null, 2) + '</pre>';
+            
+            // Auth State
+            const authStateDiv = document.getElementById('authStateContent');
+            let authState = {};
+            if (typeof AuthManager !== 'undefined') {
+                const userState = AuthManager.getUserState();
+                authState = {
+                    type: userState.type,
+                    isLoggedIn: sessionStorage.getItem('isLoggedIn'),
+                    userEmail: sessionStorage.getItem('userEmail'),
+                    politicalType: sessionStorage.getItem('politicalType'),
+                    userGender: sessionStorage.getItem('userGender'),
+                    authToken: localStorage.getItem('authToken') ? 'Present' : 'Not found'
+                };
+            }
+            authStateDiv.innerHTML = '<pre>' + JSON.stringify(authState, null, 2) + '</pre>';
+            
+            log('Data refreshed', 'success');
+        }
+        
+        function simulateApplication(orientation, status = 'pending') {
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                status: status,
+                appliedAt: new Date().toISOString(),
+                meetingId: `test_meeting_${orientation}_${Date.now()}`,
+                title: `${orientation === 'progressive' ? '진보' : '보수'} 성향 소개팅`,
+                date: '12월 14일 (토)',
+                location: '강남역 파티룸'
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            log(`Simulated ${orientation} meeting application with status: ${status}`, 'success');
+            refreshData();
+        }
+        
+        function clearMeetingData() {
+            if (confirm('정말로 모든 모임 신청 데이터를 삭제하시겠습니까?')) {
+                sessionStorage.removeItem('appliedMeetings');
+                sessionStorage.removeItem('selectedMeeting');
+                sessionStorage.removeItem('pendingBooking');
+                sessionStorage.removeItem('meetingCounts');
+                sessionStorage.removeItem('confirmedMeetingCounts');
+                log('Meeting data cleared', 'warning');
+                refreshData();
+            }
+        }
+        
+        // Initial load
+        window.onload = function() {
+            refreshData();
+            log('Debug page loaded');
+        };
+    </script>
+</body>
+</html>

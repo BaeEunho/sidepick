@@ -1896,11 +1896,6 @@
                 
             </div>
             
-            <div class="notification-section">
-                <h3>일정이 안 맞으신가요?</h3>
-                <p>회원가입 후 성향 테스트를 완료하시면<br>맞는 모임이 열릴 때 알림을 보내드립니다.</p>
-                <button class="btn-notification" onclick="location.href='signup.html'">다음 일정 알림 받기</button>
-            </div>
         </div>
     </section>
 
@@ -1931,12 +1926,6 @@
                     <div class="faq-question">연령대는 어떻게 되나요?</div>
                     <div class="faq-answer">
                         <p>주로 20대 후반-30대 초반입니다. 비슷한 연령대끼리 모임을 구성하여 공감대 형성이 쉽도록 합니다.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">다음 모임 알림을 받으려면?</div>
-                    <div class="faq-answer">
-                        <p>회원가입 후 성향 테스트를 완료하시면 맞는 모임만 알림받을 수 있습니다. 이메일로 알림을 보내드립니다.</p>
                     </div>
                 </div>
             </div>
@@ -2313,8 +2302,8 @@
                     const status = appliedMeetings[orientation].status;
                     if (status === 'pending') {
                         alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
-                    } else if (status === 'confirmed') {
-                        alert('이미 참가 확정된 소개팅입니다.');
+                    } else if (status === 'confirmed' || status === 'paid') {
+                        alert('이미 입금 완료되어 참가 확정된 소개팅입니다.');
                     } else {
                         alert('이미 신청하신 소개팅입니다.');
                     }
@@ -2334,15 +2323,19 @@
         
         // 미팅 버튼 상태 업데이트 함수
         async function updateMeetingButtons() {
+            console.log('=== updateMeetingButtons called ===');
             try {
                 // 로그인 상태 확인
                 const userState = AuthManager.getUserState();
+                console.log('User state type:', userState.type);
                 if (userState.type === 'anonymous') {
                     return; // 로그인하지 않은 경우 기본 상태 유지
                 }
                 
                 // 먼저 로컬 스토리지에서 모임 정보 확인
                 const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                console.log('Applied meetings from sessionStorage:', appliedMeetings);
+                
                 const meetingsByOrientation = {
                     progressive: appliedMeetings.progressive || null,
                     conservative: appliedMeetings.conservative || null
@@ -2403,21 +2396,34 @@
         
         // 개별 미팅 버튼 업데이트
         function updateButtonForMeeting(orientation, applicationData) {
+            console.log(`=== updateButtonForMeeting called for ${orientation} ===`);
+            console.log('Application data:', applicationData);
+            
             // meeting-header 클래스를 가진 요소를 찾고, 그 부모의 버튼을 찾음
             const meetingHeader = document.querySelector(`.meeting-header.${orientation}`);
-            if (!meetingHeader) return;
+            if (!meetingHeader) {
+                console.log(`Meeting header not found for ${orientation}`);
+                return;
+            }
             
             const button = meetingHeader.parentElement.querySelector('.btn-apply');
-            if (!button) return;
+            if (!button) {
+                console.log(`Button not found for ${orientation}`);
+                return;
+            }
+            
+            console.log(`Updating button for ${orientation}:`, applicationData);
             
             if (applicationData) {
                 const status = applicationData.status;
+                console.log(`Updating button for ${orientation} with status: ${status}`);
                 
                 if (status === 'pending') {
                     button.textContent = '입금 대기중 - 취소하기';
                     button.style.background = '#95a5a6';
                     button.style.cursor = 'pointer';
                     button.disabled = false;
+                    console.log(`Button updated to pending state for ${orientation}`);
                     
                     // 클릭 시 취소 처리
                     button.onclick = function() {
@@ -2426,15 +2432,17 @@
                         }
                     };
                 } else if (status === 'confirmed' || status === 'paid') {
-                    button.textContent = '참가 확정 - 취소하기';
+                    button.textContent = '✅ 입금 완료 - 참가 확정';
                     button.style.background = '#27ae60';
                     button.style.cursor = 'pointer';
+                    button.style.fontWeight = 'bold';
                     button.disabled = false;
+                    console.log(`Button updated to confirmed/paid state for ${orientation}`);
                     
-                    // 클릭 시 취소 처리
+                    // 클릭 시 마이페이지로 이동
                     button.onclick = function() {
-                        if (confirm('정말로 모임 신청을 취소하시겠습니까?\n\n⚠️ 취소 시 재신청이 필요합니다.\n⚠️ 환불 규정을 확인해주세요.')) {
-                            cancelMeetingFromIndex(applicationData.meetingId);
+                        if (confirm('참가가 확정되었습니다!\n마이페이지에서 상세 정보를 확인하시겠습니까?')) {
+                            window.location.href = 'mypage.html';
                         }
                     };
                 } else if (status === 'cancelled') {
@@ -2550,13 +2558,19 @@
         
         // 페이지 로드 시 참석 인원 및 버튼 상태 업데이트
         window.addEventListener('load', function() {
+            console.log('=== Page loaded, initializing meeting updates ===');
+            
             // 참석 인원 업데이트
             updateAttendanceCount();
             // 5초마다 자동 업데이트
             setInterval(updateAttendanceCount, 5000);
             
-            // 버튼 상태 업데이트
-            updateMeetingButtons();
+            // AuthManager가 준비될 때까지 잠시 대기 후 버튼 상태 업데이트
+            setTimeout(() => {
+                console.log('Calling updateMeetingButtons after delay');
+                updateMeetingButtons();
+            }, 100);
+            
             // 5초마다 버튼 상태도 업데이트
             setInterval(updateMeetingButtons, 5000);
         });

@@ -580,9 +580,11 @@ app.post('/api/meetings/apply', async (req, res) => {
         
     } catch (error) {
         console.error('모임 신청 오류:', error);
+        console.error('Error stack:', error.stack);
         res.status(500).json({ 
             success: false, 
-            message: '모임 신청 중 오류가 발생했습니다.' 
+            message: `모임 신청 중 오류가 발생했습니다: ${error.message}`,
+            error: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
 });

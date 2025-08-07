@@ -114,10 +114,6 @@
                     </div>
                 </div>
                 
-                <div class="alarm-signup">
-                    <p>날짜가 맞지 않으신가요?</p>
-                    <button class="alarm-btn" onclick="showAlarmModal()">다음 일정 알림 받기</button>
-                </div>
             </div>
 
             <div class="notice-box">
@@ -173,22 +169,6 @@
         </div>
     </footer>
 
-    <!-- 알림 신청 모달 -->
-    <div id="alarmModal" class="modal" style="display: none;">
-        <div class="modal-content">
-            <span class="close" onclick="closeAlarmModal()">&times;</span>
-            <h2>다음 일정 알림 받기</h2>
-            <p id="alarm-message">새로운 소개팅 일정이 등록되면 알려드립니다.</p>
-            <form id="alarmForm" onsubmit="submitAlarmForm(event)">
-                <div class="form-group">
-                    <label>이메일</label>
-                    <input type="email" name="email" required placeholder="your@email.com">
-                </div>
-                <input type="hidden" name="preference" value="">
-                <button type="submit" class="submit-btn">알림 신청하기</button>
-            </form>
-        </div>
-    </div>
 
     <script src="schedule-script.js?v=6"></script>
     <script src="attendance-update.js"></script>

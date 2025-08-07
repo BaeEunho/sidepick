@@ -1,5 +1,4 @@
 // 마이페이지 스크립트
-let refreshInterval;
 
 document.addEventListener('DOMContentLoaded', function() {
     // 로그인 체크만 (테스트 완료 체크는 하지 않음)
@@ -11,18 +10,8 @@ document.addEventListener('DOMContentLoaded', function() {
         return;
     }
     
-    // 초기 로드
+    // 초기 로드 (페이지 진입 시)
     refreshData();
-    
-    // 5초마다 자동 새로고침
-    refreshInterval = setInterval(refreshData, 5000);
-    
-    // 페이지 이탈 시 인터벌 정리
-    window.addEventListener('beforeunload', () => {
-        if (refreshInterval) {
-            clearInterval(refreshInterval);
-        }
-    });
 });
 
 // 데이터 새로고침 함수
