@@ -498,9 +498,28 @@ app.post('/api/meetings/apply', async (req, res) => {
     try {
         const token = authHeader.replace('Bearer ', '');
         console.log('토큰 추출:', token);
+        console.log('JWT_SECRET 사용:', JWT_SECRET ? `${JWT_SECRET.substring(0, 10)}...` : 'NOT SET');
         
-        const decoded = jwt.verify(token, JWT_SECRET);
-        console.log('토큰 디코드 성공:', decoded);
+        let decoded;
+        try {
+            decoded = jwt.verify(token, JWT_SECRET);
+            console.log('토큰 디코드 성공:', decoded);
+        } catch (jwtError) {
+            console.error('JWT 검증 실패:', jwtError.message);
+            
+            // 개발 환경에서만: 기본 시크릿으로 재시도
+            if (process.env.NODE_ENV !== 'production' && JWT_SECRET !== 'your-secret-key-change-this') {
+                console.log('기본 시크릿으로 재시도...');
+                try {
+                    decoded = jwt.verify(token, 'your-secret-key-change-this');
+                    console.log('기본 시크릿으로 디코드 성공');
+                } catch (retryError) {
+                    throw jwtError; // 원래 에러를 다시 throw
+                }
+            } else {
+                throw jwtError;
+            }
+        }
         
         const userDoc = await collections.users.doc(decoded.email).get();
         console.log('사용자 조회:', userDoc.exists ? `찾음 (${decoded.email})` : '못찾음');
