@@ -272,7 +272,14 @@
             const meetingId = urlParams.get('meetingId') || `meeting-${Date.now()}`;
             const orientation = urlParams.get('orientation') || 'progressive';
             
-            console.log('Meeting application - orientation:', orientation);
+            console.log('=== CRITICAL DEBUG ===');
+            console.log('Current URL:', window.location.href);
+            console.log('URL Search:', window.location.search);
+            console.log('URL Params:', Object.fromEntries(urlParams.entries()));
+            console.log('Meeting ID from URL:', urlParams.get('meetingId'));
+            console.log('Orientation from URL:', urlParams.get('orientation'));
+            console.log('Final orientation value:', orientation);
+            console.log('===================');
             
             // 사용자 정보 가져오기
             const userState = AuthManager.getUserState();
@@ -347,36 +354,46 @@
                 const result = await response.json();
                 console.log('서버 응답 데이터:', result);
                 
-                // appliedMeetings 업데이트 (서버 응답 반영)
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                appliedMeetings[orientation] = {
-                    appliedAt: new Date().toISOString(),
-                    status: 'pending',
-                    formData: formData,
-                    meetingId: meetingId,
-                    title: meetingTitle,
-                    date: meetingDate,
-                    location: meetingLocation,
-                    bookingId: result.data?.bookingId || `booking_${Date.now()}`
-                };
-                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
-                console.log('Saved appliedMeetings:', appliedMeetings);
-                
-                // 예약 정보를 pendingBooking에 저장
-                const bookingInfo = {
-                    meetingId: meetingId,
-                    title: meetingTitle,
-                    date: meetingDate,
-                    location: meetingLocation,
-                    orientation: orientation,
-                    bookingId: result.data?.bookingId || `booking_${Date.now()}`
-                };
-                sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
-                
-                // 예약 확인 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
-                setTimeout(() => {
-                    window.location.href = 'booking-confirm.html';
-                }, 100);
+                if (result.success) {
+                    console.log('=== API 호출 성공 ===');
+                    console.log('Booking ID:', result.data?.bookingId);
+                    
+                    // appliedMeetings 업데이트 (서버 응답 반영)
+                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                    appliedMeetings[orientation] = {
+                        appliedAt: new Date().toISOString(),
+                        status: 'pending',
+                        formData: formData,
+                        meetingId: meetingId,
+                        title: meetingTitle,
+                        date: meetingDate,
+                        location: meetingLocation,
+                        bookingId: result.data?.bookingId || `booking_${Date.now()}`
+                    };
+                    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                    console.log('Saved appliedMeetings:', appliedMeetings);
+                    
+                    // 예약 정보를 pendingBooking에 저장
+                    const bookingInfo = {
+                        meetingId: meetingId,
+                        title: meetingTitle,
+                        date: meetingDate,
+                        location: meetingLocation,
+                        orientation: orientation,
+                        bookingId: result.data?.bookingId || `booking_${Date.now()}`
+                    };
+                    sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
+                    
+                    alert('모임 신청이 완료되었습니다!');
+                    
+                    // 예약 확인 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
+                    setTimeout(() => {
+                        window.location.href = 'booking-confirm.html';
+                    }, 100);
+                } else {
+                    console.error('API 응답 실패:', result.message);
+                    alert(`모임 신청 실패: ${result.message}`);
+                }
                 
             } catch (error) {
                 console.error('신청 처리 중 오류:', error);

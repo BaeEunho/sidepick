@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Bookings Test</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success {
+            color: #27ae60;
+            font-weight: bold;
+        }
+        .error {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .warning {
+            color: #f39c12;
+            font-weight: bold;
+        }
+    </style>
+    <script src="auth-system.js"></script>
+</head>
+<body>
+    <h1>Firebase Bookings Test</h1>
+    
+    <div class="section">
+        <h2>Current Auth State</h2>
+        <div id="authLog" class="log"></div>
+    </div>
+    
+    <div class="section">
+        <h2>Test Booking Creation</h2>
+        <button onclick="testBookingAPI()">Test Create Booking</button>
+        <button onclick="checkMyBookings()">Check My Bookings</button>
+        <button onclick="checkAllBookings()">Check All Bookings (Admin)</button>
+        <div id="bookingLog" class="log"></div>
+    </div>
+
+    <script>
+        function log(elementId, message, type = 'info') {
+            const logElement = document.getElementById(elementId);
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+            logElement.innerHTML += `[${timestamp}] <span class="${className}">${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        function checkAuth() {
+            const token = localStorage.getItem('authToken');
+            const userEmail = sessionStorage.getItem('userEmail');
+            const politicalType = sessionStorage.getItem('politicalType');
+            
+            log('authLog', '=== Auth State ===');
+            log('authLog', `Token: ${token ? 'Present' : 'Missing'}`, token ? 'success' : 'error');
+            log('authLog', `Email: ${userEmail || 'Not found'}`);
+            log('authLog', `Political Type: ${politicalType || 'Not found'}`);
+            
+            return { token, userEmail, politicalType };
+        }
+
+        async function testBookingAPI() {
+            log('bookingLog', '=== Testing Booking API ===');
+            
+            const { token, userEmail, politicalType } = checkAuth();
+            
+            if (!token) {
+                log('bookingLog', 'No auth token. Please login first.', 'error');
+                return;
+            }
+            
+            const requestData = {
+                meetingId: `test_meeting_${Date.now()}`,
+                orientation: politicalType && politicalType.startsWith('M') ? 'progressive' : 'conservative',
+                meetingInfo: {
+                    title: 'Test Meeting',
+                    date: '12월 21일 (토)',
+                    location: '강남역 파티룸'
+                },
+                applicationData: {
+                    payment: 'bank'
+                }
+            };
+            
+            log('bookingLog', `Request data: ${JSON.stringify(requestData, null, 2)}`);
+            
+            try {
+                const response = await fetch('https://sidepick.onrender.com/api/meetings/apply', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                log('bookingLog', `Response status: ${response.status}`);
+                
+                const data = await response.json();
+                log('bookingLog', `Response data: ${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+                
+                if (data.success) {
+                    log('bookingLog', `Booking created with ID: ${data.data.bookingId}`, 'success');
+                } else {
+                    log('bookingLog', `Booking failed: ${data.message}`, 'error');
+                }
+            } catch (error) {
+                log('bookingLog', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkMyBookings() {
+            log('bookingLog', '=== Checking My Bookings ===');
+            
+            const { token } = checkAuth();
+            
+            if (!token) {
+                log('bookingLog', 'No auth token. Please login first.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('https://sidepick.onrender.com/api/user/meetings', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log('bookingLog', `Response status: ${response.status}`);
+                
+                const data = await response.json();
+                log('bookingLog', `My bookings: ${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+                
+                if (data.meetings) {
+                    log('bookingLog', `Total bookings: ${data.meetings.length}`, 'success');
+                    data.meetings.forEach((meeting, idx) => {
+                        log('bookingLog', `${idx + 1}. ${meeting.title} - Status: ${meeting.status} - ID: ${meeting.id}`);
+                    });
+                }
+            } catch (error) {
+                log('bookingLog', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function checkAllBookings() {
+            log('bookingLog', '=== Checking All Bookings (Admin) ===');
+            
+            const { token } = checkAuth();
+            
+            if (!token) {
+                log('bookingLog', 'No auth token. Please login first.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('https://sidepick.onrender.com/api/admin/bookings', {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log('bookingLog', `Response status: ${response.status}`);
+                
+                if (response.status === 403) {
+                    log('bookingLog', 'Access denied. Admin privileges required.', 'error');
+                    return;
+                }
+                
+                const data = await response.json();
+                log('bookingLog', `All bookings: ${JSON.stringify(data, null, 2)}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                log('bookingLog', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Check auth on load
+        window.onload = () => {
+            checkAuth();
+        };
+    </script>
+</body>
+</html>

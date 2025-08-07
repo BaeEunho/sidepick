@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>테스트 계정 생성</title>
+</head>
+<body>
+    <h1>보수 여성 테스트 계정 생성</h1>
+    <div id="status"></div>
+    <button onclick="createTestAccounts()">테스트 계정 생성 시작</button>
+    
+    <script>
+    async function createTestAccounts() {
+        const statusDiv = document.getElementById('status');
+        statusDiv.innerHTML = '<p>계정 생성 중...</p>';
+        
+        const testUsers = [
+            {
+                email: 'conservative_woman1@test.com',
+                password: 'test1234',
+                name: '김보수',
+                gender: 'female',
+                birthYear: 1995,
+                phone: '010-1234-5678',
+                politicalType: 'MCOS',
+                testResult: {
+                    economic: 25,
+                    social: 75,
+                    culture: 80,
+                    participation: 65,
+                    type: 'MCOS'
+                }
+            },
+            {
+                email: 'conservative_woman2@test.com',
+                password: 'test1234',
+                name: '이전통',
+                gender: 'female',
+                birthYear: 1993,
+                phone: '010-8765-4321',
+                politicalType: 'GCON',
+                testResult: {
+                    economic: 75,
+                    social: 80,
+                    culture: 85,
+                    participation: 70,
+                    type: 'GCON'
+                }
+            }
+        ];
+        
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : 'https://sidepick.onrender.com';
+        
+        for (const user of testUsers) {
+            try {
+                statusDiv.innerHTML += `<p>Creating account for ${user.name}...</p>`;
+                
+                // 1. 회원가입
+                const signupBody = {
+                    email: user.email,
+                    password: user.password,
+                    name: user.name,
+                    gender: user.gender,
+                    birthdate: `${user.birthYear}-01-01`, // birthdate 형식으로 변경
+                    phone: user.phone,
+                    marketingAgree: false
+                };
+                
+                console.log('Signup request body:', signupBody);
+                
+                const signupResponse = await fetch(`${API_URL}/api/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(signupBody)
+                });
+                
+                console.log('Signup response:', signupResponse.status);
+                
+                if (!signupResponse.ok) {
+                    const errorText = await signupResponse.text();
+                    console.error('Signup error response:', errorText);
+                    
+                    // JSON 파싱 시도
+                    try {
+                        const errorJson = JSON.parse(errorText);
+                        console.error('Error details:', errorJson);
+                    } catch (e) {
+                        // JSON이 아닌 경우
+                    }
+                    
+                    throw new Error(`Signup failed: ${errorText}`);
+                }
+                
+                const signupData = await signupResponse.json();
+                console.log('Signup response data:', signupData);
+                
+                // 토큰 위치 확인 - data.token 또는 token
+                const token = signupData.data?.token || signupData.token;
+                console.log('Token:', token ? `${token.substring(0, 20)}...` : 'No token');
+                
+                if (!token) {
+                    throw new Error('No token received from signup');
+                }
+                
+                statusDiv.innerHTML += `<p>✅ Account created: ${user.email}</p>`;
+                
+                // 잠시 대기 (서버 동기화를 위해)
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // 2. 정치 성향 저장
+                const politicalResponse = await fetch(`${API_URL}/api/user/political-type`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({
+                        politicalType: user.politicalType,
+                        testResult: user.testResult,
+                        testCompletedAt: new Date().toISOString()
+                    })
+                });
+                
+                if (!politicalResponse.ok) {
+                    const error = await politicalResponse.text();
+                    throw new Error(`Political type save failed: ${error}`);
+                }
+                
+                statusDiv.innerHTML += `<p>✅ Political type saved: ${user.politicalType}</p>`;
+                statusDiv.innerHTML += `<p style="color: green;">✅ ${user.name} 계정 생성 완료!</p>`;
+                statusDiv.innerHTML += `<p>Email: ${user.email} / Password: test1234</p>`;
+                statusDiv.innerHTML += '<hr>';
+                
+            } catch (error) {
+                statusDiv.innerHTML += `<p style="color: red;">❌ Error creating ${user.name}: ${error.message}</p>`;
+                console.error('Error:', error);
+            }
+        }
+        
+        statusDiv.innerHTML += '<p style="font-weight: bold;">모든 작업 완료!</p>';
+    }
+    </script>
+</body>
+</html>

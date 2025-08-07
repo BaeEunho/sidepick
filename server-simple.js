@@ -27,6 +27,10 @@ app.use(express.static('.'));
 
 // JWT 비밀키
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-this';
+console.log('=== 서버 시작 시 JWT_SECRET 확인 ===');
+console.log('JWT_SECRET 설정됨:', !!process.env.JWT_SECRET);
+console.log('JWT_SECRET 길이:', JWT_SECRET.length);
+console.log('JWT_SECRET 첫 10자:', JWT_SECRET.substring(0, 10) + '...');
 
 // API 상태 확인 엔드포인트
 app.get('/api', (req, res) => {
@@ -487,6 +491,13 @@ app.post('/api/meetings/apply', async (req, res) => {
     const { meetingId, orientation, meetingInfo, applicationData } = req.body;
     const authHeader = req.headers.authorization;
     
+    console.log('=== CRITICAL: ORIENTATION CHECK ===');
+    console.log('Received orientation:', orientation);
+    console.log('Type of orientation:', typeof orientation);
+    console.log('meetingId:', meetingId);
+    console.log('meetingInfo:', meetingInfo);
+    console.log('===================================');
+    
     if (!authHeader) {
         console.log('인증 헤더 없음');
         return res.status(401).json({ 
@@ -506,12 +517,26 @@ app.post('/api/meetings/apply', async (req, res) => {
             console.log('토큰 디코드 성공:', decoded);
         } catch (jwtError) {
             console.error('JWT 검증 실패:', jwtError.message);
+            console.error('JWT 에러 타입:', jwtError.name);
+            
+            // 토큰 구조 분석
+            try {
+                const tokenParts = token.split('.');
+                if (tokenParts.length === 3) {
+                    const payload = JSON.parse(Buffer.from(tokenParts[1], 'base64').toString());
+                    console.log('토큰 페이로드:', payload);
+                    console.log('토큰 발급시간:', new Date(payload.iat * 1000).toISOString());
+                    console.log('토큰 만료시간:', payload.exp ? new Date(payload.exp * 1000).toISOString() : '없음');
+                }
+            } catch (parseError) {
+                console.error('토큰 구조 분석 실패:', parseError.message);
+            }
             
             // 개발 환경에서만: 기본 시크릿으로 재시도
-            if (process.env.NODE_ENV !== 'production' && JWT_SECRET !== 'your-secret-key-change-this') {
+            if (process.env.NODE_ENV !== 'production' && JWT_SECRET !== process.env.JWT_SECRET) {
                 console.log('기본 시크릿으로 재시도...');
                 try {
-                    decoded = jwt.verify(token, 'your-secret-key-change-this');
+                    decoded = jwt.verify(token, process.env.JWT_SECRET);
                     console.log('기본 시크릿으로 디코드 성공');
                 } catch (retryError) {
                     throw jwtError; // 원래 에러를 다시 throw
@@ -583,7 +608,23 @@ app.post('/api/meetings/apply', async (req, res) => {
         
         console.log('저장할 booking 객체:', JSON.stringify(booking, null, 2));
         
-        await collections.bookings.doc(bookingId).set(booking);
+        try {
+            await collections.bookings.doc(bookingId).set(booking);
+            console.log('Firebase set() 완료');
+            
+            // 저장 확인
+            const savedDoc = await collections.bookings.doc(bookingId).get();
+            if (savedDoc.exists) {
+                console.log('저장 확인: 문서가 성공적으로 저장됨');
+                console.log('저장된 데이터:', savedDoc.data());
+            } else {
+                console.error('저장 실패: 문서를 찾을 수 없음');
+            }
+        } catch (saveError) {
+            console.error('Firebase 저장 중 오류:', saveError);
+            console.error('오류 상세:', saveError.message);
+            throw saveError;
+        }
         
         console.log('모임 신청 저장 완료!');
         
@@ -1031,10 +1072,35 @@ app.get('/api/user/meetings', async (req, res) => {
             });
         }
         
+        // 디버깅: 모든 bookings 확인
+        console.log('=== 디버깅: 전체 bookings 컬렉션 확인 ===');
+        const allBookingsSnapshot = await collections.bookings.limit(10).get();
+        console.log(`전체 bookings 수: ${allBookingsSnapshot.size}`);
+        allBookingsSnapshot.forEach(doc => {
+            const data = doc.data();
+            console.log(`Booking ID: ${doc.id}, Email: ${data.userEmail}, Status: ${data.status}`);
+        });
+        
         // 해당 사용자의 모임 신청 정보 찾기
-        const bookingsSnapshot = await collections.bookings
+        console.log(`\n=== ${decoded.email}의 bookings 검색 ===`);
+        
+        // 이메일 대소문자 문제 해결을 위해 두 가지 방법으로 검색
+        let bookingsSnapshot = await collections.bookings
             .where('userEmail', '==', decoded.email)
             .get();
+            
+        console.log(`첫 번째 쿼리 (${decoded.email}): ${bookingsSnapshot.size}개 찾음`);
+        
+        // 만약 못 찾았으면 소문자로도 시도
+        if (bookingsSnapshot.size === 0) {
+            console.log('소문자로 재검색 시도...');
+            bookingsSnapshot = await collections.bookings
+                .where('userEmail', '==', decoded.email.toLowerCase())
+                .get();
+            console.log(`두 번째 쿼리 (${decoded.email.toLowerCase()}): ${bookingsSnapshot.size}개 찾음`);
+        }
+        
+        console.log(`쿼리 결과: ${bookingsSnapshot.size}개 문서 찾음`);
         
         const userBookings = [];
         bookingsSnapshot.forEach(doc => {

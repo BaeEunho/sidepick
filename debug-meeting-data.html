@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meeting Data Debug</title>
+    <style>
+        body {
+            font-family: monospace;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .section {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .log {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .success { color: #27ae60; }
+        .error { color: #e74c3c; }
+        .warning { color: #f39c12; }
+    </style>
+    <script src="auth-system.js"></script>
+    <script src="data-system.js"></script>
+</head>
+<body>
+    <h1>Meeting Data Debug</h1>
+    
+    <div class="section">
+        <h2>Current State</h2>
+        <button onclick="checkCurrentState()">Check Current State</button>
+        <button onclick="checkFirebaseData()">Check Firebase Data</button>
+        <button onclick="fixMissingData()">Fix Missing Data</button>
+        <div id="stateLog" class="log"></div>
+    </div>
+
+    <script>
+        function log(message, type = 'info') {
+            const logElement = document.getElementById('stateLog');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'success' ? 'success' : type === 'error' ? 'error' : type === 'warning' ? 'warning' : '';
+            logElement.innerHTML += `[${timestamp}] <span class="${className}">${message}</span>\n`;
+            logElement.scrollTop = logElement.scrollHeight;
+        }
+
+        async function checkCurrentState() {
+            log('=== Checking Current State ===');
+            
+            // 1. Check user info
+            const userEmail = sessionStorage.getItem('userEmail');
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn');
+            const politicalType = sessionStorage.getItem('politicalType');
+            const authToken = localStorage.getItem('authToken');
+            
+            log(`User Email: ${userEmail}`);
+            log(`Is Logged In: ${isLoggedIn}`);
+            log(`Political Type: ${politicalType}`);
+            log(`Auth Token: ${authToken ? 'Present' : 'Missing'}`, authToken ? 'success' : 'error');
+            
+            // 2. Check sessionStorage
+            log('\n=== SessionStorage Data ===');
+            const appliedMeetings = sessionStorage.getItem('appliedMeetings');
+            log(`appliedMeetings: ${appliedMeetings || 'null'}`);
+            if (appliedMeetings) {
+                try {
+                    const parsed = JSON.parse(appliedMeetings);
+                    log(`Parsed: ${JSON.stringify(parsed, null, 2)}`);
+                } catch (e) {
+                    log(`Parse error: ${e.message}`, 'error');
+                }
+            }
+            
+            // 3. Check DataSystem
+            log('\n=== DataSystem Check ===');
+            if (window.DataSystem) {
+                log('DataSystem is available', 'success');
+                const bookings = window.DataSystem.getUserBookings(userEmail);
+                log(`DataSystem bookings: ${JSON.stringify(bookings, null, 2)}`);
+                
+                const meetings = window.DataSystem.getMeetings();
+                log(`Available meetings: ${JSON.stringify(meetings, null, 2)}`);
+            } else {
+                log('DataSystem not available', 'error');
+            }
+        }
+
+        async function checkFirebaseData() {
+            log('\n=== Checking Firebase Data ===');
+            
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                log('No auth token found', 'error');
+                return;
+            }
+            
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : 'https://sidepick.onrender.com';
+            
+            try {
+                log(`Calling API: ${API_URL}/api/user/meetings`);
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log(`Response status: ${response.status}`, response.ok ? 'success' : 'error');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`Response data: ${JSON.stringify(data, null, 2)}`);
+                    
+                    if (data.meetings && data.meetings.length > 0) {
+                        log(`Found ${data.meetings.length} meetings`, 'success');
+                        data.meetings.forEach((meeting, idx) => {
+                            log(`\nMeeting ${idx + 1}:`);
+                            log(`  ID: ${meeting.id}`);
+                            log(`  Title: ${meeting.title}`);
+                            log(`  Orientation: ${meeting.orientation}`);
+                            log(`  Status: ${meeting.status}`);
+                        });
+                    } else {
+                        log('No meetings found in Firebase', 'warning');
+                    }
+                } else {
+                    const error = await response.text();
+                    log(`API error: ${error}`, 'error');
+                }
+            } catch (error) {
+                log(`Network error: ${error.message}`, 'error');
+            }
+        }
+
+        async function fixMissingData() {
+            log('\n=== Attempting to Fix Missing Data ===');
+            
+            // Check if there's any booking data in DataSystem
+            const userEmail = sessionStorage.getItem('userEmail');
+            if (!userEmail) {
+                log('No user email found', 'error');
+                return;
+            }
+            
+            if (window.DataSystem) {
+                const bookings = window.DataSystem.getUserBookings(userEmail);
+                if (bookings && bookings.length > 0) {
+                    log('Found bookings in DataSystem, updating appliedMeetings');
+                    
+                    const appliedMeetings = {};
+                    bookings.forEach(booking => {
+                        if (booking.status !== 'cancelled') {
+                            const meetings = window.DataSystem.getMeetings();
+                            const meeting = meetings.find(m => m.id === booking.meetingId);
+                            if (meeting) {
+                                appliedMeetings[meeting.orientation] = {
+                                    meetingId: booking.meetingId,
+                                    status: booking.status,
+                                    appliedAt: booking.createdAt
+                                };
+                                log(`Added ${meeting.orientation} meeting with status ${booking.status}`, 'success');
+                            }
+                        }
+                    });
+                    
+                    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                    log('Updated appliedMeetings in sessionStorage', 'success');
+                    log('Please refresh the page to see the changes');
+                } else {
+                    log('No bookings found in DataSystem', 'warning');
+                }
+            }
+        }
+
+        // Check state on load
+        window.onload = () => {
+            checkCurrentState();
+        };
+    </script>
+</body>
+</html>

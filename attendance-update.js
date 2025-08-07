@@ -75,5 +75,4 @@ function updateAttendanceDisplay(attendanceData) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM 로드 완료 - 참석 인원 업데이트 시작');
     fetchAttendanceFromServer();
-    setInterval(fetchAttendanceFromServer, 5000);
 });

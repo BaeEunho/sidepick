@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버튼 업데이트 디버그</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .status-pending {
+            background: #95a5a6;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        .status-confirmed {
+            background: #27ae60;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 3px;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>버튼 업데이트 디버그 페이지</h1>
+    
+    <div class="debug-section">
+        <h2>현재 세션 데이터</h2>
+        <h3>appliedMeetings:</h3>
+        <pre id="appliedMeetings"></pre>
+        
+        <h3>selectedMeeting:</h3>
+        <pre id="selectedMeeting"></pre>
+        
+        <h3>사용자 정보:</h3>
+        <pre id="userInfo"></pre>
+    </div>
+    
+    <div class="debug-section">
+        <h2>테스트 시나리오</h2>
+        <button onclick="simulateApplication('progressive')">진보 모임 신청 시뮬레이션</button>
+        <button onclick="simulateApplication('conservative')">보수 모임 신청 시뮬레이션</button>
+        <button onclick="simulatePaymentComplete('progressive')">진보 모임 결제 완료 시뮬레이션</button>
+        <button onclick="simulatePaymentComplete('conservative')">보수 모임 결제 완료 시뮬레이션</button>
+        <button onclick="clearApplications()">신청 내역 초기화</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>버튼 상태 체크</h2>
+        <button onclick="checkButtonState()">index.html 버튼 상태 확인</button>
+        <button onclick="window.open('index.html', '_blank')">index.html 새 탭에서 열기</button>
+        <button onclick="window.open('index.html?from=payment-complete', '_blank')">index.html 열기 (결제완료 파라미터)</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>실행 로그</h2>
+        <div id="log"></div>
+    </div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+        }
+        
+        function updateDisplay() {
+            // appliedMeetings 표시
+            const appliedMeetings = sessionStorage.getItem('appliedMeetings');
+            document.getElementById('appliedMeetings').textContent = 
+                appliedMeetings ? JSON.stringify(JSON.parse(appliedMeetings), null, 2) : 'null';
+            
+            // selectedMeeting 표시
+            const selectedMeeting = sessionStorage.getItem('selectedMeeting');
+            document.getElementById('selectedMeeting').textContent = 
+                selectedMeeting ? JSON.stringify(JSON.parse(selectedMeeting), null, 2) : 'null';
+            
+            // 사용자 정보 표시
+            const userInfo = {
+                isLoggedIn: sessionStorage.getItem('isLoggedIn'),
+                userEmail: sessionStorage.getItem('userEmail'),
+                userGender: sessionStorage.getItem('userGender'),
+                politicalType: sessionStorage.getItem('politicalType')
+            };
+            document.getElementById('userInfo').textContent = JSON.stringify(userInfo, null, 2);
+        }
+        
+        function simulateApplication(orientation) {
+            // 미팅 정보 설정
+            const meetingInfo = {
+                id: `meeting_${orientation}_${Date.now()}`,
+                title: `${orientation === 'progressive' ? '진보' : '보수'} 성향 소개팅`,
+                date: '12월 15일 토요일',
+                location: '📍 강남역 카페',
+                time: '⏰ 오후 2시 - 4시',
+                fee: 45000,
+                orientation: orientation
+            };
+            sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
+            
+            // 신청 정보 추가
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                status: 'pending',
+                appliedAt: new Date().toISOString(),
+                orientation: orientation,
+                gender: sessionStorage.getItem('userGender') || 'male',
+                meetingId: meetingInfo.id
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            
+            log(`${orientation} 모임 신청 시뮬레이션 완료`, 'success');
+            updateDisplay();
+        }
+        
+        function simulatePaymentComplete(orientation) {
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            if (appliedMeetings[orientation]) {
+                // payment-complete-script.js와 동일하게 status를 'payment_completed'로 설정
+                appliedMeetings[orientation].status = 'payment_completed';
+                appliedMeetings[orientation].paymentCompletedAt = new Date().toISOString();
+                appliedMeetings[orientation].paymentInfo = {
+                    orderId: 'TEST-' + Date.now(),
+                    method: 'transfer'
+                };
+                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                log(`${orientation} 모임 payment_completed 상태로 변경`, 'success');
+                log(`Status: ${appliedMeetings[orientation].status}`, 'info');
+            } else {
+                log(`${orientation} 모임 신청 내역이 없습니다`, 'error');
+            }
+            updateDisplay();
+        }
+        
+        function clearApplications() {
+            sessionStorage.removeItem('appliedMeetings');
+            sessionStorage.removeItem('selectedMeeting');
+            log('신청 내역 초기화 완료', 'success');
+            updateDisplay();
+        }
+        
+        function checkButtonState() {
+            // 디버깅 코드 팝업
+            const popup = window.open('', 'button-check', 'width=800,height=600');
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            
+            popup.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>버튼 상태 디버깅 코드</title>
+                    <style>
+                        body { font-family: monospace; padding: 20px; }
+                        pre { background: #f0f0f0; padding: 15px; border-radius: 5px; overflow-x: auto; }
+                        .section { margin: 20px 0; }
+                        h3 { color: #e60012; }
+                        .copy-btn { 
+                            background: #3498db; 
+                            color: white; 
+                            border: none; 
+                            padding: 5px 10px; 
+                            border-radius: 3px; 
+                            cursor: pointer; 
+                            margin-left: 10px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <h2>🔍 브라우저 콘솔에서 실행할 디버깅 코드</h2>
+                    
+                    <div class="section">
+                        <h3>1. 현재 상태 확인</h3>
+                        <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code1').textContent)">복사</button>
+                        <pre id="code1">
+// === 전체 상태 확인 ===
+console.log('=== DEBUGGING BUTTON UPDATE ISSUE ===');
+console.log('현재 시간:', new Date().toISOString());
+
+// 1. SessionStorage 확인
+const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+console.log('\\n1. appliedMeetings:', appliedMeetings);
+
+// 2. 각 orientation별 상태 확인
+['progressive', 'conservative'].forEach(orientation => {
+    if (appliedMeetings[orientation]) {
+        console.log(\`\\n\${orientation} 모임 상태:\`);
+        console.log('- status:', appliedMeetings[orientation].status);
+        console.log('- paymentCompletedAt:', appliedMeetings[orientation].paymentCompletedAt);
+        console.log('- is payment_completed?', appliedMeetings[orientation].status === 'payment_completed');
+    }
+});
+
+// 3. userMeetingInfo 전역 변수 확인
+console.log('\\n2. userMeetingInfo 전역 변수:', window.userMeetingInfo);
+
+// 4. 버튼 상태 확인
+console.log('\\n3. 현재 버튼 상태:');
+document.querySelectorAll('.meeting-header').forEach(header => {
+    const orientation = header.classList.contains('progressive') ? 'progressive' : 'conservative';
+    const button = header.parentElement.querySelector('.btn-apply');
+    if (button) {
+        console.log(\`\\n\${orientation} 버튼:\`);
+        console.log('- 텍스트:', button.textContent);
+        console.log('- 클래스:', button.className);
+        console.log('- 스타일:', button.getAttribute('style'));
+        console.log('- disabled:', button.disabled);
+    }
+});</pre>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>2. updateMeetingButtons 함수 추적</h3>
+                        <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code2').textContent)">복사</button>
+                        <pre id="code2">
+// updateMeetingButtons 함수 실행 및 추적
+console.log('\\n=== updateMeetingButtons 실행 추적 ===');
+
+// 임시로 fetchUserMeetingInfo 함수 래핑
+const originalFetch = window.fetchUserMeetingInfo;
+window.fetchUserMeetingInfo = async function() {
+    console.log('fetchUserMeetingInfo 호출됨');
+    await originalFetch.call(this);
+    console.log('fetchUserMeetingInfo 완료, userMeetingInfo:', window.userMeetingInfo);
+};
+
+// updateMeetingButtonsUI 함수 래핑
+const originalUpdateUI = window.updateMeetingButtonsUI;
+window.updateMeetingButtonsUI = function() {
+    console.log('updateMeetingButtonsUI 호출됨');
+    originalUpdateUI.call(this);
+};
+
+// updateButtonForMeeting 함수 래핑
+const originalUpdateButton = window.updateButtonForMeeting;
+window.updateButtonForMeeting = function(orientation, applicationData) {
+    console.log(\`updateButtonForMeeting 호출: \${orientation}\`, applicationData);
+    originalUpdateButton.call(this, orientation, applicationData);
+};
+
+// 이제 함수 실행
+await updateMeetingButtons();
+console.log('updateMeetingButtons 실행 완료');</pre>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>3. 강제 업데이트</h3>
+                        <button class="copy-btn" onclick="navigator.clipboard.writeText(document.getElementById('code3').textContent)">복사</button>
+                        <pre id="code3">
+// payment_completed 상태로 수동 업데이트 후 버튼 새로고침
+const orientation = 'conservative'; // 또는 'progressive'
+
+// 1. appliedMeetings 업데이트
+const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+if (appliedMeetings[orientation]) {
+    console.log('이전 상태:', appliedMeetings[orientation].status);
+    appliedMeetings[orientation].status = 'payment_completed';
+    appliedMeetings[orientation].paymentCompletedAt = new Date().toISOString();
+    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+    console.log('새 상태:', appliedMeetings[orientation].status);
+}
+
+// 2. userMeetingInfo 직접 업데이트
+if (window.userMeetingInfo) {
+    window.userMeetingInfo[orientation] = {
+        status: 'payment_completed',
+        meetingId: appliedMeetings[orientation]?.meetingId || 'test-123'
+    };
+    console.log('userMeetingInfo 업데이트됨:', window.userMeetingInfo);
+}
+
+// 3. 버튼 UI 직접 업데이트
+updateButtonForMeeting(orientation, window.userMeetingInfo[orientation]);
+
+// 4. 버튼 상태 확인
+setTimeout(() => {
+    const header = document.querySelector(\`.meeting-header.\${orientation}\`);
+    const button = header?.parentElement.querySelector('.btn-apply');
+    console.log('업데이트 후 버튼:', {
+        text: button?.textContent,
+        class: button?.className,
+        style: button?.getAttribute('style')
+    });
+}, 100);</pre>
+                    </div>
+                    
+                    <div class="section">
+                        <h3>현재 appliedMeetings 상태:</h3>
+                        <pre>${JSON.stringify(appliedMeetings, null, 2)}</pre>
+                    </div>
+                </body>
+                </html>
+            `);
+        }
+        
+        // 초기 표시
+        updateDisplay();
+        
+        // 세션 스토리지 변경 감지
+        window.addEventListener('storage', function(e) {
+            if (e.key === 'appliedMeetings' || e.key === 'selectedMeeting') {
+                log(`세션 스토리지 변경 감지: ${e.key}`, 'info');
+                updateDisplay();
+            }
+        });
+        
+        // 로그인 상태 시뮬레이션
+        if (!sessionStorage.getItem('isLoggedIn')) {
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userEmail', 'test@example.com');
+            sessionStorage.setItem('userGender', 'male');
+            sessionStorage.setItem('politicalType', 'MPOS');
+            log('테스트용 로그인 상태 설정 완료', 'success');
+            updateDisplay();
+        }
+    </script>
+</body>
+</html>

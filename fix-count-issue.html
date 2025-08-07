@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>카운트 문제 해결</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        button {
+            padding: 12px 24px;
+            margin: 10px 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            background: #3498db;
+            color: white;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        pre {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>참가자 수 문제 해결</h1>
+        
+        <div class="warning">
+            <h3>문제 상황</h3>
+            <p>보수 여성 3명만 신청했는데 4명으로 표시되어 마감 처리됨</p>
+            <p>원인: sessionStorage의 confirmedMeetingCounts가 잘못된 값을 가지고 있음</p>
+        </div>
+        
+        <h2>해결 방법</h2>
+        
+        <button onclick="resetConservativeFemaleCount()">보수 여성 카운트만 리셋</button>
+        <button onclick="resetAllCounts()">모든 카운트 리셋</button>
+        <button onclick="showCurrentStatus()">현재 상태 확인</button>
+        
+        <h3>현재 상태</h3>
+        <pre id="status"></pre>
+        
+        <h3>실행 결과</h3>
+        <div id="result"></div>
+    </div>
+    
+    <script>
+        function showCurrentStatus() {
+            const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
+            const meetingCounts = JSON.parse(sessionStorage.getItem('meetingCounts') || '{}');
+            
+            const status = {
+                confirmedMeetingCounts: confirmedCounts,
+                meetingCounts: meetingCounts,
+                appliedMeetings: JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}')
+            };
+            
+            document.getElementById('status').textContent = JSON.stringify(status, null, 2);
+        }
+        
+        function resetConservativeFemaleCount() {
+            // confirmedMeetingCounts 가져오기
+            const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
+            
+            // 보수 여성 카운트를 3으로 설정
+            if (!confirmedCounts.conservative) {
+                confirmedCounts.conservative = { male: 0, female: 0 };
+            }
+            confirmedCounts.conservative.female = 3;
+            
+            // 저장
+            sessionStorage.setItem('confirmedMeetingCounts', JSON.stringify(confirmedCounts));
+            
+            // meetingCounts도 동일하게 수정
+            const meetingCounts = JSON.parse(sessionStorage.getItem('meetingCounts') || '{}');
+            if (!meetingCounts.conservative) {
+                meetingCounts.conservative = { male: 0, female: 0 };
+            }
+            meetingCounts.conservative.female = 3;
+            sessionStorage.setItem('meetingCounts', JSON.stringify(meetingCounts));
+            
+            document.getElementById('result').innerHTML = 
+                '<p style="color: green;">✓ 보수 여성 카운트를 3명으로 수정했습니다.</p>' +
+                '<p>이제 다시 신청할 수 있습니다. <a href="index.html">메인 페이지로 이동</a></p>';
+            
+            showCurrentStatus();
+        }
+        
+        function resetAllCounts() {
+            // 모든 카운트 초기화
+            const emptyCount = {
+                progressive: { male: 0, female: 0 },
+                conservative: { male: 0, female: 0 }
+            };
+            
+            sessionStorage.setItem('confirmedMeetingCounts', JSON.stringify(emptyCount));
+            sessionStorage.setItem('meetingCounts', JSON.stringify(emptyCount));
+            
+            document.getElementById('result').innerHTML = 
+                '<p style="color: green;">✓ 모든 카운트를 초기화했습니다.</p>' +
+                '<p><a href="index.html">메인 페이지로 이동</a></p>';
+            
+            showCurrentStatus();
+        }
+        
+        // 초기 상태 표시
+        showCurrentStatus();
+    </script>
+</body>
+</html>

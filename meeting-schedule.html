@@ -170,7 +170,7 @@
     </footer>
 
 
-    <script src="schedule-script.js?v=6"></script>
+    <script src="schedule-script.js?v=7"></script>
     <script src="attendance-update.js"></script>
     
     <!-- 참석 인원 실시간 업데이트 -->
@@ -178,7 +178,6 @@
         (function() {
             console.log('참석 인원 업데이트 스크립트 시작');
             
-            // 즉시 실행하고 5초마다 반복
             function updateAttendance() {
                 console.log('참석 인원 업데이트 중...');
                 
@@ -232,12 +231,7 @@
                     });
             }
             
-            // 페이지 로드 후 1초 뒤에 시작
-            setTimeout(function() {
-                updateAttendance();
-                // 5초마다 업데이트
-                setInterval(updateAttendance, 5000);
-            }, 1000);
+            updateAttendance()
         })();
     </script>
 </body>

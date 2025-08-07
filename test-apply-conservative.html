@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conservative Meeting Apply Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        .warning { color: orange; }
+    </style>
+</head>
+<body>
+    <h1>Conservative Meeting Apply 테스트</h1>
+    
+    <div class="section">
+        <h2>1. 현재 상태 확인</h2>
+        <button onclick="checkCurrentState()">현재 상태 확인</button>
+        <pre id="current-state"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>2. Conservative 모임 신청 시뮬레이션</h2>
+        <button onclick="simulateConservativeApply()">Conservative 모임 신청 테스트</button>
+        <p>이 버튼은 index.html의 보수 모임 신청과 동일한 방식으로 작동합니다.</p>
+    </div>
+    
+    <div class="section">
+        <h2>3. API 직접 호출 테스트</h2>
+        <button onclick="testDirectAPI()">API 직접 호출 (Conservative)</button>
+        <button onclick="testDirectAPI('progressive')">API 직접 호출 (Progressive)</button>
+    </div>
+    
+    <div class="section">
+        <h2>4. Firebase 데이터 확인</h2>
+        <button onclick="checkFirebaseData()">Firebase 데이터 조회</button>
+        <pre id="firebase-data"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>실행 로그</h2>
+        <div id="log" class="log"></div>
+    </div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : type === 'warning' ? 'warning' : '';
+            logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function checkCurrentState() {
+            const state = {
+                user: {
+                    email: sessionStorage.getItem('userEmail'),
+                    politicalType: sessionStorage.getItem('politicalType'),
+                    gender: sessionStorage.getItem('userGender'),
+                    orientation: getOrientationFromPoliticalType()
+                },
+                auth: {
+                    isLoggedIn: sessionStorage.getItem('isLoggedIn'),
+                    authToken: !!localStorage.getItem('authToken')
+                },
+                meetings: JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}')
+            };
+            
+            document.getElementById('current-state').textContent = JSON.stringify(state, null, 2);
+            log('현재 상태 확인 완료');
+        }
+        
+        function getOrientationFromPoliticalType() {
+            const politicalType = sessionStorage.getItem('politicalType');
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            return progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+        }
+        
+        function simulateConservativeApply() {
+            // index.html과 동일한 방식으로 meeting-apply.html로 이동
+            const orientation = 'conservative';
+            const meetingId = `meeting_${orientation}_${Date.now()}`;
+            const url = `meeting-apply.html?meetingId=${meetingId}&orientation=${orientation}`;
+            
+            log(`Redirecting to: ${url}`);
+            log('orientation parameter: ' + orientation, 'warning');
+            
+            // 3초 후 이동
+            setTimeout(() => {
+                window.location.href = url;
+            }, 3000);
+        }
+        
+        async function testDirectAPI(orientation = 'conservative') {
+            log(`=== API 직접 호출 테스트: ${orientation} ===`);
+            
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                log('Auth token이 없습니다!', 'error');
+                return;
+            }
+            
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : 'https://sidepick.onrender.com';
+            
+            const requestData = {
+                meetingId: `test_meeting_${orientation}_${Date.now()}`,
+                orientation: orientation,
+                meetingInfo: {
+                    title: `${orientation === 'conservative' ? '보수' : '진보'} 성향 소개팅`,
+                    date: '12월 15일 토요일',
+                    location: '강남역 카페'
+                },
+                applicationData: {
+                    payment: 'bank'
+                }
+            };
+            
+            log('Request data: ' + JSON.stringify(requestData, null, 2));
+            
+            try {
+                const response = await fetch(`${API_URL}/api/meetings/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                const result = await response.json();
+                log(`Response status: ${response.status}`);
+                log('Response data: ' + JSON.stringify(result, null, 2));
+                
+                if (response.ok) {
+                    log(`✓ ${orientation} 모임 신청 성공!`, 'success');
+                    
+                    // sessionStorage 업데이트
+                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                    appliedMeetings[orientation] = {
+                        status: 'pending',
+                        meetingId: requestData.meetingId,
+                        appliedAt: new Date().toISOString()
+                    };
+                    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                    log('sessionStorage 업데이트 완료', 'success');
+                } else {
+                    log(`✗ 신청 실패: ${result.message}`, 'error');
+                }
+            } catch (error) {
+                log(`API 호출 오류: ${error.message}`, 'error');
+            }
+        }
+        
+        async function checkFirebaseData() {
+            log('=== Firebase 데이터 조회 ===');
+            
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                log('Auth token이 없습니다!', 'error');
+                return;
+            }
+            
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : 'https://sidepick.onrender.com';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                document.getElementById('firebase-data').textContent = JSON.stringify(data, null, 2);
+                
+                if (data.meetings && data.meetings.length > 0) {
+                    log(`Firebase에서 ${data.meetings.length}개의 모임 데이터 조회됨`, 'success');
+                    data.meetings.forEach(meeting => {
+                        const emoji = meeting.orientation === 'conservative' ? '🔵' : '🔴';
+                        log(`${emoji} ${meeting.orientation} - Status: ${meeting.status} - ID: ${meeting.id}`);
+                    });
+                } else {
+                    log('Firebase에 모임 데이터가 없습니다', 'warning');
+                }
+            } catch (error) {
+                log(`Firebase 조회 오류: ${error.message}`, 'error');
+            }
+        }
+        
+        // 초기 상태 표시
+        checkCurrentState();
+        
+        // 정치 성향 코드 함수 정의
+        window.getOrientationFromCode = function(code) {
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            return progressiveCodes.includes(code) ? 'progressive' : 'conservative';
+        };
+    </script>
+</body>
+</html>

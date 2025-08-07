@@ -270,16 +270,27 @@ function saveParticipantInfo() {
     // 신청 목록에 추가 (입금 대기 상태로) - 참가자 수는 증가시키지 않음
     const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting'));
     const userGender = sessionStorage.getItem('userGender');
+    console.log('=== Saving participant info ===');
+    console.log('Meeting info:', meetingInfo);
+    console.log('User gender:', userGender);
+    
     if (meetingInfo && userGender) {
         const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+        console.log('Current applied meetings:', appliedMeetings);
+        
         appliedMeetings[meetingInfo.orientation] = {
             status: 'pending',  // 입금 대기
             appliedAt: new Date().toISOString(),
             orientation: meetingInfo.orientation,
             gender: userGender,
-            meetingId: meetingInfo.id
+            meetingId: meetingInfo.id || meetingInfo.meetingId  // Handle both possible ID fields
         };
+        
+        console.log('Updated applied meetings:', appliedMeetings);
         sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+        console.log('Applied meetings saved to sessionStorage');
+    } else {
+        console.error('Missing meetingInfo or userGender');
     }
 }
 

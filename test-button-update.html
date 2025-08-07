@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Button Update Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>버튼 업데이트 테스트</h1>
+    
+    <div class="test-section">
+        <h2>1단계: 현재 상태 확인</h2>
+        <button onclick="checkCurrentState()">현재 상태 확인</button>
+        <pre id="current-state"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>2단계: fetchUserMeetingInfo 테스트</h2>
+        <button onclick="testFetchUserMeetingInfo()">fetchUserMeetingInfo 실행</button>
+        <pre id="fetch-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>3단계: 수동으로 userMeetingInfo 설정</h2>
+        <button onclick="setManualData('conservative', 'pending')">Conservative - Pending</button>
+        <button onclick="setManualData('conservative', 'payment_completed')">Conservative - Payment Completed</button>
+        <button onclick="setManualData('conservative', 'paid')">Conservative - Paid</button>
+        <button onclick="setManualData('progressive', 'paid')">Progressive - Paid</button>
+        <pre id="manual-result"></pre>
+    </div>
+    
+    <div class="test-section">
+        <h2>4단계: 버튼 업데이트 테스트</h2>
+        <button onclick="testButtonUpdate()">updateMeetingButtonsUI 실행</button>
+        <button onclick="window.open('index.html', '_blank')">index.html 열기</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>실행 로그</h2>
+        <div id="log" class="log"></div>
+    </div>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        function checkCurrentState() {
+            const state = {
+                sessionStorage: {
+                    userEmail: sessionStorage.getItem('userEmail'),
+                    politicalType: sessionStorage.getItem('politicalType'),
+                    userGender: sessionStorage.getItem('userGender'),
+                    appliedMeetings: JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}')
+                },
+                localStorage: {
+                    authToken: !!localStorage.getItem('authToken')
+                }
+            };
+            
+            document.getElementById('current-state').textContent = JSON.stringify(state, null, 2);
+            log('현재 상태 확인 완료');
+        }
+        
+        async function testFetchUserMeetingInfo() {
+            log('fetchUserMeetingInfo 테스트 시작...');
+            
+            // index.html을 iframe으로 로드
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            iframe.src = 'index.html';
+            document.body.appendChild(iframe);
+            
+            // iframe이 로드될 때까지 대기
+            await new Promise(resolve => {
+                iframe.onload = resolve;
+            });
+            
+            const iframeWindow = iframe.contentWindow;
+            
+            if (iframeWindow.fetchUserMeetingInfo) {
+                log('fetchUserMeetingInfo 함수 발견');
+                
+                // 함수 실행
+                await iframeWindow.fetchUserMeetingInfo();
+                
+                const result = {
+                    userMeetingInfo: iframeWindow.userMeetingInfo,
+                    politicalType: sessionStorage.getItem('politicalType'),
+                    userOrientation: iframeWindow.getOrientationFromCode ? 
+                        iframeWindow.getOrientationFromCode(sessionStorage.getItem('politicalType')) : 
+                        'unknown'
+                };
+                
+                document.getElementById('fetch-result').textContent = JSON.stringify(result, null, 2);
+                log('fetchUserMeetingInfo 실행 완료');
+                
+                // 전역 변수로 저장
+                window.testUserMeetingInfo = iframeWindow.userMeetingInfo;
+            } else {
+                log('fetchUserMeetingInfo 함수를 찾을 수 없음');
+            }
+            
+            // iframe 제거
+            document.body.removeChild(iframe);
+        }
+        
+        function setManualData(orientation, status) {
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                status: status,
+                meetingId: `test_meeting_${Date.now()}`,
+                appliedAt: new Date().toISOString()
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            
+            document.getElementById('manual-result').textContent = JSON.stringify(appliedMeetings, null, 2);
+            log(`${orientation} 모임을 ${status} 상태로 설정`);
+        }
+        
+        async function testButtonUpdate() {
+            log('버튼 업데이트 테스트 시작...');
+            
+            // index.html 페이지에서 함수 실행
+            const newWindow = window.open('index.html', 'test-window');
+            
+            // 페이지 로드 대기
+            await new Promise(resolve => setTimeout(resolve, 3000));
+            
+            // 콘솔에 명령 전달
+            newWindow.console.log('=== 테스트 페이지에서 실행 ===');
+            newWindow.fetchUserMeetingInfo && await newWindow.fetchUserMeetingInfo();
+            newWindow.updateMeetingButtonsUI && newWindow.updateMeetingButtonsUI();
+            
+            log('index.html에서 버튼 업데이트 함수 실행 완료');
+            log('브라우저 개발자 도구에서 결과를 확인하세요');
+        }
+        
+        // 초기 상태 표시
+        checkCurrentState();
+    </script>
+</body>
+</html>

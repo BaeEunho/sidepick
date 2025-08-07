@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Status Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        button:hover {
+            opacity: 0.8;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+        .status-box {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        .status-pending { background: #f39c12; color: white; }
+        .status-payment_completed { background: #8B5CF6; color: white; }
+        .status-paid { background: #27ae60; color: white; }
+        .status-confirmed { background: #27ae60; color: white; }
+    </style>
+</head>
+<body>
+    <h1>Firebase Status 디버깅 페이지</h1>
+    
+    <div class="debug-section">
+        <h2>현재 로그인 정보</h2>
+        <div id="login-info"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Firebase API 테스트</h2>
+        <button onclick="testFirebaseAPI()">Firebase API 호출 테스트</button>
+        <button onclick="testWithDifferentPorts()">포트 3000 vs 3001 테스트</button>
+        <div id="api-result"></div>
+    </div>
+    
+    <div class="debug-section">
+        <h2>현재 세션 데이터</h2>
+        <button onclick="displaySessionData()">세션 데이터 표시</button>
+        <pre id="session-data"></pre>
+    </div>
+    
+    <div class="debug-section">
+        <h2>버튼 상태 시뮬레이션</h2>
+        <button onclick="simulateButtonUpdate('pending')">Pending 상태로 업데이트</button>
+        <button onclick="simulateButtonUpdate('payment_completed')">Payment Completed 상태로 업데이트</button>
+        <button onclick="simulateButtonUpdate('paid')">Paid 상태로 업데이트</button>
+        <button onclick="window.open('index.html', '_blank')">index.html 열기</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>실행 로그</h2>
+        <div id="log"></div>
+    </div>
+    
+    <script>
+        function log(message, type = 'info') {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : '';
+            logDiv.innerHTML += `<div class="${className}">[${time}] ${message}</div>`;
+        }
+        
+        function displayLoginInfo() {
+            const loginInfo = document.getElementById('login-info');
+            const userEmail = sessionStorage.getItem('userEmail');
+            const politicalType = sessionStorage.getItem('politicalType');
+            const userGender = sessionStorage.getItem('userGender');
+            const authToken = localStorage.getItem('authToken');
+            
+            loginInfo.innerHTML = `
+                <p><strong>Email:</strong> ${userEmail || 'Not logged in'}</p>
+                <p><strong>Political Type:</strong> ${politicalType || 'Not set'}</p>
+                <p><strong>Gender:</strong> ${userGender || 'Not set'}</p>
+                <p><strong>Auth Token:</strong> ${authToken ? '✓ Present' : '✗ Missing'}</p>
+            `;
+        }
+        
+        async function testFirebaseAPI() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>Testing Firebase API...</p>';
+            
+            try {
+                const authToken = localStorage.getItem('authToken');
+                if (!authToken) {
+                    resultDiv.innerHTML = '<p class="error">No auth token found!</p>';
+                    return;
+                }
+                
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
+                
+                log(`Calling ${API_URL}/api/user/meetings`);
+                
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                
+                resultDiv.innerHTML = `
+                    <p><strong>Status:</strong> ${response.status}</p>
+                    <p><strong>Response:</strong></p>
+                    <pre>${JSON.stringify(data, null, 2)}</pre>
+                `;
+                
+                if (data.meetings && data.meetings.length > 0) {
+                    data.meetings.forEach(meeting => {
+                        const statusBox = document.createElement('div');
+                        statusBox.className = `status-box status-${meeting.status}`;
+                        statusBox.textContent = `${meeting.orientation} 모임: ${meeting.status}`;
+                        resultDiv.appendChild(statusBox);
+                    });
+                }
+                
+                log(`API response: ${response.status}`, response.ok ? 'success' : 'error');
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                log(`API error: ${error.message}`, 'error');
+            }
+        }
+        
+        async function testWithDifferentPorts() {
+            const resultDiv = document.getElementById('api-result');
+            resultDiv.innerHTML = '<p>Testing different ports...</p>';
+            
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                resultDiv.innerHTML = '<p class="error">No auth token found!</p>';
+                return;
+            }
+            
+            const ports = ['3000', '3001'];
+            const results = {};
+            
+            for (const port of ports) {
+                try {
+                    const url = `http://localhost:${port}/api/user/meetings`;
+                    log(`Testing port ${port}...`);
+                    
+                    const response = await fetch(url, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    results[port] = {
+                        status: response.status,
+                        ok: response.ok,
+                        data: data
+                    };
+                    
+                    log(`Port ${port}: ${response.status}`, response.ok ? 'success' : 'error');
+                } catch (error) {
+                    results[port] = {
+                        error: error.message
+                    };
+                    log(`Port ${port}: ${error.message}`, 'error');
+                }
+            }
+            
+            resultDiv.innerHTML = `
+                <h3>Port Test Results:</h3>
+                <pre>${JSON.stringify(results, null, 2)}</pre>
+            `;
+        }
+        
+        function displaySessionData() {
+            const sessionDataDiv = document.getElementById('session-data');
+            const appliedMeetings = sessionStorage.getItem('appliedMeetings');
+            const selectedMeeting = sessionStorage.getItem('selectedMeeting');
+            
+            const data = {
+                appliedMeetings: appliedMeetings ? JSON.parse(appliedMeetings) : null,
+                selectedMeeting: selectedMeeting ? JSON.parse(selectedMeeting) : null,
+                userEmail: sessionStorage.getItem('userEmail'),
+                politicalType: sessionStorage.getItem('politicalType'),
+                userGender: sessionStorage.getItem('userGender')
+            };
+            
+            sessionDataDiv.textContent = JSON.stringify(data, null, 2);
+            log('Session data displayed');
+        }
+        
+        function simulateButtonUpdate(status) {
+            const politicalType = sessionStorage.getItem('politicalType');
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            const userOrientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+            
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[userOrientation] = {
+                status: status,
+                meetingId: `test_meeting_${Date.now()}`,
+                appliedAt: new Date().toISOString()
+            };
+            
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            log(`Updated ${userOrientation} meeting to status: ${status}`, 'success');
+            
+            // Display updated data
+            displaySessionData();
+        }
+        
+        // Initialize
+        displayLoginInfo();
+        log('Page loaded');
+        
+        // Check if getOrientationFromCode function exists
+        if (window.opener && window.opener.getOrientationFromCode) {
+            const testCode = 'MCOS';
+            const result = window.opener.getOrientationFromCode(testCode);
+            log(`getOrientationFromCode('${testCode}') = '${result}'`);
+        }
+    </script>
+</body>
+</html>

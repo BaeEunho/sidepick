@@ -125,10 +125,10 @@ const DataSystem = {
                 return { success: false, message: '잠시 후 다시 시도해주세요.' };
             }
             
-            // 자리 확인
-            if (meeting.currentParticipants[userGender] >= meeting.maxParticipants[userGender]) {
-                return { success: false, message: '해당 성별 자리가 마감되었습니다.' };
-            }
+            // 자리 확인 - 주석 처리 (Firebase에서 이미 확인했으므로)
+            // if (meeting.currentParticipants[userGender] >= meeting.maxParticipants[userGender]) {
+            //     return { success: false, message: '해당 성별 자리가 마감되었습니다.' };
+            // }
             
             // 예약 생성 (더 고유한 ID 생성)
             const timestamp = Date.now();

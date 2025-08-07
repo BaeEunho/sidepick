@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>appliedMeetings Debug</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .debug-section {
+            background: #f5f5f5;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        pre {
+            background: #fff;
+            padding: 10px;
+            border: 1px solid #ccc;
+            overflow-x: auto;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .log-entry {
+            margin: 5px 0;
+            padding: 5px;
+            background: #e9ecef;
+            border-left: 3px solid #007bff;
+        }
+        .timestamp {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <h1>appliedMeetings SessionStorage Debug</h1>
+    
+    <div class="debug-section">
+        <h2>Current appliedMeetings Value</h2>
+        <pre id="current-value">Loading...</pre>
+        <button onclick="refreshValue()">Refresh</button>
+        <button onclick="clearAppliedMeetings()">Clear appliedMeetings</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Modification History</h2>
+        <div id="modification-log"></div>
+        <button onclick="clearLog()">Clear Log</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Test Actions</h2>
+        <button onclick="addTestMeeting('progressive')">Add Progressive Meeting</button>
+        <button onclick="addTestMeeting('conservative')">Add Conservative Meeting</button>
+        <button onclick="window.open('meeting-schedule.html', '_blank')">Open Meeting Schedule</button>
+        <button onclick="window.open('index.html', '_blank')">Open Index</button>
+    </div>
+    
+    <div class="debug-section">
+        <h2>Storage Event Monitor</h2>
+        <div id="storage-events"></div>
+    </div>
+
+    <script>
+        // Override sessionStorage.setItem to track modifications
+        const originalSetItem = sessionStorage.setItem;
+        const modificationLog = [];
+        
+        sessionStorage.setItem = function(key, value) {
+            if (key === 'appliedMeetings') {
+                const logEntry = {
+                    timestamp: new Date().toISOString(),
+                    value: value,
+                    stack: new Error().stack,
+                    page: window.location.pathname
+                };
+                modificationLog.push(logEntry);
+                updateLog();
+                
+                console.log('appliedMeetings modified:', logEntry);
+            }
+            return originalSetItem.call(this, key, value);
+        };
+        
+        // Monitor storage events
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'appliedMeetings') {
+                const eventLog = document.getElementById('storage-events');
+                const entry = document.createElement('div');
+                entry.className = 'log-entry';
+                entry.innerHTML = `
+                    <span class="timestamp">${new Date().toISOString()}</span><br>
+                    Storage event detected from another tab<br>
+                    Old value: ${e.oldValue}<br>
+                    New value: ${e.newValue}
+                `;
+                eventLog.insertBefore(entry, eventLog.firstChild);
+            }
+        });
+        
+        function refreshValue() {
+            const value = sessionStorage.getItem('appliedMeetings');
+            const display = document.getElementById('current-value');
+            if (value) {
+                try {
+                    const parsed = JSON.parse(value);
+                    display.textContent = JSON.stringify(parsed, null, 2);
+                } catch (e) {
+                    display.textContent = 'Invalid JSON: ' + value;
+                }
+            } else {
+                display.textContent = 'No appliedMeetings in sessionStorage';
+            }
+        }
+        
+        function clearAppliedMeetings() {
+            sessionStorage.removeItem('appliedMeetings');
+            refreshValue();
+            alert('appliedMeetings cleared');
+        }
+        
+        function addTestMeeting(orientation) {
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            appliedMeetings[orientation] = {
+                appliedAt: new Date().toISOString(),
+                status: 'pending',
+                meetingId: `test-${Date.now()}`,
+                title: `Test ${orientation} Meeting`,
+                date: '2024-02-01',
+                location: 'Test Location'
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            refreshValue();
+        }
+        
+        function updateLog() {
+            const logDiv = document.getElementById('modification-log');
+            logDiv.innerHTML = '';
+            
+            modificationLog.slice(-10).reverse().forEach(entry => {
+                const div = document.createElement('div');
+                div.className = 'log-entry';
+                
+                // Extract caller from stack trace
+                const stackLines = entry.stack.split('\n');
+                const callerLine = stackLines[2] || stackLines[1] || 'Unknown';
+                
+                div.innerHTML = `
+                    <span class="timestamp">${entry.timestamp}</span><br>
+                    <strong>Page:</strong> ${entry.page}<br>
+                    <strong>Caller:</strong> ${callerLine.trim()}<br>
+                    <details>
+                        <summary>Value</summary>
+                        <pre>${JSON.stringify(JSON.parse(entry.value), null, 2)}</pre>
+                    </details>
+                `;
+                logDiv.appendChild(div);
+            });
+        }
+        
+        function clearLog() {
+            modificationLog.length = 0;
+            updateLog();
+        }
+        
+        // Initial load
+        refreshValue();
+        
+        // Auto-refresh every 2 seconds
+        setInterval(refreshValue, 2000);
+    </script>
+</body>
+</html>

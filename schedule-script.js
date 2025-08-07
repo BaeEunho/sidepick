@@ -21,7 +21,7 @@ async function fetchAttendanceFromServer() {
     console.log('fetchAttendanceFromServer 호출됨');
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
+            ? 'http://localhost:3001' 
             : 'https://sidepick.onrender.com';
         console.log('API URL:', `${API_URL}/api/meetings/attendance`);
         
@@ -94,12 +94,9 @@ function updateAttendanceDisplay(attendanceData) {
     });
 }
 
-// 참석 인원 자동 업데이트 시작
+// 참석 인원 업데이트 시작 (한 번만)
 function startAttendanceUpdates() {
     fetchAttendanceFromServer();
-    
-    // 5초마다 자동 업데이트
-    setInterval(fetchAttendanceFromServer, 5000);
 }
 
 // 사용자 모임 신청 정보를 저장할 전역 변수
@@ -135,6 +132,7 @@ async function fetchUserMeetingInfo() {
                     }
                 }
             });
+            console.log("dataSystem", bookings);
         }
         
         // 세션 스토리지에서도 확인 (이전 버전 호환성)
@@ -148,6 +146,7 @@ async function fetchUserMeetingInfo() {
                 };
             }
         });
+        console.log("session", appliedMeetings)
         
         // 서버에서도 확인 (있을 경우)
         const token = localStorage.getItem('authToken');
@@ -165,6 +164,8 @@ async function fetchUserMeetingInfo() {
                 
                 if (response.ok) {
                     const data = await response.json();
+
+                    console.log("response", response)
                     
                     if (data.meetings && data.meetings.length > 0) {
                         data.meetings.forEach(meeting => {
@@ -242,10 +243,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             // 사용자의 모임 신청 정보 가져오기
-            fetchUserMeetingInfo().then(() => {
+            fetchUserMeetingInfo().then(async () => {
                 // 성별에 따른 신청 가능 여부 표시
                 if (userGender) {
-                    updateMeetingAvailability(userGender);
+                    await updateMeetingAvailability(userGender);
                 }
             });
         } else {
@@ -374,44 +375,73 @@ function displayUserGender(gender) {
     orientationElement.innerHTML = `<span class="gender-info">${genderText}</span> | ${currentText}`;
 }
 
-// 참가자 수 업데이트 (확정된 인원만 표시)
-function updateParticipantCounts() {
-    // 확정된 참가자 수만 표시
-    const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
-    
-    // 진보 모임 카운트 업데이트
-    const progressiveMeeting = document.querySelector('#progressive-meetings .meeting-card');
-    if (progressiveMeeting) {
-        const maleCount = progressiveMeeting.querySelector('.male-count');
-        const femaleCount = progressiveMeeting.querySelector('.female-count');
-        if (maleCount) {
-            maleCount.textContent = `👨 남자 ${confirmedCounts.progressive?.male || 0}/4명`;
-            maleCount.setAttribute('data-current', confirmedCounts.progressive?.male || 0);
+// 참가자 수 업데이트 (Firebase에서 실제 데이터 가져오기)
+async function updateParticipantCounts() {
+    try {
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : 'https://sidepick.onrender.com';
+        
+        const response = await fetch(`${API_URL}/api/meetings/attendance`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            let progressiveMale = 0, progressiveFemale = 0;
+            let conservativeMale = 0, conservativeFemale = 0;
+            
+            // Firebase 데이터 집계
+            Object.values(data.data).forEach(meeting => {
+                if (meeting.orientation === 'progressive') {
+                    progressiveMale += meeting.male;
+                    progressiveFemale += meeting.female;
+                } else if (meeting.orientation === 'conservative') {
+                    conservativeMale += meeting.male;
+                    conservativeFemale += meeting.female;
+                }
+            });
+            
+            // 진보 모임 카운트 업데이트
+            const progressiveMeeting = document.querySelector('#progressive-meetings .meeting-card');
+            if (progressiveMeeting) {
+                const maleCount = progressiveMeeting.querySelector('.male-count');
+                const femaleCount = progressiveMeeting.querySelector('.female-count');
+                if (maleCount) {
+                    maleCount.textContent = `👨 남자 ${progressiveMale}/4명`;
+                    maleCount.setAttribute('data-current', progressiveMale);
+                }
+                if (femaleCount) {
+                    femaleCount.textContent = `👩 여자 ${progressiveFemale}/4명`;
+                    femaleCount.setAttribute('data-current', progressiveFemale);
+                }
+            }
+            
+            // 보수 모임 카운트 업데이트
+            const conservativeMeeting = document.querySelector('#conservative-meetings .meeting-card');
+            if (conservativeMeeting) {
+                const maleCount = conservativeMeeting.querySelector('.male-count');
+                const femaleCount = conservativeMeeting.querySelector('.female-count');
+                if (maleCount) {
+                    maleCount.textContent = `👨 남자 ${conservativeMale}/4명`;
+                    maleCount.setAttribute('data-current', conservativeMale);
+                }
+                if (femaleCount) {
+                    femaleCount.textContent = `👩 여자 ${conservativeFemale}/4명`;
+                    femaleCount.setAttribute('data-current', conservativeFemale);
+                }
+            }
+            
+            console.log('참가자 수 업데이트 완료:', {
+                progressive: { male: progressiveMale, female: progressiveFemale },
+                conservative: { male: conservativeMale, female: conservativeFemale }
+            });
         }
-        if (femaleCount) {
-            femaleCount.textContent = `👩 여자 ${confirmedCounts.progressive?.female || 0}/4명`;
-            femaleCount.setAttribute('data-current', confirmedCounts.progressive?.female || 0);
-        }
-    }
-    
-    // 보수 모임 카운트 업데이트
-    const conservativeMeeting = document.querySelector('#conservative-meetings .meeting-card');
-    if (conservativeMeeting) {
-        const maleCount = conservativeMeeting.querySelector('.male-count');
-        const femaleCount = conservativeMeeting.querySelector('.female-count');
-        if (maleCount) {
-            maleCount.textContent = `👨 남자 ${confirmedCounts.conservative?.male || 0}/4명`;
-            maleCount.setAttribute('data-current', confirmedCounts.conservative?.male || 0);
-        }
-        if (femaleCount) {
-            femaleCount.textContent = `👩 여자 ${confirmedCounts.conservative?.female || 0}/4명`;
-            femaleCount.setAttribute('data-current', confirmedCounts.conservative?.female || 0);
-        }
+    } catch (error) {
+        console.error('참가자 수 조회 실패:', error);
     }
 }
 
 // 소개팅 신청 기능
-function applyMeeting(button) {
+window.applyMeeting = async function(button) {
     // 중복 클릭 방지
     if (button.disabled || button.classList.contains('processing')) {
         return;
@@ -452,58 +482,101 @@ function applyMeeting(button) {
         return;
     }
     
-    // 실제 DataSystem을 사용한 미팅 신청
-    if (window.DataSystem) {
-        const meetings = window.DataSystem.getMeetings(meetingOrientation);
-        if (meetings.length > 0) {
-            const meeting = meetings[0]; // 현재는 각 성향별로 하나씩만 있음
-            const result = window.DataSystem.applyForMeeting(meeting.id, userEmail, userGender);
+    // 2. Firebase에서 실제 참가자 수 확인 (마감 여부)
+    try {
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : 'https://sidepick.onrender.com';
+        
+        const response = await fetch(`${API_URL}/api/meetings/attendance`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            let currentCount = 0;
             
-            if (result.success) {
-                alert(result.message);
-                window.location.href = `booking-confirm.html?bookingId=${result.bookingId}`;
-            } else {
-                alert(result.message);
+            // Firebase 데이터에서 해당 성향, 성별의 참가자 수 계산
+            console.log('=== applyMeeting Firebase 데이터 확인 ===');
+            console.log('전체 meetings:', data.data);
+            
+            Object.values(data.data).forEach(meeting => {
+                console.log(`Meeting check: orientation=${meeting.orientation}, ${userGender}=${meeting[userGender]}`);
+                if (meeting.orientation === meetingOrientation) {
+                    currentCount += meeting[userGender] || 0;
+                    console.log(`Matched! Adding ${meeting[userGender] || 0} to count`);
+                }
+            });
+            
+            console.log(`최종 계산: ${meetingOrientation} ${userGender} 현재 참가자 수:`, currentCount);
+            
+            // 4명 이상이면 마감
+            if (currentCount >= 4) {
+                alert(`죄송합니다. ${meetingOrientation === 'progressive' ? '진보' : '보수'} 성향 ${userGender === 'male' ? '남성' : '여성'} 모집이 마감되었습니다.\n\n현재 ${currentCount}/4명`);
                 button.disabled = false;
                 button.classList.remove('processing');
                 button.textContent = originalText;
+                return;
             }
-            return;
         }
+    } catch (error) {
+        console.error('참가자 수 확인 실패:', error);
+        // 에러가 나도 계속 진행 (서버 문제일 수 있으므로)
     }
     
-    // 폴백: 기존 방식
-    const meetingTitle = meetingCard.querySelector('h4').textContent;
-    const meetingDate = meetingCard.querySelector('.day').textContent + '일';
-    const meetingMonth = meetingCard.querySelector('.month').textContent;
-    const meetingWeekday = meetingCard.querySelector('.weekday').textContent;
-    const meetingLocation = meetingCard.querySelector('.location').textContent;
-    const meetingTime = meetingCard.querySelector('.time').textContent;
+    // DataSystem 대신 직접 meeting-apply.html로 이동
+    console.log('DataSystem 건너뛰고 직접 신청 페이지로 이동');
     
-    // 미팅 정보를 sessionStorage에 저장
+    // 미팅 ID 생성
+    const meetingId = `meeting_${meetingOrientation}_${Date.now()}`;
+    
+    // sessionStorage에 미팅 정보 저장 (meeting-apply.html에서 사용)
     const meetingInfo = {
         id: meetingId,
-        title: meetingTitle,
-        date: `${meetingMonth} ${meetingDate} ${meetingWeekday}`,
-        location: meetingLocation,
-        time: meetingTime,
+        title: `${meetingOrientation === 'progressive' ? '진보' : '보수'} 성향 소개팅`,
+        date: meetingCard.querySelector('.day').textContent + '일 ' + meetingCard.querySelector('.weekday').textContent,
+        location: meetingCard.querySelector('.location').textContent,
+        time: meetingCard.querySelector('.time').textContent,
         fee: 45000,
-        userType: userType,
         orientation: meetingOrientation
     };
     
     sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
     
-    // meeting-apply.html로 직접 이동 (meetingId와 orientation 파라미터 전달)
-    const meetingIdParam = `meeting_${meetingOrientation}_${Date.now()}`;
-    window.location.href = `meeting-apply.html?meetingId=${meetingIdParam}&orientation=${meetingOrientation}`;
+    // meeting-apply.html로 이동
+    window.location.href = `meeting-apply.html?meetingId=${meetingId}&orientation=${meetingOrientation}`;
 }
 
 // 성별에 따른 신청 가능 여부 업데이트
-function updateMeetingAvailability(userGender) {
-    const confirmedCounts = JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}');
+async function updateMeetingAvailability(userGender) {
     const userType = sessionStorage.getItem('politicalType');
     const userOrientation = getOrientationFromCode(userType);
+    
+    // Firebase에서 실제 참석 인원 가져오기
+    let firebaseCounts = { progressive: { male: 0, female: 0 }, conservative: { male: 0, female: 0 } };
+    
+    try {
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3001' 
+            : 'https://sidepick.onrender.com';
+        
+        const response = await fetch(`${API_URL}/api/meetings/attendance`);
+        const data = await response.json();
+        
+        if (data.success && data.data) {
+            // Firebase 데이터 집계
+            Object.values(data.data).forEach(meeting => {
+                if (meeting.orientation === 'progressive') {
+                    firebaseCounts.progressive.male += meeting.male;
+                    firebaseCounts.progressive.female += meeting.female;
+                } else if (meeting.orientation === 'conservative') {
+                    firebaseCounts.conservative.male += meeting.male;
+                    firebaseCounts.conservative.female += meeting.female;
+                }
+            });
+        }
+        console.log('Firebase 참석 인원:', firebaseCounts);
+    } catch (error) {
+        console.error('Firebase 참석 인원 조회 실패:', error);
+    }
     
     document.querySelectorAll('.meeting-card').forEach(card => {
         const isProgressive = card.closest('#progressive-meetings') !== null;
@@ -516,7 +589,20 @@ function updateMeetingAvailability(userGender) {
         const femaleCountElement = card.querySelector('.female-count');
         const applyBtn = card.querySelector('.apply-btn');
         
-        const currentCount = confirmedCounts[userOrientation]?.[userGender] || 0;
+        if (!applyBtn) {
+            console.error('Apply button not found in card:', card);
+            return;
+        }
+        
+        // Firebase 데이터 사용
+        const currentCount = firebaseCounts[userOrientation]?.[userGender] || 0;
+        
+        console.log(`=== 버튼 업데이트 디버그 ===`);
+        console.log(`Meeting: ${meetingOrientation}`);
+        console.log(`User: ${userOrientation} ${userGender}`);
+        console.log(`Current count: ${currentCount}`);
+        console.log(`Is full? ${currentCount >= 4}`);
+        console.log(`User already applied? ${!!userMeetingInfo[meetingOrientation]}`);
         
         // 이미 신청한 경우 (전역 변수에서 확인)
         if (userMeetingInfo[meetingOrientation]) {
@@ -544,6 +630,17 @@ function updateMeetingAvailability(userGender) {
                     sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
                     window.location.href = `booking-confirm.html?reapply=true`;
                 };
+            } else if (status === 'payment_completed') {
+                // 결제 안내 완료, 입금 대기 중
+                applyBtn.textContent = '입금 대기 중';
+                applyBtn.classList.add('payment-waiting');
+                applyBtn.classList.remove('confirmed', 'notify-btn');
+                applyBtn.disabled = false;
+                applyBtn.style.backgroundColor = '#8B5CF6';
+                applyBtn.onclick = () => {
+                    // 입금 안내 페이지로 다시 이동 가능
+                    window.location.href = `booking-confirm.html?reapply=true`;
+                };
             } else if (status === 'confirmed' || status === 'paid') {
                 applyBtn.textContent = '참가 확정';
                 applyBtn.classList.add('confirmed');
@@ -553,14 +650,20 @@ function updateMeetingAvailability(userGender) {
         } 
         // 해당 성별이 마감된 경우
         else if (currentCount >= 4) {
-            applyBtn.textContent = '알림 받기';
-            applyBtn.classList.add('notify-btn');
-            applyBtn.onclick = () => showAlarmModal();
+            console.log('마감 처리: currentCount >= 4');
+            applyBtn.textContent = '마감';
+            applyBtn.classList.add('disabled');
+            applyBtn.classList.remove('notify-btn');
+            applyBtn.disabled = true;
+            applyBtn.onclick = null;
         } else {
             // 신청 가능한 상태로 초기화
+            console.log('신청 가능 처리: currentCount < 4');
+            console.log('Button before update:', applyBtn.textContent);
             applyBtn.textContent = '신청하기';
             applyBtn.classList.remove('waiting', 'confirmed', 'notify-btn');
-            applyBtn.onclick = () => applyMeeting(applyBtn);
+            applyBtn.onclick = () => window.applyMeeting(applyBtn);
+            console.log('Button after update:', applyBtn.textContent);
         }
         
         // 성별별 자리 상태 표시
@@ -586,6 +689,11 @@ function incrementParticipantCount(meetingOrientation, gender) {
     }
     counts[meetingOrientation][gender] = Math.min((counts[meetingOrientation][gender] || 0) + 1, 4);
     sessionStorage.setItem('meetingCounts', JSON.stringify(counts));
+}
+
+// 알림 모달 표시 함수
+function showAlarmModal() {
+    alert('죄송합니다. 해당 성별의 모집이 마감되었습니다.\n다음 모임 오픈 시 알려드리겠습니다.');
 }
 
 // 뒤로가기 방지 (테스트 결과 유지)

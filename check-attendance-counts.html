@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>참석 인원 확인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 10px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: #f2f2f2;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeeba;
+            color: #856404;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>참석 인원 수 확인</h1>
+    
+    <div class="section">
+        <h2>1. SessionStorage 확인</h2>
+        <button onclick="checkSessionStorage()">SessionStorage 확인</button>
+        <pre id="session-data"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>2. Firebase 참석 인원 확인</h2>
+        <button onclick="checkFirebaseAttendance()">Firebase 참석 인원 조회</button>
+        <div id="firebase-attendance"></div>
+    </div>
+    
+    <div class="section">
+        <h2>3. 실제 신청 내역 확인</h2>
+        <button onclick="checkUserMeetings()">내 신청 내역 확인</button>
+        <pre id="user-meetings"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>4. SessionStorage 초기화</h2>
+        <button onclick="resetCounts()">참가자 수 초기화</button>
+        <button onclick="clearAllMeetingData()">모든 모임 데이터 초기화</button>
+    </div>
+    
+    <script>
+        function checkSessionStorage() {
+            const data = {
+                confirmedMeetingCounts: JSON.parse(sessionStorage.getItem('confirmedMeetingCounts') || '{}'),
+                meetingCounts: JSON.parse(sessionStorage.getItem('meetingCounts') || '{}'),
+                appliedMeetings: JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}'),
+                userGender: sessionStorage.getItem('userGender'),
+                politicalType: sessionStorage.getItem('politicalType')
+            };
+            
+            document.getElementById('session-data').textContent = JSON.stringify(data, null, 2);
+        }
+        
+        async function checkFirebaseAttendance() {
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : 'https://sidepick.onrender.com';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/meetings/attendance`);
+                const data = await response.json();
+                
+                let html = '<h3>Firebase 참석 인원</h3>';
+                
+                if (data.success && data.data) {
+                    html += '<table>';
+                    html += '<tr><th>모임 ID</th><th>성향</th><th>남성</th><th>여성</th><th>총원</th></tr>';
+                    
+                    let totalProgMale = 0, totalProgFemale = 0;
+                    let totalConsMale = 0, totalConsFemale = 0;
+                    
+                    Object.entries(data.data).forEach(([id, meeting]) => {
+                        html += `<tr>
+                            <td>${id}</td>
+                            <td>${meeting.orientation}</td>
+                            <td>${meeting.male}</td>
+                            <td>${meeting.female}</td>
+                            <td>${meeting.male + meeting.female}</td>
+                        </tr>`;
+                        
+                        if (meeting.orientation === 'progressive') {
+                            totalProgMale += meeting.male;
+                            totalProgFemale += meeting.female;
+                        } else if (meeting.orientation === 'conservative') {
+                            totalConsMale += meeting.male;
+                            totalConsFemale += meeting.female;
+                        }
+                    });
+                    
+                    html += '</table>';
+                    
+                    html += '<h4>총계</h4>';
+                    html += `<p><strong>진보 모임:</strong> 남성 ${totalProgMale}명, 여성 ${totalProgFemale}명</p>`;
+                    html += `<p><strong>보수 모임:</strong> 남성 ${totalConsMale}명, 여성 ${totalConsFemale}명</p>`;
+                    
+                    if (totalConsFemale >= 4) {
+                        html += '<div class="warning">⚠️ 보수 여성이 4명 이상입니다. 마감 처리되어야 합니다.</div>';
+                    }
+                } else {
+                    html += '<p>데이터를 가져올 수 없습니다.</p>';
+                }
+                
+                document.getElementById('firebase-attendance').innerHTML = html;
+            } catch (error) {
+                document.getElementById('firebase-attendance').innerHTML = 
+                    `<p style="color: red;">오류: ${error.message}</p>`;
+            }
+        }
+        
+        async function checkUserMeetings() {
+            const authToken = localStorage.getItem('authToken');
+            if (!authToken) {
+                document.getElementById('user-meetings').textContent = '로그인이 필요합니다.';
+                return;
+            }
+            
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : 'https://sidepick.onrender.com';
+            
+            try {
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken}`
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('user-meetings').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('user-meetings').textContent = `오류: ${error.message}`;
+            }
+        }
+        
+        function resetCounts() {
+            // confirmedMeetingCounts 초기화
+            sessionStorage.setItem('confirmedMeetingCounts', JSON.stringify({
+                progressive: { male: 0, female: 0 },
+                conservative: { male: 0, female: 0 }
+            }));
+            
+            // meetingCounts도 초기화
+            sessionStorage.setItem('meetingCounts', JSON.stringify({
+                progressive: { male: 0, female: 0 },
+                conservative: { male: 0, female: 0 }
+            }));
+            
+            alert('참가자 수가 초기화되었습니다. 페이지를 새로고침하세요.');
+            checkSessionStorage();
+        }
+        
+        function clearAllMeetingData() {
+            if (confirm('정말 모든 모임 관련 데이터를 초기화하시겠습니까?')) {
+                sessionStorage.removeItem('confirmedMeetingCounts');
+                sessionStorage.removeItem('meetingCounts');
+                sessionStorage.removeItem('appliedMeetings');
+                sessionStorage.removeItem('selectedMeeting');
+                
+                alert('모든 모임 데이터가 초기화되었습니다.');
+                checkSessionStorage();
+            }
+        }
+        
+        // 초기 로드
+        checkSessionStorage();
+    </script>
+</body>
+</html>

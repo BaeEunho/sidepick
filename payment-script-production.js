@@ -74,6 +74,7 @@ async function confirmPayment() {
         });
         
         if (response.ok) {
+            console.log(response)
             // 결제 완료 페이지로 이동
             window.location.href = '/payment-complete.html';
         } else {

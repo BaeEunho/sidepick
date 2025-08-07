@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Firebase Orientation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .section {
+            background: #f0f0f0;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        .warning {
+            background: #ff6b6b;
+            color: white;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .log {
+            background: #fff;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>Firebase Orientation 수정 도구</h1>
+    
+    <div class="section">
+        <h2>현재 문제</h2>
+        <p>Firebase bookings 컬렉션에 conservative 모임이 progressive로 잘못 저장되어 있습니다.</p>
+        <p>보수 성향 사용자가 보수 모임을 신청했는데, progressive로 저장되어 버튼이 업데이트되지 않는 문제가 있습니다.</p>
+    </div>
+    
+    <div class="section">
+        <h2>1. 현재 Firebase 데이터 확인</h2>
+        <button onclick="checkCurrentData()">현재 데이터 확인</button>
+        <pre id="current-data"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>2. 수정 방법</h2>
+        <p>관리자가 Firebase Console에서 직접 수정하거나, 아래 코드를 사용하여 수정할 수 있습니다.</p>
+        
+        <h3>브라우저 콘솔에서 실행할 코드:</h3>
+        <button onclick="copyFixCode()">코드 복사</button>
+        <pre id="fix-code">
+// 이 코드는 서버 측에서 실행해야 합니다
+// 클라이언트에서는 보안상 직접 수정이 불가능합니다
+
+// 1. 먼저 현재 사용자의 정치 성향 확인
+const politicalType = sessionStorage.getItem('politicalType');
+const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+const userOrientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+console.log('사용자 정치 성향:', politicalType);
+console.log('사용자 orientation:', userOrientation);
+
+// 2. 현재 Firebase 데이터 확인
+const authToken = localStorage.getItem('authToken');
+const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
+
+const response = await fetch(`${API_URL}/api/user/meetings`, {
+    headers: { 'Authorization': `Bearer ${authToken}` }
+});
+const data = await response.json();
+console.log('현재 Firebase 데이터:', data);
+
+// 3. 잘못된 orientation 찾기
+if (data.meetings) {
+    data.meetings.forEach(meeting => {
+        if (meeting.orientation !== userOrientation && meeting.status !== 'cancelled') {
+            console.log('잘못된 orientation 발견:', {
+                id: meeting.id,
+                현재: meeting.orientation,
+                정정: userOrientation
+            });
+        }
+    });
+}</pre>
+    </div>
+    
+    <div class="section">
+        <h2>3. 임시 해결책</h2>
+        <button onclick="temporaryFix()">임시로 sessionStorage 수정</button>
+        <p>Firebase를 수정할 수 없다면, 임시로 sessionStorage를 수정하여 버튼이 보이도록 할 수 있습니다.</p>
+    </div>
+    
+    <div class="section">
+        <h2>실행 로그</h2>
+        <div id="log" class="log"></div>
+    </div>
+    
+    <script>
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+        
+        async function checkCurrentData() {
+            try {
+                const authToken = localStorage.getItem('authToken');
+                const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
+                
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: { 'Authorization': `Bearer ${authToken}` }
+                });
+                const data = await response.json();
+                
+                const politicalType = sessionStorage.getItem('politicalType');
+                const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+                const userOrientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+                
+                const result = {
+                    userInfo: {
+                        email: sessionStorage.getItem('userEmail'),
+                        politicalType: politicalType,
+                        expectedOrientation: userOrientation
+                    },
+                    firebaseMeetings: data.meetings,
+                    problems: []
+                };
+                
+                if (data.meetings) {
+                    data.meetings.forEach(meeting => {
+                        if (meeting.orientation !== userOrientation && meeting.status !== 'cancelled') {
+                            result.problems.push({
+                                meetingId: meeting.id,
+                                currentOrientation: meeting.orientation,
+                                shouldBe: userOrientation,
+                                status: meeting.status
+                            });
+                        }
+                    });
+                }
+                
+                document.getElementById('current-data').textContent = JSON.stringify(result, null, 2);
+                log(`데이터 확인 완료. 문제 발견: ${result.problems.length}개`);
+            } catch (error) {
+                log(`오류 발생: ${error.message}`);
+            }
+        }
+        
+        function copyFixCode() {
+            const code = document.getElementById('fix-code').textContent;
+            navigator.clipboard.writeText(code);
+            log('코드가 클립보드에 복사되었습니다');
+        }
+        
+        function temporaryFix() {
+            const politicalType = sessionStorage.getItem('politicalType');
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            const userOrientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
+            
+            // appliedMeetings에서 잘못된 orientation을 수정
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            const newAppliedMeetings = {};
+            
+            Object.keys(appliedMeetings).forEach(orientation => {
+                if (orientation !== userOrientation) {
+                    // 잘못된 orientation이면 올바른 것으로 이동
+                    newAppliedMeetings[userOrientation] = appliedMeetings[orientation];
+                    log(`${orientation} → ${userOrientation} 로 변경`);
+                } else {
+                    newAppliedMeetings[orientation] = appliedMeetings[orientation];
+                }
+            });
+            
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(newAppliedMeetings));
+            log('sessionStorage 수정 완료. index.html을 새로고침하세요.');
+        }
+    </script>
+</body>
+</html>
