@@ -2370,31 +2370,60 @@
                     // 에러가 나도 계속 진행 (서버 문제일 수 있으므로)
                 }
                 
-                // 이미 신청한 모임인지 확인 - 전역 변수 userMeetingInfo 확인
-                if (userMeetingInfo[orientation]) {
-                    const status = userMeetingInfo[orientation].status;
-                    if (status === 'pending') {
-                        alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
-                    } else if (status === 'confirmed' || status === 'paid') {
-                        alert('이미 입금 완료되어 참가 확정된 소개팅입니다.');
-                    } else {
-                        alert('이미 신청하신 소개팅입니다.');
+                // Firebase에서 실시간으로 이미 신청했는지 확인
+                try {
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        const API_URL = window.location.hostname === 'localhost' 
+                            ? 'http://localhost:3001' 
+                            : 'https://sidepick.onrender.com';
+                            
+                        const response = await fetch(`${API_URL}/api/user/meetings?t=${Date.now()}`, {
+                            headers: {
+                                'Authorization': `Bearer ${token}`,
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
+                            }
+                        });
+                        
+                        if (response.ok) {
+                            const data = await response.json();
+                            console.log('실시간 모임 신청 상태 확인 (index.html):', data);
+                            
+                            if (data.meetings && data.meetings.length > 0) {
+                                // 해당 성향의 모임에 이미 신청했는지 확인
+                                const existingApplication = data.meetings.find(meeting => 
+                                    meeting.orientation === orientation && 
+                                    meeting.status !== 'cancelled'
+                                );
+                                
+                                if (existingApplication) {
+                                    const status = existingApplication.status;
+                                    if (status === 'pending') {
+                                        alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
+                                    } else if (status === 'confirmed' || status === 'paid') {
+                                        alert('이미 입금 완료되어 참가 확정된 소개팅입니다.');
+                                    } else {
+                                        alert('이미 신청하신 소개팅입니다.');
+                                    }
+                                    
+                                    // userMeetingInfo 업데이트
+                                    userMeetingInfo[orientation] = {
+                                        status: existingApplication.status,
+                                        meetingId: existingApplication.id || existingApplication.meetingId
+                                    };
+                                    
+                                    // UI 즉시 업데이트
+                                    updateMeetingButtonsUI();
+                                    
+                                    return;
+                                }
+                            }
+                        }
                     }
-                    return;
-                }
-                
-                // sessionStorage도 확인 (이전 버전 호환성)
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                if (appliedMeetings[orientation]) {
-                    const status = appliedMeetings[orientation].status;
-                    if (status === 'pending') {
-                        alert('이미 신청하신 소개팅입니다.\n현재 입금 대기 중입니다.');
-                    } else if (status === 'confirmed' || status === 'paid') {
-                        alert('이미 입금 완료되어 참가 확정된 소개팅입니다.');
-                    } else {
-                        alert('이미 신청하신 소개팅입니다.');
-                    }
-                    return;
+                } catch (error) {
+                    console.error('실시간 신청 상태 확인 실패:', error);
+                    // 에러가 나도 계속 진행
                 }
                 
                 // 모든 조건을 만족하면 신청 페이지로 이동
@@ -3136,6 +3165,40 @@
             
             console.log('=== END DIAGNOSIS ===');
         };
+        
+        // 모바일 브라우저 캐시 처리 - 페이지가 다시 보일 때 Firebase 데이터 새로고침
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+                // 페이지가 캐시에서 복원된 경우
+                console.log('페이지가 캐시에서 복원됨 - Firebase 데이터 새로고침');
+                
+                // 로그인 상태 확인 후 데이터 새로고침
+                if (typeof AuthManager !== 'undefined') {
+                    const userState = AuthManager.getUserState();
+                    if (userState.type !== 'anonymous') {
+                        // 약간의 지연 후 업데이트 (DOM이 완전히 로드되도록)
+                        setTimeout(() => {
+                            updateMeetingButtons();
+                        }, 100);
+                    }
+                }
+            }
+        });
+        
+        // 모바일에서 탭 전환 시 데이터 새로고침
+        document.addEventListener('visibilitychange', function() {
+            if (!document.hidden) {
+                // 페이지가 다시 활성화됨
+                console.log('페이지가 다시 활성화됨 - Firebase 데이터 새로고침');
+                
+                if (typeof AuthManager !== 'undefined') {
+                    const userState = AuthManager.getUserState();
+                    if (userState.type !== 'anonymous') {
+                        updateMeetingButtons();
+                    }
+                }
+            }
+        });
     </script>
 
     
