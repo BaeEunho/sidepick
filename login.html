@@ -395,7 +395,7 @@
             try {
                 // 실제 서버 연결 시도
                 const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000' 
+                    ? 'http://localhost:3001' 
                     : 'https://sidepick.onrender.com';
                     
                 const response = await fetch(`${API_URL}/api/password/reset-request`, {
@@ -436,7 +436,7 @@
             try {
                 // 실제 서버 연결 시도
                 const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3000' 
+                    ? 'http://localhost:3001' 
                     : 'https://sidepick.onrender.com';
                     
                 const response = await fetch(`${API_URL}/api/password/verify-reset-code`, {

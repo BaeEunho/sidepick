@@ -304,7 +304,9 @@
             
             try {
                 // 실제 서버로 요청 (서버가 있을 경우)
-                const SERVER_URL = 'http://localhost:3000'; // 통합 서버로 변경
+                const SERVER_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                 const response = await fetch(`${SERVER_URL}/api/email/send-verification`, {
                     method: 'POST',
                     headers: {
@@ -362,7 +364,9 @@
             
             try {
                 // 실제 서버로 확인 요청
-                const SERVER_URL = 'http://localhost:3000';
+                const SERVER_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                 const response = await fetch(`${SERVER_URL}/api/email/verify-code`, {
                     method: 'POST',
                     headers: {
