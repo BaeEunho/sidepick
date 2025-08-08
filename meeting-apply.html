@@ -263,9 +263,10 @@
                 // info-value 요소들을 더 정확하게 선택
                 const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
                 if (infoValues.length >= 5) {
-                    infoValues[0].textContent = data.date;
-                    infoValues[1].textContent = data.location;
-                    infoValues[3].textContent = data.age;
+                    infoValues[0].textContent = data.date;      // 날짜
+                    infoValues[1].textContent = data.location;   // 장소
+                    infoValues[2].textContent = '45,000원';      // 참가비
+                    infoValues[3].textContent = data.age;        // 연령대
                     
                     // Firebase에서 가져온 실제 참가자 수 표시
                     const counts = participantCounts[type] || { male: 0, female: 0 };
@@ -287,9 +288,10 @@
                     const data = meetingData[orientation];
                     const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
                     if (infoValues.length >= 5) {
-                        infoValues[0].textContent = data.date;
-                        infoValues[1].textContent = data.location;
-                        infoValues[3].textContent = data.age;
+                        infoValues[0].textContent = data.date;      // 날짜
+                        infoValues[1].textContent = data.location;   // 장소
+                        infoValues[2].textContent = '45,000원';      // 참가비
+                        infoValues[3].textContent = data.age;        // 연령대
                         
                         // Firebase에서 가져온 실제 참가자 수 표시
                         const counts = participantCounts[orientation] || { male: 0, female: 0 };
@@ -325,11 +327,30 @@
             const userState = AuthManager.getUserState();
             const politicalType = sessionStorage.getItem('politicalType');
             
-            // 모임 정보 가져오기 (화면에서)
+            // 모임 정보 가져오기 (화면에서) - 라벨 기반으로 안전하게 가져오기
             const meetingTitle = document.querySelector('.meeting-info-card h2').textContent;
-            const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
-            const meetingDate = infoValues[0] ? infoValues[0].textContent : '날짜 미정';
-            const meetingLocation = infoValues[1] ? infoValues[1].textContent : '장소 미정';
+            
+            // 각 info-item에서 라벨과 값을 매칭하여 가져오기
+            let meetingDate = '날짜 미정';
+            let meetingLocation = '장소 미정';
+            
+            const infoItems = document.querySelectorAll('.meeting-info-card .info-item');
+            infoItems.forEach(item => {
+                const label = item.querySelector('.info-label')?.textContent;
+                const value = item.querySelector('.info-value')?.textContent;
+                
+                if (label === '날짜') {
+                    meetingDate = value || '날짜 미정';
+                } else if (label === '장소') {
+                    meetingLocation = value || '장소 미정';
+                }
+            });
+            
+            console.log('=== 모임 정보 수집 ===');
+            console.log('제목:', meetingTitle);
+            console.log('날짜:', meetingDate);
+            console.log('장소:', meetingLocation);
+            console.log('===================');
             
             // API 요청 데이터 구성
             const requestData = {
