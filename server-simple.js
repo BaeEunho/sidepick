@@ -1,6 +1,6 @@
 // Firebase 기반 서버
 const express = require('express');
-const bcrypt = require('bcrypt');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
@@ -1498,6 +1498,92 @@ app.post('/api/meetings/confirm-payment', async (req, res) => {
     }
 });
 
+// 미팅 상태 업데이트 API
+app.put('/api/meetings/:meetingId/status', async (req, res) => {
+    const { meetingId } = req.params;
+    const { status, paymentInfo } = req.body;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '인증이 필요합니다.' 
+        });
+    }
+    
+    try {
+        // JWT 토큰 검증
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        const userEmail = decoded.email;
+        
+        console.log(`상태 업데이트 요청: ${userEmail} - ${meetingId} - ${status}`);
+        
+        // 해당 사용자의 booking 찾기
+        const bookingsSnapshot = await collections.bookings
+            .where('userEmail', '==', userEmail)
+            .where('meetingId', '==', meetingId)
+            .where('status', '!=', 'cancelled')
+            .get();
+        
+        if (bookingsSnapshot.empty) {
+            console.log('예약을 찾을 수 없음');
+            return res.status(404).json({
+                success: false,
+                message: '예약을 찾을 수 없습니다.'
+            });
+        }
+        
+        // 첫 번째 매칭되는 booking 업데이트
+        const bookingDoc = bookingsSnapshot.docs[0];
+        const bookingId = bookingDoc.id;
+        
+        const updateData = {
+            status: status,
+            updatedAt: admin.firestore.FieldValue.serverTimestamp()
+        };
+        
+        // paymentInfo가 있으면 추가
+        if (paymentInfo) {
+            updateData.paymentInfo = paymentInfo;
+        }
+        
+        // status별 추가 필드
+        if (status === 'payment_pending') {
+            updateData.paymentPendingAt = admin.firestore.FieldValue.serverTimestamp();
+        } else if (status === 'paid') {
+            updateData.paidAt = admin.firestore.FieldValue.serverTimestamp();
+        } else if (status === 'confirmed') {
+            updateData.confirmedAt = admin.firestore.FieldValue.serverTimestamp();
+        }
+        
+        await collections.bookings.doc(bookingId).update(updateData);
+        
+        console.log(`예약 상태 업데이트 완료: ${bookingId} -> ${status}`);
+        
+        res.json({
+            success: true,
+            message: '예약 상태가 업데이트되었습니다.',
+            data: { bookingId, status }
+        });
+        
+    } catch (error) {
+        console.error('상태 업데이트 오류:', error);
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false, 
+                message: '유효하지 않은 토큰입니다.' 
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: '상태 업데이트 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
 // 임시 관리자 비밀번호 재설정 API (개발용)
 app.post('/api/admin/reset-password-temp', async (req, res) => {
     const { adminEmail, newPassword } = req.body;
@@ -1538,7 +1624,7 @@ app.post('/api/admin/reset-password-temp', async (req, res) => {
 });
 
 // 서버 시작
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`Firebase 서버가 포트 ${PORT}에서 실행 중입니다.`);
     if (process.env.NODE_ENV === 'production') {

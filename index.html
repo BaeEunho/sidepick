@@ -2821,8 +2821,8 @@
                         // 결제 페이지로 이동
                         window.location.href = 'booking-confirm.html?reapply=true';
                     };
-                } else if (status === 'payment_completed') {
-                    console.log(`Setting button to payment_completed state for ${orientation}`);
+                } else if (status === 'payment_pending') {
+                    console.log(`Setting button to payment_pending state for ${orientation}`);
                     // 결제 안내 완료, 입금 대기 중
                     button.textContent = '입금 대기 중';
                     button.className = 'btn-apply payment-waiting';
@@ -2837,21 +2837,27 @@
                         console.log('Payment info button clicked for:', orientation);
                         window.location.href = 'booking-confirm.html?reapply=true';
                     };
-                } else if (status === 'confirmed' || status === 'paid') {
-                    console.log(`Setting button to confirmed/paid state for ${orientation}`);
-                    // meeting-schedule.html과 동일하게 설정
-                    button.textContent = '참가 확정';
-                    button.className = 'btn-apply confirmed'; // 클래스 완전 재설정
+                } else if (status === 'paid') {
+                    console.log(`Setting button to paid state for ${orientation}`);
+                    // 입금은 했지만 관리자 확인 대기 중
+                    button.textContent = '입금 확인 중';
+                    button.className = 'btn-apply paid-waiting';
                     button.disabled = true;
                     
-                    // 모든 인라인 스타일 제거 후 다시 설정
+                    button.removeAttribute('style');
+                    button.setAttribute('style', 'background-color: #10B981 !important; color: #ffffff !important; cursor: default !important;');
+                    
+                    button.onclick = null;
+                } else if (status === 'confirmed') {
+                    console.log(`Setting button to confirmed state for ${orientation}`);
+                    // 관리자가 최종 확인 완료
+                    button.textContent = '참가 확정';
+                    button.className = 'btn-apply confirmed';
+                    button.disabled = true;
+                    
                     button.removeAttribute('style');
                     button.setAttribute('style', 'background-color: #27ae60 !important; color: #ffffff !important; cursor: default !important;');
                     
-                    console.log(`Button text after update: '${button.textContent}'`);
-                    console.log(`Button classes: ${button.className}`);
-                    
-                    // onclick 제거
                     button.onclick = null;
                 } else if (status === 'cancelled') {
                     // 취소된 경우 다시 신청 가능

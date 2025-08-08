@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>입금 확인 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .confirm-section {
+            padding: 100px 0 80px;
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 70px);
+        }
+        .confirm-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        .confirm-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .confirm-header h1 {
+            font-size: 32px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .confirm-header p {
+            font-size: 18px;
+            color: #666;
+        }
+        .payment-info {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+        }
+        .payment-info h3 {
+            font-size: 20px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        .payment-info p {
+            font-size: 16px;
+            color: #666;
+            line-height: 1.6;
+            margin: 5px 0;
+        }
+        .payment-info .amount {
+            font-size: 24px;
+            color: #ff6b6b;
+            font-weight: bold;
+        }
+        .confirm-form {
+            margin-top: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+        .checkbox-group {
+            margin: 20px 0;
+        }
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            color: #333;
+            cursor: pointer;
+        }
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin-right: 10px;
+        }
+        .btn-confirm {
+            width: 100%;
+            padding: 16px;
+            background-color: #10B981;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .btn-confirm:hover {
+            background-color: #059669;
+            transform: translateY(-2px);
+        }
+        .btn-confirm:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        .warning-box p {
+            color: #856404;
+            font-size: 14px;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <nav class="nav-container">
+            <div class="logo">
+                <a href="index.html">사이드픽</a>
+            </div>
+        </nav>
+    </header>
+
+    <section class="confirm-section">
+        <div class="container">
+            <div class="confirm-container">
+                <div class="confirm-header">
+                    <h1>입금 완료 확인</h1>
+                    <p>입금을 완료하셨나요?</p>
+                </div>
+
+                <div class="payment-info">
+                    <h3>입금 정보</h3>
+                    <p>은행: 신한은행</p>
+                    <p>계좌번호: 110-386-140132</p>
+                    <p>예금주: 배은호</p>
+                    <p class="amount">입금액: 45,000원</p>
+                </div>
+
+                <div class="warning-box">
+                    <p>⚠️ 실제로 입금을 완료한 경우에만 아래 버튼을 클릭해주세요.</p>
+                    <p>허위로 입금 완료 처리 시 참가가 취소될 수 있습니다.</p>
+                </div>
+
+                <form id="confirmForm" class="confirm-form">
+                    <div class="form-group">
+                        <label for="depositorName">입금자명</label>
+                        <input type="text" id="depositorName" required placeholder="실제 입금하신 분의 성함">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="depositTime">입금 시간</label>
+                        <input type="datetime-local" id="depositTime" required>
+                    </div>
+
+                    <div class="checkbox-group">
+                        <label>
+                            <input type="checkbox" id="confirmCheck" required>
+                            위 계좌로 45,000원을 입금 완료했습니다.
+                        </label>
+                    </div>
+
+                    <button type="submit" class="btn-confirm" id="confirmBtn">입금 완료 확인</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // 현재 시간을 기본값으로 설정
+            const now = new Date();
+            const localDateTime = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+            document.getElementById('depositTime').value = localDateTime;
+
+            // 폼 제출 처리
+            document.getElementById('confirmForm').addEventListener('submit', async function(e) {
+                e.preventDefault();
+
+                const depositorName = document.getElementById('depositorName').value;
+                const depositTime = document.getElementById('depositTime').value;
+                const confirmCheck = document.getElementById('confirmCheck').checked;
+
+                if (!depositorName || !depositTime || !confirmCheck) {
+                    alert('모든 필드를 입력하고 확인란에 체크해주세요.');
+                    return;
+                }
+
+                const confirmBtn = document.getElementById('confirmBtn');
+                confirmBtn.disabled = true;
+                confirmBtn.textContent = '처리 중...';
+
+                try {
+                    // sessionStorage에서 필요한 정보 가져오기
+                    const userEmail = sessionStorage.getItem('userEmail');
+                    const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+                    const politicalType = sessionStorage.getItem('politicalType');
+                    const orientation = politicalType && ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'].includes(politicalType) 
+                        ? 'progressive' : 'conservative';
+
+                    if (!appliedMeetings[orientation]) {
+                        alert('신청 정보를 찾을 수 없습니다.');
+                        return;
+                    }
+
+                    // 상태를 paid로 업데이트
+                    appliedMeetings[orientation].status = 'paid';
+                    appliedMeetings[orientation].paidAt = new Date().toISOString();
+                    appliedMeetings[orientation].depositorName = depositorName;
+                    appliedMeetings[orientation].depositTime = depositTime;
+                    sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+
+                    // Firebase 업데이트 시도
+                    const token = localStorage.getItem('authToken');
+                    if (token) {
+                        const API_URL = window.location.hostname === 'localhost' 
+                            ? 'http://localhost:3001' 
+                            : 'https://sidepick.onrender.com';
+                        
+                        try {
+                            const response = await fetch(`${API_URL}/api/meetings/confirm-payment`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${token}`
+                                },
+                                body: JSON.stringify({
+                                    meetingId: appliedMeetings[orientation].meetingId,
+                                    depositorName: depositorName,
+                                    depositTime: depositTime
+                                })
+                            });
+
+                            if (!response.ok) {
+                                console.error('Firebase 업데이트 실패:', response.status);
+                            }
+                        } catch (error) {
+                            console.error('Firebase 업데이트 중 오류:', error);
+                        }
+                    }
+
+                    alert('입금 확인이 완료되었습니다.\n\n관리자가 확인 후 최종 참가 확정 안내를 드릴 예정입니다.');
+                    window.location.href = 'index.html';
+                } catch (error) {
+                    console.error('Error:', error);
+                    alert('처리 중 오류가 발생했습니다.');
+                    confirmBtn.disabled = false;
+                    confirmBtn.textContent = '입금 완료 확인';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

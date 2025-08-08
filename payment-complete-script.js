@@ -155,9 +155,81 @@ async function confirmParticipation() {
             console.error('인증 토큰이 없습니다!');
             // 토큰이 없어도 로컬 처리는 계속 진행
         } else {
-            // 입금 정보 업데이트 API 호출 (있다면)
-            // 현재는 서버에 해당 API가 없으므로 주석 처리
-            console.log('입금 대기 상태로 유지됩니다. 관리자가 입금 확인 후 참가 확정 처리합니다.');
+            // Firebase에 payment_pending 상태 업데이트
+            // 먼저 현재 사용자의 신청 정보 조회
+            const userMeetingsResponse = await fetch(`${API_URL}/api/user/meetings`, {
+                headers: {
+                    'Authorization': `Bearer ${authToken}`
+                }
+            });
+            
+            if (userMeetingsResponse.ok) {
+                const userData = await userMeetingsResponse.json();
+                console.log('현재 사용자 모임 정보:', userData);
+                
+                if (userData.meetings && userData.meetings.length > 0) {
+                    // 해당 orientation의 모임 찾기
+                    const currentMeeting = userData.meetings.find(m => 
+                        m.orientation === meetingInfo.orientation && 
+                        m.status !== 'cancelled'
+                    );
+                    
+                    if (currentMeeting) {
+                        console.log('업데이트할 모임 찾음:', currentMeeting);
+                        
+                        // 다양한 API 엔드포인트 시도
+                        const updateAttempts = [
+                            {
+                                url: `${API_URL}/api/meetings/${currentMeeting.id}`,
+                                method: 'PATCH',
+                                body: { status: 'payment_pending' }
+                            },
+                            {
+                                url: `${API_URL}/api/meetings/${currentMeeting.id}/status`,
+                                method: 'PUT',
+                                body: { status: 'payment_pending' }
+                            },
+                            {
+                                url: `${API_URL}/api/meetings/update-status`,
+                                method: 'POST',
+                                body: { 
+                                    meetingId: currentMeeting.id,
+                                    status: 'payment_pending'
+                                }
+                            }
+                        ];
+                        
+                        let updateSuccess = false;
+                        for (const attempt of updateAttempts) {
+                            console.log(`시도: ${attempt.method} ${attempt.url}`);
+                            try {
+                                const response = await fetch(attempt.url, {
+                                    method: attempt.method,
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'Authorization': `Bearer ${authToken}`
+                                    },
+                                    body: JSON.stringify(attempt.body)
+                                });
+                                
+                                console.log(`응답: ${response.status}`);
+                                if (response.ok) {
+                                    console.log('Firebase 상태 업데이트 성공!');
+                                    updateSuccess = true;
+                                    break;
+                                }
+                            } catch (err) {
+                                console.error(`실패: ${err.message}`);
+                            }
+                        }
+                        
+                        if (!updateSuccess) {
+                            console.error('모든 업데이트 시도 실패');
+                            console.log('관리자에게 문의하여 수동으로 상태를 변경해주세요.');
+                        }
+                    }
+                }
+            }
         }
     } catch (error) {
         console.error('서버 통신 오류:', error);
@@ -171,8 +243,8 @@ async function confirmParticipation() {
     
     if (appliedMeetings[meetingInfo.orientation]) {
         console.log(`${meetingInfo.orientation} 모임 - 결제 안내 완료 상태로 변경`);
-        // status를 payment_completed로 변경 (입금은 아직 안 함)
-        appliedMeetings[meetingInfo.orientation].status = 'payment_completed';
+        // status를 payment_pending으로 변경 (입금 대기 중)
+        appliedMeetings[meetingInfo.orientation].status = 'payment_pending';
         appliedMeetings[meetingInfo.orientation].paymentInfo = paymentInfo;
         appliedMeetings[meetingInfo.orientation].paymentCompletedAt = new Date().toISOString();
         sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
@@ -182,7 +254,7 @@ async function confirmParticipation() {
         // 없는 경우 새로 추가
         appliedMeetings[meetingInfo.orientation] = {
             meetingId: meetingInfo.id || meetingInfo.meetingId,
-            status: 'payment_completed', // 결제 안내 완료
+            status: 'payment_pending', // 입금 대기 중
             paymentCompletedAt: new Date().toISOString(),
             paymentInfo: paymentInfo
         };

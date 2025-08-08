@@ -3,183 +3,180 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>결제 상태 디버깅</title>
+    <title>Payment Status Debug</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-family: Arial, sans-serif;
+            padding: 20px;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
-            background-color: #f5f5f5;
         }
-        .debug-container {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #333;
-            margin-bottom: 20px;
-        }
-        h2 {
-            color: #555;
-            margin-top: 20px;
-            margin-bottom: 10px;
-        }
-        .data-view {
-            background: #f8f9fa;
+        .section {
+            background: #f0f0f0;
             padding: 15px;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 14px;
-            white-space: pre-wrap;
-            word-break: break-word;
             margin: 10px 0;
+            border-radius: 5px;
         }
         button {
-            background: #007bff;
-            color: white;
-            border: none;
             padding: 10px 20px;
-            border-radius: 5px;
-            cursor: pointer;
             margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
         }
-        button:hover {
-            background: #0056b3;
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
         }
-        .status-pending {
-            color: #f39c12;
+        .status-box {
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
             font-weight: bold;
         }
-        .status-confirmed {
-            color: #27ae60;
-            font-weight: bold;
-        }
+        .pending { background: #FFA500; color: white; }
+        .payment_completed { background: #8B5CF6; color: white; }
+        .confirmed { background: #27ae60; color: white; }
     </style>
 </head>
 <body>
-    <div class="debug-container">
-        <h1>결제 상태 디버깅 페이지</h1>
-        
-        <h2>1. appliedMeetings 데이터</h2>
-        <div id="applied-meetings" class="data-view">로딩중...</div>
-        
-        <h2>2. selectedMeeting 데이터</h2>
-        <div id="selected-meeting" class="data-view">로딩중...</div>
-        
-        <h2>3. 참가자 정보</h2>
-        <div id="participant-info" class="data-view">로딩중...</div>
-        
-        <h2>4. 결제 정보</h2>
-        <div id="payment-info" class="data-view">로딩중...</div>
-        
-        <h2>5. 테스트 액션</h2>
-        <button onclick="simulatePendingStatus()">입금 대기 상태로 설정</button>
-        <button onclick="simulateConfirmedStatus()">참가 확정 상태로 설정</button>
-        <button onclick="clearAllData()">모든 데이터 초기화</button>
-        <button onclick="refreshData()">데이터 새로고침</button>
-        
-        <h2>6. 페이지 이동</h2>
-        <button onclick="location.href='index.html'">홈으로</button>
-        <button onclick="location.href='mypage.html'">마이페이지로</button>
-        <button onclick="location.href='meeting-schedule.html'">미팅 일정으로</button>
+    <h1>Payment Status 디버깅</h1>
+    
+    <div class="section">
+        <h2>1. SessionStorage 확인</h2>
+        <button onclick="checkSessionData()">Session 데이터 확인</button>
+        <pre id="session-data"></pre>
     </div>
-
+    
+    <div class="section">
+        <h2>2. Firebase 데이터 확인</h2>
+        <button onclick="checkFirebaseData()">Firebase 데이터 확인</button>
+        <pre id="firebase-data"></pre>
+    </div>
+    
+    <div class="section">
+        <h2>3. 상태 수동 변경</h2>
+        <button onclick="setPaymentCompleted('progressive')">진보 - payment_completed로 변경</button>
+        <button onclick="setPaymentCompleted('conservative')">보수 - payment_completed로 변경</button>
+        <button onclick="clearApplications()">모든 신청 초기화</button>
+    </div>
+    
+    <div class="section">
+        <h2>4. 버튼 상태 시뮬레이션</h2>
+        <div id="button-simulation"></div>
+    </div>
+    
     <script>
-        function loadData() {
-            // appliedMeetings
+        function checkSessionData() {
             const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-            document.getElementById('applied-meetings').innerHTML = JSON.stringify(appliedMeetings, null, 2);
+            const userEmail = sessionStorage.getItem('userEmail');
+            const userGender = sessionStorage.getItem('userGender');
+            const politicalType = sessionStorage.getItem('politicalType');
             
-            // selectedMeeting
-            const selectedMeeting = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
-            document.getElementById('selected-meeting').innerHTML = JSON.stringify(selectedMeeting, null, 2);
-            
-            // participantInfo
-            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
-            document.getElementById('participant-info').innerHTML = JSON.stringify(participantInfo, null, 2);
-            
-            // paymentInfo
-            const paymentInfo = JSON.parse(sessionStorage.getItem('paymentInfo') || '{}');
-            document.getElementById('payment-info').innerHTML = JSON.stringify(paymentInfo, null, 2);
-            
-            // 상태별 색상 적용
-            const appliedView = document.getElementById('applied-meetings');
-            if (appliedView.innerHTML.includes('"status": "pending"')) {
-                appliedView.innerHTML = appliedView.innerHTML.replace(/"status": "pending"/g, '<span class="status-pending">"status": "pending"</span>');
-            }
-            if (appliedView.innerHTML.includes('"status": "confirmed"')) {
-                appliedView.innerHTML = appliedView.innerHTML.replace(/"status": "confirmed"/g, '<span class="status-confirmed">"status": "confirmed"</span>');
-            }
-        }
-        
-        function simulatePendingStatus() {
-            // 테스트용 데이터 생성
-            const politicalType = sessionStorage.getItem('politicalType') || 'MPOS';
-            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
-            const orientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
-            
-            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-            appliedMeetings[orientation] = {
-                status: 'pending',
-                appliedAt: new Date().toISOString(),
-                orientation: orientation,
-                gender: sessionStorage.getItem('userGender') || 'male',
-                meetingId: '2025-08-23'
+            const data = {
+                userEmail,
+                userGender,
+                politicalType,
+                appliedMeetings
             };
-            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
             
-            alert('입금 대기 상태로 설정되었습니다.');
-            refreshData();
+            document.getElementById('session-data').textContent = JSON.stringify(data, null, 2);
+            
+            // 버튼 시뮬레이션
+            simulateButtons(appliedMeetings);
         }
         
-        function simulateConfirmedStatus() {
-            // 테스트용 데이터 생성
-            const politicalType = sessionStorage.getItem('politicalType') || 'MPOS';
-            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
-            const orientation = progressiveCodes.includes(politicalType) ? 'progressive' : 'conservative';
-            
+        async function checkFirebaseData() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
+                
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+                document.getElementById('firebase-data').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                document.getElementById('firebase-data').textContent = 'Error: ' + error.message;
+            }
+        }
+        
+        function setPaymentCompleted(orientation) {
             const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-            appliedMeetings[orientation] = {
-                status: 'confirmed',
-                appliedAt: new Date(Date.now() - 86400000).toISOString(), // 1일 전
-                confirmedAt: new Date().toISOString(),
-                orientation: orientation,
-                gender: sessionStorage.getItem('userGender') || 'male',
-                meetingId: '2025-08-23'
-            };
-            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
             
-            alert('참가 확정 상태로 설정되었습니다.');
-            refreshData();
+            if (appliedMeetings[orientation]) {
+                appliedMeetings[orientation].status = 'payment_completed';
+                appliedMeetings[orientation].paymentCompletedAt = new Date().toISOString();
+                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+                alert(`${orientation} 상태를 payment_completed로 변경했습니다.`);
+                checkSessionData();
+            } else {
+                alert(`${orientation} 신청 정보가 없습니다.`);
+            }
         }
         
-        function clearAllData() {
-            if (confirm('정말로 모든 미팅 관련 데이터를 초기화하시겠습니까?')) {
+        function clearApplications() {
+            if (confirm('정말로 모든 신청을 초기화하시겠습니까?')) {
                 sessionStorage.removeItem('appliedMeetings');
-                sessionStorage.removeItem('selectedMeeting');
-                sessionStorage.removeItem('participantInfo');
-                sessionStorage.removeItem('paymentInfo');
-                sessionStorage.removeItem('orderData');
-                sessionStorage.removeItem('meetingCounts');
-                sessionStorage.removeItem('confirmedMeetingCounts');
-                alert('데이터가 초기화되었습니다.');
-                refreshData();
+                alert('초기화되었습니다.');
+                checkSessionData();
             }
         }
         
-        function refreshData() {
-            loadData();
+        function simulateButtons(appliedMeetings) {
+            const container = document.getElementById('button-simulation');
+            container.innerHTML = '';
+            
+            ['progressive', 'conservative'].forEach(orientation => {
+                const div = document.createElement('div');
+                div.style.margin = '10px 0';
+                
+                const label = document.createElement('h3');
+                label.textContent = `${orientation === 'progressive' ? '진보' : '보수'} 모임:`;
+                div.appendChild(label);
+                
+                const statusBox = document.createElement('div');
+                
+                if (appliedMeetings[orientation]) {
+                    const status = appliedMeetings[orientation].status;
+                    statusBox.className = `status-box ${status}`;
+                    
+                    let buttonText = '';
+                    if (status === 'pending') {
+                        buttonText = '결제 진행하기';
+                    } else if (status === 'payment_pending') {
+                        buttonText = '입금 대기 중';
+                    } else if (status === 'confirmed' || status === 'paid') {
+                        buttonText = '참가 확정';
+                    } else {
+                        buttonText = status;
+                    }
+                    
+                    statusBox.textContent = `Status: ${status} → 버튼: "${buttonText}"`;
+                } else {
+                    statusBox.className = 'status-box';
+                    statusBox.style.background = '#e0e0e0';
+                    statusBox.textContent = '신청 없음 → 버튼: "참가 신청하기"';
+                }
+                
+                div.appendChild(statusBox);
+                container.appendChild(div);
+            });
         }
         
-        // 페이지 로드 시 데이터 표시
-        document.addEventListener('DOMContentLoaded', loadData);
-        
-        // 자동 새로고침 (5초마다)
-        setInterval(loadData, 5000);
+        // 페이지 로드 시 자동 실행
+        checkSessionData();
     </script>
 </body>
 </html>

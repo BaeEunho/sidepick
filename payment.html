@@ -10,6 +10,7 @@
     <script src="data-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
+    <script src="payment-simple.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -305,12 +306,24 @@
             confirmButton.textContent = '처리 중...';
             
             try {
+                // 간단한 처리 함수 사용
+                const success = await processPayment();
+                
+                if (success) {
+                    // 완료 페이지로 이동
+                    window.location.href = 'payment-complete.html';
+                } else {
+                    throw new Error('결제 처리 실패');
+                }
+                
+                return; // 기존 코드는 실행하지 않음
+                
                 // 주문 정보 생성
                 const orderData = {
                     orderId: 'ORD-' + Date.now(),
                     method: 'bank_transfer',
                     amount: 45000,
-                    status: 'pending',
+                    status: 'payment_pending',  // 결제 대기 상태
                     createdAt: new Date().toISOString()
                 };
                 
@@ -326,43 +339,173 @@
                 if (authToken && meetingInfo && userEmail) {
                     const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
                     
-                    // 서버가 기대하는 형식으로 데이터 구성
-                    const requestBody = {
-                        meetingId: meetingInfo.id || meetingInfo.meetingId || `meeting_${meetingInfo.orientation}_${Date.now()}`,
-                        orientation: meetingInfo.orientation,
-                        meetingInfo: meetingInfo,  // 서버가 기대하는 필드
-                        applicationData: {  // 서버가 기대하는 필드
-                            userEmail: userEmail,
-                            userGender: userGender,
-                            participantInfo: participantInfo,
-                            orderData: orderData
-                        }
-                    };
+                    console.log('=== Payment Process Start ===');
+                    console.log('Meeting Info:', meetingInfo);
+                    console.log('User Email:', userEmail);
+                    console.log('Auth Token exists:', !!authToken);
                     
-                    console.log('API 요청 데이터:', requestBody);
-                    
-                    const response = await fetch(`${API_URL}/api/meetings/apply`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Authorization': `Bearer ${authToken}`
-                        },
-                        body: JSON.stringify(requestBody)
-                    });
-                    
-                    console.log('API 응답:', response.status, response.statusText);
-
-                    if (response.ok) {
-                        const result = await response.json();
-                        console.log('Firebase에 예약 정보 저장 성공:', result);
-                    } else {
-                        const errorText = await response.text();
-                        console.error('Firebase 저장 실패:', response.status, errorText);
+                    // 이미 신청한 경우 상태 업데이트 API 호출
+                    try {
+                        // 먼저 기존 신청 정보가 있는지 확인
+                        console.log('Checking existing meetings...');
+                        const checkUrl = `${API_URL}/api/user/meetings`;
+                        console.log('Check URL:', checkUrl);
                         
-                        // 중복 신청이 아닌 경우에만 alert 표시
-                        if (response.status !== 400) {
-                            alert(`예약 처리 중 오류가 발생했습니다: ${errorText}`);
+                        const checkResponse = await fetch(checkUrl, {
+                            headers: {
+                                'Authorization': `Bearer ${authToken}`
+                            }
+                        });
+                        
+                        console.log('Check Response Status:', checkResponse.status);
+                        
+                        let existingMeetingId = null;
+                        if (checkResponse.ok) {
+                            const userData = await checkResponse.json();
+                            console.log('User meetings data:', userData);
+                            if (userData.meetings && userData.meetings.length > 0) {
+                                console.log('Finding meeting with orientation:', meetingInfo.orientation);
+                                const existingMeeting = userData.meetings.find(m => 
+                                    m.orientation === meetingInfo.orientation && 
+                                    m.status !== 'cancelled'
+                                );
+                                if (existingMeeting) {
+                                    existingMeetingId = existingMeeting.id || existingMeeting.meetingId;
+                                    console.log('기존 신청 발견:', existingMeeting);
+                                    console.log('Meeting ID to update:', existingMeetingId);
+                                } else {
+                                    console.log('No existing meeting found for orientation:', meetingInfo.orientation);
+                                }
+                            } else {
+                                console.log('No meetings found for user');
+                            }
+                        } else {
+                            console.error('Failed to fetch user meetings:', checkResponse.status);
                         }
+                        
+                        if (existingMeetingId) {
+                            // 이미 신청한 경우 - 상태만 업데이트
+                            console.log('기존 신청 상태 업데이트 시도');
+                            console.log('Meeting ID:', existingMeetingId);
+                            const updateUrl = `${API_URL}/api/meetings/${existingMeetingId}/status`;
+                            console.log('Update URL:', updateUrl);
+                            
+                            const updateBody = {
+                                status: 'payment_pending',
+                                paymentInfo: {
+                                    orderId: orderData.orderId,
+                                    method: 'bank_transfer',
+                                    amount: 45000
+                                }
+                            };
+                            console.log('Update Body:', updateBody);
+                            
+                            const updateResponse = await fetch(updateUrl, {
+                                method: 'PUT',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${authToken}`
+                                },
+                                body: JSON.stringify(updateBody)
+                            });
+                            
+                            console.log('Update Response Status:', updateResponse.status);
+                            
+                            if (updateResponse.ok) {
+                                const result = await updateResponse.json();
+                                console.log('상태 업데이트 성공:', result);
+                            } else {
+                                const errorText = await updateResponse.text();
+                                console.error('상태 업데이트 실패:', updateResponse.status, errorText);
+                            }
+                        }
+                        
+                        if (!existingMeetingId) {
+                            // 새로운 신청인 경우에만
+                            const requestBody = {
+                                meetingId: meetingInfo.id || meetingInfo.meetingId || `meeting_${meetingInfo.orientation}_${Date.now()}`,
+                                orientation: meetingInfo.orientation,
+                                status: 'payment_pending',
+                                meetingInfo: meetingInfo,
+                                applicationData: {
+                                    userEmail: userEmail,
+                                    userGender: userGender,
+                                    participantInfo: participantInfo,
+                                    orderData: orderData
+                                }
+                            };
+                            
+                            console.log('새 신청 API 요청:', requestBody);
+                            
+                            const response = await fetch(`${API_URL}/api/meetings/apply`, {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': `Bearer ${authToken}`
+                                },
+                                body: JSON.stringify(requestBody)
+                            });
+                            
+                            if (response.ok) {
+                                const result = await response.json();
+                                console.log('Firebase에 예약 정보 저장 성공:', result);
+                            } else {
+                                const errorData = await response.json();
+                                console.error('Firebase 저장 실패:', response.status, errorData);
+                                
+                                // 이미 신청한 경우 기존 신청의 meetingId 찾기
+                                if (errorData.message && errorData.message.includes('이미 신청')) {
+                                    console.log('이미 신청한 모임 - 다시 조회하여 상태 업데이트');
+                                    // 다시 조회하여 meetingId 찾기
+                                    const retryResponse = await fetch(`${API_URL}/api/user/meetings`, {
+                                        headers: {
+                                            'Authorization': `Bearer ${authToken}`
+                                        }
+                                    });
+                                    
+                                    if (retryResponse.ok) {
+                                        const retryData = await retryResponse.json();
+                                        if (retryData.meetings && retryData.meetings.length > 0) {
+                                            const existingMeeting = retryData.meetings.find(m => 
+                                                m.orientation === meetingInfo.orientation && 
+                                                m.status !== 'cancelled'
+                                            );
+                                            if (existingMeeting) {
+                                                const meetingIdToUpdate = existingMeeting.id || existingMeeting.meetingId;
+                                                console.log('Retry - found meeting to update:', meetingIdToUpdate);
+                                                
+                                                // 상태 업데이트
+                                                const updateResponse = await fetch(`${API_URL}/api/meetings/${meetingIdToUpdate}/status`, {
+                                                    method: 'PUT',
+                                                    headers: {
+                                                        'Content-Type': 'application/json',
+                                                        'Authorization': `Bearer ${authToken}`
+                                                    },
+                                                    body: JSON.stringify({
+                                                        status: 'payment_pending',
+                                                        paymentInfo: {
+                                                            orderId: orderData.orderId,
+                                                            method: 'bank_transfer',
+                                                            amount: 45000
+                                                        }
+                                                    })
+                                                });
+                                                
+                                                if (updateResponse.ok) {
+                                                    console.log('Retry - 상태 업데이트 성공');
+                                                } else {
+                                                    console.error('Retry - 상태 업데이트 실패:', updateResponse.status);
+                                                }
+                                            }
+                                        }
+                                    }
+                                } else if (response.status !== 400) {
+                                    alert(`예약 처리 중 오류가 발생했습니다: ${errorData.message || response.statusText}`);
+                                }
+                            }
+                        }
+                    } catch (error) {
+                        console.error('API 처리 중 오류:', error);
                     }
                 }
                 

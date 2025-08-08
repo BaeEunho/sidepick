@@ -630,7 +630,7 @@ async function updateMeetingAvailability(userGender) {
                     sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
                     window.location.href = `booking-confirm.html?reapply=true`;
                 };
-            } else if (status === 'payment_completed') {
+            } else if (status === 'payment_pending') {
                 // 결제 안내 완료, 입금 대기 중
                 applyBtn.textContent = '입금 대기 중';
                 applyBtn.classList.add('payment-waiting');
@@ -641,7 +641,16 @@ async function updateMeetingAvailability(userGender) {
                     // 입금 안내 페이지로 다시 이동 가능
                     window.location.href = `booking-confirm.html?reapply=true`;
                 };
-            } else if (status === 'confirmed' || status === 'paid') {
+            } else if (status === 'paid') {
+                // 입금은 했지만 관리자 확인 대기 중
+                applyBtn.textContent = '입금 확인 중';
+                applyBtn.classList.add('paid-waiting');
+                applyBtn.classList.remove('confirmed', 'notify-btn');
+                applyBtn.disabled = true;
+                applyBtn.style.backgroundColor = '#10B981';
+                applyBtn.onclick = null;
+            } else if (status === 'confirmed') {
+                // 관리자가 최종 확인 완료
                 applyBtn.textContent = '참가 확정';
                 applyBtn.classList.add('confirmed');
                 applyBtn.disabled = true;
