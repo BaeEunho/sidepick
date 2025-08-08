@@ -60,7 +60,7 @@ async function syncWithServer() {
     
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
+            ? 'http://localhost:3001' 
             : 'https://sidepick.onrender.com';
             
         // 서버에서 사용자 정보 가져오기
@@ -292,74 +292,13 @@ function loadPoliticalType() {
 async function loadUpcomingMeetings() {
     const upcomingDiv = document.getElementById('upcoming-meetings');
     const userEmail = sessionStorage.getItem('userEmail');
-    
-    // DataSystem 사용하여 실제 예약 내역 로드
-    if (window.DataSystem && userEmail) {
-        const bookings = window.DataSystem.getUserBookings(userEmail);
-        const activeBookings = bookings.filter(b => b.status !== 'cancelled');
-        
-        console.log('=== 마이페이지: DataSystem 예약 내역 ===');
-        console.log('전체 예약:', bookings.length);
-        console.log('활성 예약:', activeBookings.length);
-        activeBookings.forEach((booking, idx) => {
-            console.log(`예약 ${idx + 1}:`, {
-                title: booking.meetingTitle,
-                date: booking.meetingDate,
-                time: booking.meetingTime,
-                location: booking.meetingLocation,
-                status: booking.status
-            });
-        });
-        
-        if (activeBookings.length > 0) {
-            let html = '';
-            activeBookings.forEach(booking => {
-                const statusText = {
-                    'pending': '입금 대기중',
-                    'paid': '입금 확인중',
-                    'confirmed': '참가 확정'
-                }[booking.status] || booking.status;
-                
-                const statusClass = booking.status === 'confirmed' ? 'confirmed' : 'pending';
-                
-                html += `
-                    <div class="meeting-item">
-                        <div class="meeting-header">
-                            <h4>${booking.meetingTitle}</h4>
-                            <div class="meeting-status ${statusClass}">
-                                ${statusText}
-                            </div>
-                        </div>
-                        <div class="meeting-details">
-                            <span class="detail-item">${booking.meetingDate}</span>
-                            <span class="detail-separator">•</span>
-                            <span class="detail-item">${booking.meetingTime || '오후 3시'}</span>
-                            <span class="detail-separator">•</span>
-                            <span class="detail-item">${booking.meetingLocation || '강남역 파티룸'}</span>
-                        </div>
-                        ${booking.status === 'pending' ? `
-                            <div class="payment-notice">
-                                <div class="payment-compact">
-                                    <span class="bank-info">신한은행 110-386-140132 (배은호)</span>
-                                    <span class="amount">${booking.price.toLocaleString()}원</span>
-                                </div>
-                                <span class="warning-text">입금 기한: ${new Date(booking.paymentDeadline).toLocaleDateString()}</span>
-                            </div>
-                        ` : ''}
-                    </div>
-                `;
-            });
-            upcomingDiv.innerHTML = html;
-            return;
-        }
-    }
     const userState = AuthManager.getUserState();
     
     try {
         // 서버에서 사용자 정보 가져오기
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
+            ? 'http://localhost:3001' 
             : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/user/meetings`, {
@@ -826,7 +765,7 @@ async function deleteAccount() {
         const userState = AuthManager.getUserState();
         const token = localStorage.getItem('authToken'); // localStorage에서 토큰 가져오기
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
+            ? 'http://localhost:3001' 
             : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/auth/delete-account`, {
             method: 'DELETE',
@@ -1518,7 +1457,7 @@ async function cancelMeeting(meetingId) {
     try {
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
+            ? 'http://localhost:3001' 
             : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/meetings/cancel/${meetingId}`, {
