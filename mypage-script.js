@@ -298,6 +298,19 @@ async function loadUpcomingMeetings() {
         const bookings = window.DataSystem.getUserBookings(userEmail);
         const activeBookings = bookings.filter(b => b.status !== 'cancelled');
         
+        console.log('=== 마이페이지: DataSystem 예약 내역 ===');
+        console.log('전체 예약:', bookings.length);
+        console.log('활성 예약:', activeBookings.length);
+        activeBookings.forEach((booking, idx) => {
+            console.log(`예약 ${idx + 1}:`, {
+                title: booking.meetingTitle,
+                date: booking.meetingDate,
+                time: booking.meetingTime,
+                location: booking.meetingLocation,
+                status: booking.status
+            });
+        });
+        
         if (activeBookings.length > 0) {
             let html = '';
             activeBookings.forEach(booking => {
@@ -320,9 +333,9 @@ async function loadUpcomingMeetings() {
                         <div class="meeting-details">
                             <span class="detail-item">${booking.meetingDate}</span>
                             <span class="detail-separator">•</span>
-                            <span class="detail-item">${booking.meetingTime}</span>
+                            <span class="detail-item">${booking.meetingTime || '오후 3시'}</span>
                             <span class="detail-separator">•</span>
-                            <span class="detail-item">${booking.meetingLocation}</span>
+                            <span class="detail-item">${booking.meetingLocation || '강남역 파티룸'}</span>
                         </div>
                         ${booking.status === 'pending' ? `
                             <div class="payment-notice">

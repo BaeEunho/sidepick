@@ -327,8 +327,9 @@
             
             // 모임 정보 가져오기 (화면에서)
             const meetingTitle = document.querySelector('.meeting-info-card h2').textContent;
-            const meetingDate = document.querySelector('.info-value').textContent;
-            const meetingLocation = document.querySelector('.info-value:nth-of-type(2)').textContent;
+            const infoValues = document.querySelectorAll('.meeting-info-card .info-value');
+            const meetingDate = infoValues[0] ? infoValues[0].textContent : '날짜 미정';
+            const meetingLocation = infoValues[1] ? infoValues[1].textContent : '장소 미정';
             
             // API 요청 데이터 구성
             const requestData = {
