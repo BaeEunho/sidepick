@@ -34,7 +34,7 @@
                 <div class="meeting-info-grid">
                     <div class="info-item">
                         <span class="info-label">날짜</span>
-                        <span class="info-value">12월 7일 (토) 15:00</span>
+                        <span class="info-value">8월 23일 (토) 15:00</span>
                     </div>
                     <div class="info-item">
                         <span class="info-label">장소</span>
@@ -101,15 +101,15 @@
                             <div class="bank-info">
                                 <div class="bank-row">
                                     <span>은행명:</span>
-                                    <span>국민은행</span>
+                                    <span>신한은행</span>
                                 </div>
                                 <div class="bank-row">
                                     <span>계좌번호:</span>
-                                    <span>123-456-789012</span>
+                                    <span>110386140132</span>
                                 </div>
                                 <div class="bank-row">
                                     <span>예금주:</span>
-                                    <span>(주)사이드픽</span>
+                                    <span>배은호</span>
                                 </div>
                             </div>
                             <p class="payment-alert">⚠️ 신청 후 24시간 이내에 입금해주셔야 합니다.</p>
@@ -141,7 +141,7 @@
 
     <script>
         // 페이지 로드 시 인증 확인
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
             // 인증된 사용자인지 확인 (성향 테스트까지 완료한 사용자)
             if (!AuthManager.checkPageAccess('verified')) {
                 return; // checkPageAccess가 리다이렉트 처리함
@@ -185,39 +185,73 @@
             
             // 모임 타입에 따라 정보 업데이트 (필요한 경우)
             updateMeetingInfo(meetingType, orientation);
+            
+            // Firebase에서 참가자 수 가져오기
+            await fetchParticipantCounts();
+            
+            // 참가자 수를 가져온 후 다시 화면 업데이트
+            updateMeetingInfo(meetingType, orientation);
         });
         
+        // 참가자 수 데이터를 저장할 변수
+        let participantCounts = {
+            progressive: { male: 0, female: 0 },
+            conservative: { male: 0, female: 0 }
+        };
+        
+        // Firebase에서 참가자 수 가져오기
+        async function fetchParticipantCounts() {
+            try {
+                const API_URL = window.location.hostname === 'localhost' ? 
+                    'http://localhost:3001' : 'https://sidepick.onrender.com';
+                
+                const response = await fetch(`${API_URL}/api/meetings/attendance`);
+                const data = await response.json();
+                
+                console.log('meeting-apply.html - 참가자 수 데이터 받음:', data);
+                
+                if (data.success && data.data) {
+                    // 초기화
+                    participantCounts = {
+                        progressive: { male: 0, female: 0 },
+                        conservative: { male: 0, female: 0 }
+                    };
+                    
+                    // 데이터 집계
+                    Object.values(data.data).forEach(meeting => {
+                        if (meeting.orientation === 'progressive') {
+                            participantCounts.progressive.male += meeting.male;
+                            participantCounts.progressive.female += meeting.female;
+                        } else if (meeting.orientation === 'conservative') {
+                            participantCounts.conservative.male += meeting.male;
+                            participantCounts.conservative.female += meeting.female;
+                        }
+                    });
+                    
+                    console.log('meeting-apply.html - 집계된 참가자 수:', participantCounts);
+                    console.log('진보: 남성', participantCounts.progressive.male, '여성', participantCounts.progressive.female);
+                    console.log('보수: 남성', participantCounts.conservative.male, '여성', participantCounts.conservative.female);
+                }
+            } catch (error) {
+                console.error('meeting-apply.html - 참가자 수 조회 실패:', error);
+                // 실패 시 기본값 사용
+            }
+        }
         
         // 모임 정보 업데이트 함수
         function updateMeetingInfo(type, orientation) {
             const meetingData = {
                 'progressive': {
-                    title: '진보 개혁형 × 사회 복지형',
-                    date: '12월 7일 (토) 15:00',
+                    title: '진보 성향 소개팅',
+                    date: '8월 23일 (토) 15:00',
                     location: '강남역 파티룸',
-                    age: '25-32세',
-                    status: '남성 2/4, 여성 3/4'
-                },
-                'moderate': {
-                    title: '중도 실용형 × 경제 성장형',
-                    date: '12월 8일 (일) 14:00',
-                    location: '강남역 파티룸',
-                    age: '28-35세',
-                    status: '남성 3/4, 여성 2/4'
-                },
-                'environment': {
-                    title: '환경 우선형 × 글로벌 시민형',
-                    date: '12월 8일 (일) 18:00',
-                    location: '강남역 파티룸',
-                    age: '23-30세',
-                    status: '남성 1/4, 여성 4/4'
+                    age: '25-32세'
                 },
                 'conservative': {
-                    title: '보수 전통형 × 시장 경제형',
-                    date: '12월 14일 (토) 15:00',
+                    title: '보수 성향 소개팅',
+                    date: '8월 30일 (토) 15:00',
                     location: '강남역 파티룸',
-                    age: '27-35세',
-                    status: '남성 3/4, 여성 2/4'
+                    age: '27-35세'
                 }
             };
             
@@ -232,7 +266,10 @@
                     infoValues[0].textContent = data.date;
                     infoValues[1].textContent = data.location;
                     infoValues[3].textContent = data.age;
-                    infoValues[4].textContent = data.status;
+                    
+                    // Firebase에서 가져온 실제 참가자 수 표시
+                    const counts = participantCounts[type] || { male: 0, female: 0 };
+                    infoValues[4].textContent = `남성 ${counts.male}/4, 여성 ${counts.female}/4`;
                 }
             } else if (orientation) {
                 // orientation만 있는 경우 일반적인 제목 사용
@@ -253,7 +290,10 @@
                         infoValues[0].textContent = data.date;
                         infoValues[1].textContent = data.location;
                         infoValues[3].textContent = data.age;
-                        infoValues[4].textContent = data.status;
+                        
+                        // Firebase에서 가져온 실제 참가자 수 표시
+                        const counts = participantCounts[orientation] || { male: 0, female: 0 };
+                        infoValues[4].textContent = `남성 ${counts.male}/4, 여성 ${counts.female}/4`;
                     }
                 }
             }

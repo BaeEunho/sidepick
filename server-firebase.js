@@ -591,7 +591,7 @@ app.get('/api/user/meetings', async (req, res) => {
             meetings: userBookings.map(booking => ({
                 id: booking.meetingId,
                 title: booking.meetingTitle || '모임',
-                date: booking.meetingDate || '12월 7일 (토)',
+                date: booking.meetingDate || '8월 23일 (토)',
                 location: booking.meetingLocation || '강남역 파티룸',
                 time: '15:00',
                 orientation: booking.orientation,
