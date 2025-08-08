@@ -337,7 +337,7 @@
                 const authToken = localStorage.getItem('authToken');
                 
                 if (authToken && meetingInfo && userEmail) {
-                    const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
+                    const API_URL = 'https://sidepick.onrender.com';
                     
                     console.log('=== Payment Process Start ===');
                     console.log('Meeting Info:', meetingInfo);

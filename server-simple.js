@@ -1523,7 +1523,6 @@ app.put('/api/meetings/:meetingId/status', async (req, res) => {
         const bookingsSnapshot = await collections.bookings
             .where('userEmail', '==', userEmail)
             .where('meetingId', '==', meetingId)
-            .where('status', '!=', 'cancelled')
             .get();
         
         if (bookingsSnapshot.empty) {
@@ -1534,8 +1533,24 @@ app.put('/api/meetings/:meetingId/status', async (req, res) => {
             });
         }
         
-        // 첫 번째 매칭되는 booking 업데이트
-        const bookingDoc = bookingsSnapshot.docs[0];
+        // cancelled가 아닌 booking 찾기
+        let bookingDoc = null;
+        for (const doc of bookingsSnapshot.docs) {
+            const data = doc.data();
+            if (data.status !== 'cancelled') {
+                bookingDoc = doc;
+                break;
+            }
+        }
+        
+        if (!bookingDoc) {
+            console.log('활성 예약을 찾을 수 없음 (모두 취소됨)');
+            return res.status(404).json({
+                success: false,
+                message: '활성 예약을 찾을 수 없습니다.'
+            });
+        }
+        
         const bookingId = bookingDoc.id;
         
         const updateData = {

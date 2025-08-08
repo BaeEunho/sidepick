@@ -2073,9 +2073,7 @@
         // 참가자 수 업데이트 함수 (Firebase에서 실제 데이터 가져오기)
         async function updateMeetingCounts() {
             try {
-                const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
-                    : 'https://sidepick.onrender.com';
+                const API_URL = 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
                 const data = await response.json();
@@ -2340,9 +2338,7 @@
                 
                 // Firebase에서 실제 참가자 수 확인
                 try {
-                    const API_URL = window.location.hostname === 'localhost' 
-                        ? 'http://localhost:3001' 
-                        : 'https://sidepick.onrender.com';
+                    const API_URL = 'https://sidepick.onrender.com';
                     
                     const response = await fetch(`${API_URL}/api/meetings/attendance`);
                     const data = await response.json();
@@ -2551,9 +2547,7 @@
                 // 서버에서도 확인 (있을 경우)
                 const token = localStorage.getItem('authToken');
                 if (token) {
-                    const API_URL = window.location.hostname === 'localhost' 
-                        ? 'http://localhost:3001' 
-                        : 'https://sidepick.onrender.com';
+                    const API_URL = 'https://sidepick.onrender.com';
                         
                     try {
                         const response = await fetch(`${API_URL}/api/user/meetings`, {
@@ -2610,21 +2604,16 @@
                                         // 디버깅: 조건 비교 전 값 확인
                                         console.log('=== 조건 비교 ===');
                                         console.log('meeting.orientation:', meeting.orientation, typeof meeting.orientation);
-                                        console.log('userOrientation:', userOrientation, typeof userOrientation);
-                                        console.log('조건 결과:', meeting.orientation === userOrientation);
+                                        console.log('meeting.status:', meeting.status);
                                         
-                                        // 사용자 성향과 일치하는 모임만 처리
-                                        if (meeting.orientation === userOrientation) {
-                                            userMeetingInfo[meeting.orientation] = {
-                                                status: meeting.status,
-                                                meetingId: meeting.id || meeting.meetingId
-                                            };
-                                            console.log("aaaaa", userMeetingInfo)
-                                            console.log(`✓ Added ${meeting.orientation} meeting with status ${meeting.status} to userMeetingInfo`);
-                                            console.log('현재 userMeetingInfo:', JSON.stringify(userMeetingInfo));
-                                        } else {
-                                            console.log(`✗ Skipping ${meeting.orientation} meeting - user orientation is ${userOrientation}`);
-                                        }
+                                        // 이미 신청한 모임은 성향 관계없이 모두 표시
+                                        // (관리자가 임의로 다른 성향 모임에 배치할 수도 있음)
+                                        userMeetingInfo[meeting.orientation] = {
+                                            status: meeting.status,
+                                            meetingId: meeting.id || meeting.meetingId
+                                        };
+                                        console.log(`✓ Added ${meeting.orientation} meeting with status ${meeting.status} to userMeetingInfo`);
+                                        console.log('현재 userMeetingInfo:', JSON.stringify(userMeetingInfo));
                                     } else {
                                         console.log(`✗ Skipping cancelled meeting`);
                                     }
@@ -2938,9 +2927,7 @@
         async function checkCapacityAndUpdateButton(orientation, button) {
             try {
                 const userGender = sessionStorage.getItem('userGender');
-                const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
-                    : 'https://sidepick.onrender.com';
+                const API_URL = 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
                 const data = await response.json();
@@ -3035,9 +3022,7 @@
         async function cancelMeetingFromIndex(meetingId) {
             try {
                 const token = localStorage.getItem('authToken');
-                const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
-                    : 'https://sidepick.onrender.com';
+                const API_URL ='https://sidepick.onrender.com';
                     
                 const response = await fetch(`${API_URL}/api/meetings/cancel/${meetingId}`, {
                     method: 'DELETE',

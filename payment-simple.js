@@ -14,9 +14,7 @@ async function processPayment() {
         return false;
     }
     
-    const API_URL = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3001' 
-        : 'https://sidepick.onrender.com';
+    const API_URL = 'https://sidepick.onrender.com';
     
     // 주문 정보 생성
     const orderData = {
@@ -36,92 +34,72 @@ async function processPayment() {
     }));
     
     try {
-        // 1. 먼저 apply 시도
-        console.log('신청 시도...');
-        const applyResponse = await fetch(`${API_URL}/api/meetings/apply`, {
-            method: 'POST',
+        // 결제 페이지는 이미 신청한 사용자만 접근 가능하므로
+        // 기존 신청 정보를 조회하여 상태 업데이트
+        console.log('기존 신청 정보 조회...');
+        
+        const meetingsResponse = await fetch(`${API_URL}/api/user/meetings`, {
+            headers: {
+                'Authorization': `Bearer ${authToken}`
+            }
+        });
+        
+        if (!meetingsResponse.ok) {
+            console.error('신청 정보 조회 실패:', meetingsResponse.status);
+            return false;
+        }
+        
+        const userData = await meetingsResponse.json();
+        console.log('User meetings:', userData);
+        
+        if (!userData.meetings || userData.meetings.length === 0) {
+            console.error('신청 정보가 없습니다');
+            return false;
+        }
+        
+        // 현재 성향의 신청 찾기
+        const existingMeeting = userData.meetings.find(m => 
+            m.orientation === meetingInfo.orientation && 
+            m.status !== 'cancelled'
+        );
+        
+        if (!existingMeeting) {
+            console.error('해당 성향의 신청을 찾을 수 없습니다');
+            return false;
+        }
+        
+        const meetingId = existingMeeting.id || existingMeeting.meetingId;
+        console.log('Found existing meeting:', meetingId);
+        console.log('Current status:', existingMeeting.status);
+        
+        // 상태를 payment_pending으로 업데이트
+        const updateResponse = await fetch(`${API_URL}/api/meetings/${meetingId}/status`, {
+            method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${authToken}`
             },
             body: JSON.stringify({
-                meetingId: meetingInfo.id || meetingInfo.meetingId || `meeting_${meetingInfo.orientation}_${Date.now()}`,
-                orientation: meetingInfo.orientation,
                 status: 'payment_pending',
-                meetingInfo: meetingInfo,
-                applicationData: {
-                    userEmail: userEmail,
-                    userGender: userGender,
-                    participantInfo: participantInfo,
-                    orderData: orderData
+                paymentInfo: {
+                    orderId: orderData.orderId,
+                    method: 'bank_transfer',
+                    amount: 45000
                 }
             })
         });
         
-        console.log('Apply response:', applyResponse.status);
+        console.log('Update response:', updateResponse.status);
         
-        if (applyResponse.ok) {
-            console.log('새로운 신청 성공');
+        if (updateResponse.ok) {
+            const result = await updateResponse.json();
+            console.log('상태 업데이트 성공:', result);
             return true;
+        } else {
+            const errorText = await updateResponse.text();
+            console.error('상태 업데이트 실패:', errorText);
+            return false;
         }
-        
-        // 2. 이미 신청한 경우 - 기존 신청 찾아서 업데이트
-        if (applyResponse.status === 400) {
-            console.log('이미 신청함 - 상태 업데이트 시도');
-            
-            // 기존 신청 정보 조회
-            const meetingsResponse = await fetch(`${API_URL}/api/user/meetings`, {
-                headers: {
-                    'Authorization': `Bearer ${authToken}`
-                }
-            });
-            
-            if (meetingsResponse.ok) {
-                const userData = await meetingsResponse.json();
-                console.log('User meetings:', userData);
-                
-                if (userData.meetings && userData.meetings.length > 0) {
-                    const existingMeeting = userData.meetings.find(m => 
-                        m.orientation === meetingInfo.orientation && 
-                        m.status !== 'cancelled'
-                    );
-                    
-                    if (existingMeeting) {
-                        const meetingId = existingMeeting.id || existingMeeting.meetingId;
-                        console.log('Found existing meeting:', meetingId);
-                        
-                        // 상태 업데이트
-                        const updateResponse = await fetch(`${API_URL}/api/meetings/${meetingId}/status`, {
-                            method: 'PUT',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${authToken}`
-                            },
-                            body: JSON.stringify({
-                                status: 'payment_pending',
-                                paymentInfo: {
-                                    orderId: orderData.orderId,
-                                    method: 'bank_transfer',
-                                    amount: 45000
-                                }
-                            })
-                        });
-                        
-                        console.log('Update response:', updateResponse.status);
-                        
-                        if (updateResponse.ok) {
-                            console.log('상태 업데이트 성공');
-                            return true;
-                        } else {
-                            const errorText = await updateResponse.text();
-                            console.error('업데이트 실패:', errorText);
-                        }
-                    }
-                }
-            }
-        }
-        
-        return false;
         
     } catch (error) {
         console.error('처리 중 오류:', error);

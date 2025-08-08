@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>현재 사용자 확인</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .info-box {
+            background: #f0f0f0;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+        .error { color: red; }
+        .success { color: green; }
+        button {
+            padding: 10px 20px;
+            margin: 5px;
+            cursor: pointer;
+            border: none;
+            border-radius: 5px;
+            background: #3498db;
+            color: white;
+        }
+        pre {
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>현재 로그인 정보 확인</h1>
+    
+    <div class="info-box">
+        <h2>SessionStorage 정보</h2>
+        <pre id="session-info"></pre>
+    </div>
+    
+    <div class="info-box">
+        <h2>신청 정보</h2>
+        <pre id="applied-info"></pre>
+    </div>
+    
+    <div class="info-box">
+        <h2>선택된 모임 정보</h2>
+        <pre id="meeting-info"></pre>
+    </div>
+    
+    <div style="margin-top: 20px;">
+        <button onclick="clearAllApplications()">모든 신청 초기화</button>
+        <button onclick="switchToConservative()">보수 모임으로 변경</button>
+        <button onclick="checkFirebaseStatus()">Firebase 상태 확인</button>
+    </div>
+    
+    <div id="result" style="margin-top: 20px;"></div>
+    
+    <script>
+        function displayInfo() {
+            // SessionStorage 정보
+            const sessionInfo = {
+                userEmail: sessionStorage.getItem('userEmail'),
+                userGender: sessionStorage.getItem('userGender'),
+                politicalType: sessionStorage.getItem('politicalType'),
+                isLoggedIn: sessionStorage.getItem('isLoggedIn')
+            };
+            
+            const progressiveCodes = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'];
+            sessionInfo.expectedOrientation = progressiveCodes.includes(sessionInfo.politicalType) ? 'progressive' : 'conservative';
+            
+            document.getElementById('session-info').textContent = JSON.stringify(sessionInfo, null, 2);
+            
+            // 신청 정보
+            const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
+            document.getElementById('applied-info').textContent = JSON.stringify(appliedMeetings, null, 2);
+            
+            // 선택된 모임
+            const selectedMeeting = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+            document.getElementById('meeting-info').textContent = JSON.stringify(selectedMeeting, null, 2);
+            
+            // 문제 진단
+            const result = document.getElementById('result');
+            if (sessionInfo.politicalType && selectedMeeting.orientation) {
+                if (sessionInfo.expectedOrientation !== selectedMeeting.orientation) {
+                    result.innerHTML = `<p class="error">⚠️ 문제 발견: ${sessionInfo.politicalType} (${sessionInfo.expectedOrientation}) 계정으로 ${selectedMeeting.orientation} 모임에 신청하려고 합니다!</p>`;
+                } else {
+                    result.innerHTML = `<p class="success">✓ 성향 일치: ${sessionInfo.expectedOrientation}</p>`;
+                }
+            }
+        }
+        
+        function clearAllApplications() {
+            sessionStorage.removeItem('appliedMeetings');
+            alert('모든 신청 정보가 초기화되었습니다.');
+            displayInfo();
+        }
+        
+        function switchToConservative() {
+            const selectedMeeting = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+            selectedMeeting.orientation = 'conservative';
+            selectedMeeting.title = '보수 성향 소개팅';
+            selectedMeeting.id = 'meeting_conservative_' + Date.now();
+            sessionStorage.setItem('selectedMeeting', JSON.stringify(selectedMeeting));
+            
+            alert('보수 모임으로 변경되었습니다.');
+            displayInfo();
+        }
+        
+        async function checkFirebaseStatus() {
+            try {
+                const token = localStorage.getItem('authToken');
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
+                
+                const response = await fetch(`${API_URL}/api/user/meetings`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    const result = document.getElementById('result');
+                    result.innerHTML += '<h3>Firebase 신청 상태:</h3>';
+                    result.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
+                }
+            } catch (error) {
+                alert('Firebase 조회 실패: ' + error.message);
+            }
+        }
+        
+        // 페이지 로드 시 정보 표시
+        displayInfo();
+    </script>
+</body>
+</html>
