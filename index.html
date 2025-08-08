@@ -2518,37 +2518,7 @@
                 };
                 console.log('userMeetingInfo 초기화됨');
 
-                // 먼저 로컬 DataSystem에서 확인
-                if (window.DataSystem) {
-                    const bookings = window.DataSystem.getUserBookings(userEmail);
-                    bookings.forEach(booking => {
-                        if (booking.status !== 'cancelled') {
-                            const meetings = window.DataSystem.getMeetings();
-                            const meeting = meetings.find(m => m.id === booking.meetingId);
-                            if (meeting) {
-                                userMeetingInfo[meeting.orientation] = {
-                                    status: booking.status,
-                                    meetingId: booking.meetingId
-                                };
-                            }
-                        }
-                    });
-                }
-                
-                // 세션 스토리지에서도 확인 (이전 버전 호환성)
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                Object.keys(appliedMeetings).forEach(orientation => {
-                    const meetingData = appliedMeetings[orientation];
-                    if (meetingData && meetingData.status !== 'cancelled') {
-                        userMeetingInfo[orientation] = {
-                            status: meetingData.status,
-                            meetingId: meetingData.meetingId
-                        };
-                    }
-                });
-                console.log("session", appliedMeetings)
-                
-                // 서버에서도 확인 (있을 경우)
+                // Firebase에서만 데이터 가져오기
                 const token = localStorage.getItem('authToken');
                 if (token) {
                     const API_URL = window.location.hostname === 'localhost' 
@@ -2630,62 +2600,16 @@
                                 // 디버깅: 처리 후 상태
                                 console.log('userMeetingInfo after processing Firebase data:', JSON.stringify(userMeetingInfo));
                                 
-                                // Firebase 데이터로 sessionStorage 업데이트
-                                const updatedAppliedMeetings = {};
-                                Object.keys(userMeetingInfo).forEach(orientation => {
-                                    if (userMeetingInfo[orientation]) {
-                                        updatedAppliedMeetings[orientation] = userMeetingInfo[orientation];
-                                    }
-                                });
-                                
-                                if (Object.keys(updatedAppliedMeetings).length > 0) {
-                                    sessionStorage.setItem('appliedMeetings', JSON.stringify(updatedAppliedMeetings));
-                                    console.log('sessionStorage를 Firebase 데이터로 업데이트:', updatedAppliedMeetings);
-                                }
+                                // sessionStorage 업데이트는 하지 않음 - Firebase 데이터만 사용
+                                console.log('Firebase 데이터만 사용, sessionStorage 업데이트 건너뜀');
                             } else {
                                 console.log('Firebase에서 meetings 데이터가 없음');
                             }
                         }
                     } catch (error) {
-                        console.log('서버 연결 실패, 로컬 데이터 확인');
+                        console.log('서버 연결 실패 - Firebase 데이터를 가져올 수 없음');
                         console.error('Error details:', error);
-                        
-                        // 서버 연결 실패 시 로컬 데이터 확인
-                        // DataSystem 확인
-                        console.log('Checking if DataSystem exists:', typeof window.DataSystem);
-                        if (window.DataSystem) {
-                            console.log('DataSystem exists, checking getUserBookings method:', typeof window.DataSystem.getUserBookings);
-                            const bookings = window.DataSystem.getUserBookings(userEmail);
-                            console.log('DataSystem bookings:', bookings);
-                            bookings.forEach(booking => {
-                                if (booking.status !== 'cancelled') {
-                                    const meetings = window.DataSystem.getMeetings();
-                                    const meeting = meetings.find(m => m.id === booking.meetingId);
-                                    if (meeting) {
-                                        console.log('Found meeting in DataSystem:', meeting);
-                                        userMeetingInfo[meeting.orientation] = {
-                                            status: booking.status,
-                                            meetingId: booking.meetingId
-                                        };
-                                    }
-                                }
-                            });
-                        }
-                        
-                        // sessionStorage 확인 (마지막 수단)
-                        const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                        if (Object.keys(appliedMeetings).length > 0) {
-                            console.log('Checking sessionStorage as last resort:', appliedMeetings);
-                            Object.keys(appliedMeetings).forEach(orientation => {
-                                const meetingData = appliedMeetings[orientation];
-                                if (meetingData && meetingData.status !== 'cancelled' && !userMeetingInfo[orientation]) {
-                                    userMeetingInfo[orientation] = {
-                                        status: meetingData.status,
-                                        meetingId: meetingData.meetingId
-                                    };
-                                }
-                            });
-                        }
+                        // 서버 연결 실패 시 버튼을 기본 상태로 유지
                     }
                 }
                 
@@ -3070,9 +2994,7 @@
         window.addEventListener('load', function() {
             console.log('=== Page loaded, initializing meeting updates ===');
             console.log('Current URL:', window.location.href);
-            console.log('SessionStorage appliedMeetings:', sessionStorage.getItem('appliedMeetings'));
-            console.log('DataSystem check on load:', typeof window.DataSystem);
-            console.log('window.DataSystem object:', window.DataSystem);
+            console.log('Firebase 데이터만 사용 - sessionStorage/DataSystem 무시');
             
             // 즉시 한 번 실행
             updateMeetingButtons();
@@ -3081,14 +3003,6 @@
             const urlParams = new URLSearchParams(window.location.search);
             const fromPage = urlParams.get('from');
             console.log('From page:', fromPage);
-            
-            // 디버깅을 위한 모든 sessionStorage 키 출력
-            console.log('All sessionStorage keys:', Object.keys(sessionStorage));
-            for (let key of Object.keys(sessionStorage)) {
-                if (key.includes('meeting') || key.includes('Meeting')) {
-                    console.log(`${key}:`, sessionStorage.getItem(key));
-                }
-            }
             
             // 참석 인원 업데이트 (페이지 로드 시 한 번만)
             updateAttendanceCount();
