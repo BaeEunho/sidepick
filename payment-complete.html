@@ -6,6 +6,77 @@
     <title>예약 완료 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="payment-complete-styles.css">
+    <style>
+        /* 액션 버튼 컨테이너 */
+        .action-buttons {
+            display: flex;
+            gap: 16px;
+            margin: 40px auto;
+            max-width: 500px;
+            padding: 0 20px;
+            justify-content: center;
+        }
+        
+        /* 모든 버튼 공통 스타일 */
+        .action-buttons button {
+            padding: 20px 32px;
+            font-size: 16px;
+            font-weight: 700;
+            border-radius: 16px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            width: 100%;
+            letter-spacing: -0.5px;
+        }
+        
+        /* 계좌번호 복사 버튼 */
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+            border: 2px solid #E5E7EB;
+        }
+        
+        .btn-secondary:hover {
+            background: #E5E7EB;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-secondary:active {
+            transform: translateY(0);
+        }
+        
+        /* 홈으로 돌아가기 버튼 */
+        .btn-primary {
+            background: #4F46E5;
+            color: white;
+            border: none;
+            font-size: 16px;
+            box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+        }
+        
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(79, 70, 229, 0.4);
+        }
+        
+        /* 모바일 최적화 */
+        @media (max-width: 768px) {
+            .action-buttons {
+                padding: 0;
+            }
+            
+            .action-buttons button {
+                font-size: 15px;
+                padding: 18px 24px;
+            }
+        }
+    </style>
     <script src="auth-check.js"></script>
 </head>
 <body>
@@ -143,13 +214,10 @@
                 <!-- 액션 버튼 -->
                 <div class="action-buttons">
                     <button type="button" class="btn-secondary" onclick="copyAccountNumber()">
-                        계좌번호 복사
-                    </button>
-                    <button type="button" class="btn-confirm" onclick="window.location.href='payment-confirm.html'" style="background-color: #10B981; color: white;">
-                        입금 완료했어요
+                        <span>📋 계좌번호 복사</span>
                     </button>
                     <button type="button" class="btn-primary" onclick="window.location.href='index.html?from=payment-complete'">
-                        나중에 입금하기
+                        <span>홈으로 돌아가기</span>
                     </button>
                 </div>
 

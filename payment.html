@@ -6,6 +6,118 @@
     <title>결제하기 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="payment-styles.css">
+    <style>
+        /* 버튼 그룹 스타일 */
+        .button-group {
+            display: flex;
+            gap: 16px;
+            margin-top: 40px;
+            justify-content: center;
+        }
+        
+        /* 기본 버튼 스타일 */
+        .btn-secondary,
+        .btn-primary {
+            padding: 16px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            border-radius: 12px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 160px;
+        }
+        
+        /* 이전 버튼 */
+        .btn-secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #E5E7EB;
+            transform: translateY(-1px);
+        }
+        
+        /* 입금 완료 버튼 */
+        .btn-primary {
+            background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%);
+            color: white;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-primary:disabled {
+            background: #E5E7EB;
+            color: #9CA3AF;
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+        
+        .btn-primary:not(:disabled):hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+        
+        .btn-primary:not(:disabled):active {
+            transform: translateY(0);
+        }
+        
+        /* 버튼 아이콘 애니메이션 */
+        .button-icon {
+            font-size: 20px;
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+        
+        .btn-primary:not(:disabled):hover .button-icon {
+            transform: scale(1.2) rotate(10deg);
+        }
+        
+        /* 버튼 텍스트 */
+        .button-text {
+            font-size: 16px;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+        
+        /* 활성화 시 반짝이는 효과 */
+        @keyframes shimmer {
+            0% {
+                background-position: -200% center;
+            }
+            100% {
+                background-position: 200% center;
+            }
+        }
+        
+        .btn-primary:not(:disabled) {
+            background-size: 200% auto;
+            animation: shimmer 3s linear infinite;
+        }
+        
+        /* 체크박스 모두 체크 시 버튼 활성화 애니메이션 */
+        @keyframes enableButton {
+            0% {
+                transform: scale(0.95);
+            }
+            50% {
+                transform: scale(1.05);
+            }
+            100% {
+                transform: scale(1);
+            }
+        }
+        
+        .btn-primary.just-enabled {
+            animation: enableButton 0.4s ease;
+        }
+    </style>
     <script src="auth-system.js"></script>
     <script src="data-system.js"></script>
     <script src="auth-check.js"></script>
@@ -160,7 +272,10 @@
                 <!-- 버튼 -->
                 <div class="button-group">
                     <button type="button" class="btn-secondary" onclick="history.back()">이전으로</button>
-                    <button type="button" class="btn-primary" id="confirm-button" disabled>입금 정보 확인 완료</button>
+                    <button type="button" class="btn-primary" id="confirm-button" disabled>
+                        <span class="button-icon">💰</span>
+                        <span class="button-text">입금 완료했어요</span>
+                    </button>
                 </div>
 
                 <!-- 고객센터 안내 -->
@@ -295,7 +410,16 @@
         checkboxes.forEach(checkbox => {
             checkbox.addEventListener('change', function() {
                 const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+                const wasDisabled = confirmButton.disabled;
                 confirmButton.disabled = !allChecked;
+                
+                // 버튼이 활성화될 때 애니메이션 효과
+                if (wasDisabled && !confirmButton.disabled) {
+                    confirmButton.classList.add('just-enabled');
+                    setTimeout(() => {
+                        confirmButton.classList.remove('just-enabled');
+                    }, 400);
+                }
             });
         });
 

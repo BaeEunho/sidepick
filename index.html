@@ -2073,7 +2073,9 @@
         // 참가자 수 업데이트 함수 (Firebase에서 실제 데이터 가져오기)
         async function updateMeetingCounts() {
             try {
-                const API_URL = 'https://sidepick.onrender.com';
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
                 const data = await response.json();
@@ -2338,7 +2340,9 @@
                 
                 // Firebase에서 실제 참가자 수 확인
                 try {
-                    const API_URL = 'https://sidepick.onrender.com';
+                    const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                     
                     const response = await fetch(`${API_URL}/api/meetings/attendance`);
                     const data = await response.json();
@@ -2547,12 +2551,16 @@
                 // 서버에서도 확인 (있을 경우)
                 const token = localStorage.getItem('authToken');
                 if (token) {
-                    const API_URL = 'https://sidepick.onrender.com';
+                    const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                         
                     try {
-                        const response = await fetch(`${API_URL}/api/user/meetings`, {
+                        const response = await fetch(`${API_URL}/api/user/meetings?t=${Date.now()}`, {
                             headers: {
-                                'Authorization': `Bearer ${token}`
+                                'Authorization': `Bearer ${token}`,
+                                'Cache-Control': 'no-cache',
+                                'Pragma': 'no-cache'
                             }
                         });
                         
@@ -2927,7 +2935,9 @@
         async function checkCapacityAndUpdateButton(orientation, button) {
             try {
                 const userGender = sessionStorage.getItem('userGender');
-                const API_URL = 'https://sidepick.onrender.com';
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3001' 
+                    : 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
                 const data = await response.json();
@@ -3137,6 +3147,14 @@
         window.setButtonState = function(orientation, status) {
             console.log(`Manually setting ${orientation} button to ${status}`);
             updateButtonForMeeting(orientation, { status: status, meetingId: 'test-123' });
+        };
+        
+        // 디버깅 함수 - 수동으로 상태 새로고침
+        window.refreshMeetingStatus = async function() {
+            console.log('=== 수동 상태 새로고침 시작 ===');
+            userMeetingInfo = {}; // 캐시 초기화
+            await fetchUserMeetingInfo();
+            console.log('=== 수동 상태 새로고침 완료 ===');
         };
         
         // 디버깅 함수 - 강제로 버튼 텍스트 변경

@@ -56,7 +56,7 @@ async function loadData() {
 async function loadFromServer() {
     console.log('=== 관리자 페이지: 서버에서 데이터 로드 중 ===');
     try {
-        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/admin/users`);
         console.log('서버 응답 상태:', response.status);
         
@@ -153,11 +153,12 @@ function getCurrentSessionUser() {
                 status: meetingData.status || 'pending'
             });
             
-            if (meetingData.status === 'confirmed') {
+            // paid 또는 confirmed 상태면 결제 완료로 간주
+            if (meetingData.status === 'paid' || meetingData.status === 'confirmed') {
                 userData.payments.push({
                     meetingId: meetingData.meetingId,
                     amount: 45000,
-                    status: 'paid'
+                    status: meetingData.status
                 });
             }
         }
@@ -197,7 +198,10 @@ function updateStats() {
     const totalUsers = allUsers.length;
     const testCompleted = allUsers.filter(u => u.political_type || u.politicalType).length;
     const meetingApplied = allUsers.filter(u => u.meetings && u.meetings.length > 0).length;
-    const paymentCompleted = allUsers.filter(u => u.payments && u.payments.length > 0).length;
+    // confirmed 상태인 사용자만 결제 완료로 카운트
+    const paymentCompleted = allUsers.filter(u => 
+        u.meetings && u.meetings.some(m => m.status === 'confirmed')
+    ).length;
     
     document.getElementById('total-users').textContent = totalUsers;
     document.getElementById('test-completed').textContent = testCompleted;
@@ -260,8 +264,10 @@ function createUserRow(user) {
         
         paymentStatusHtml = `
             <select class="payment-status-select" onchange="updatePaymentStatus('${user.email}', this.value)" data-current="${currentStatus}">
-                <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>입금대기</option>
-                <option value="paid" ${currentStatus === 'paid' || currentStatus === 'confirmed' ? 'selected' : ''}>결제완료</option>
+                <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>신청완료</option>
+                <option value="payment_pending" ${currentStatus === 'payment_pending' ? 'selected' : ''}>입금대기</option>
+                <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>입금완료</option>
+                <option value="confirmed" ${currentStatus === 'confirmed' ? 'selected' : ''}>결제완료</option>
                 <option value="cancelled" ${currentStatus === 'cancelled' ? 'selected' : ''}>취소</option>
             </select>
         `;
@@ -356,7 +362,12 @@ function filterUsers() {
                     if (!user.meetings || user.meetings.length === 0) return false;
                     break;
                 case 'paid':
-                    if (!user.payments || user.payments.length === 0) return false;
+                    // 입금 완료 상태인 사용자만
+                    if (!user.meetings || !user.meetings.some(m => m.status === 'paid')) return false;
+                    break;
+                case 'confirmed':
+                    // 결제 완료 상태인 사용자만
+                    if (!user.meetings || !user.meetings.some(m => m.status === 'confirmed')) return false;
                     break;
             }
         }
@@ -463,9 +474,10 @@ function showUserDetail(email) {
 // 상태 텍스트 변환
 function getStatusText(status) {
     const statusMap = {
-        'pending': '입금 대기',
-        'paid': '결제 완료',
-        'confirmed': '참가 확정',
+        'pending': '신청 완료',
+        'payment_pending': '입금 대기',
+        'paid': '입금 완료',
+        'confirmed': '결제 완료',
         'cancelled': '취소됨',
         'completed': '완료됨'
     };
@@ -573,7 +585,7 @@ async function updatePaymentStatus(email, newStatus) {
     console.log(`새 상태: ${newStatus}`);
     
     try {
-        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
+        const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3001' : 'https://sidepick.onrender.com';
         console.log(`API 호출: ${API_URL}/api/admin/users/${email}/payment-status`);
         
         const response = await fetch(`${API_URL}/api/admin/users/${email}/payment-status`, {
