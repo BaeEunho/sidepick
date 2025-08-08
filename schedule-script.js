@@ -117,42 +117,13 @@ async function fetchUserMeetingInfo() {
             conservative: null
         };
         
-        // 먼저 로컬 DataSystem에서 확인
-        if (window.DataSystem) {
-            const bookings = window.DataSystem.getUserBookings(userEmail);
-            bookings.forEach(booking => {
-                if (booking.status !== 'cancelled') {
-                    const meetings = window.DataSystem.getMeetings();
-                    const meeting = meetings.find(m => m.id === booking.meetingId);
-                    if (meeting) {
-                        userMeetingInfo[meeting.orientation] = {
-                            status: booking.status,
-                            meetingId: booking.meetingId
-                        };
-                    }
-                }
-            });
-            console.log("dataSystem", bookings);
-        }
+        console.log('Firebase에서만 모임 신청 정보를 가져옵니다.');
         
-        // 세션 스토리지에서도 확인 (이전 버전 호환성)
-        const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-        Object.keys(appliedMeetings).forEach(orientation => {
-            const meetingData = appliedMeetings[orientation];
-            if (meetingData && meetingData.status !== 'cancelled') {
-                userMeetingInfo[orientation] = {
-                    status: meetingData.status,
-                    meetingId: meetingData.meetingId
-                };
-            }
-        });
-        console.log("session", appliedMeetings)
-        
-        // 서버에서도 확인 (있을 경우)
+        // Firebase에서만 확인
         const token = localStorage.getItem('authToken');
         if (token) {
             const API_URL = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3000' 
+                ? 'http://localhost:3001' 
                 : 'https://sidepick.onrender.com';
                 
             try {
@@ -482,6 +453,58 @@ window.applyMeeting = async function(button) {
         return;
     }
     
+    // 1-1. Firebase에서 이미 신청했는지 실시간으로 확인
+    try {
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3001' 
+                : 'https://sidepick.onrender.com';
+                
+            const response = await fetch(`${API_URL}/api/user/meetings`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                console.log('실시간 모임 신청 상태 확인:', data);
+                
+                if (data.meetings && data.meetings.length > 0) {
+                    // 해당 성향의 모임에 이미 신청했는지 확인
+                    const existingApplication = data.meetings.find(meeting => 
+                        meeting.orientation === meetingOrientation && 
+                        meeting.status !== 'cancelled'
+                    );
+                    
+                    if (existingApplication) {
+                        alert('이미 해당 성향의 모임에 신청하셨습니다.');
+                        button.disabled = false;
+                        button.classList.remove('processing');
+                        button.textContent = originalText;
+                        
+                        // userMeetingInfo 업데이트하고 UI 새로고침
+                        userMeetingInfo[meetingOrientation] = {
+                            status: existingApplication.status,
+                            meetingId: existingApplication.id
+                        };
+                        
+                        // 버튼 상태 즉시 업데이트
+                        if (userGender) {
+                            await updateMeetingAvailability(userGender);
+                        }
+                        
+                        return;
+                    }
+                }
+            }
+        }
+    } catch (error) {
+        console.error('실시간 신청 상태 확인 실패:', error);
+        // 에러가 나도 계속 진행
+    }
+    
     // 2. Firebase에서 실제 참가자 수 확인 (마감 여부)
     try {
         const API_URL = window.location.hostname === 'localhost' 
@@ -712,6 +735,32 @@ window.addEventListener('pageshow', function(event) {
         const politicalType = sessionStorage.getItem('politicalType');
         if (!politicalType) {
             window.location.href = 'political-test.html?logged_in=true';
+        } else {
+            // 캐시에서 복원된 경우에도 Firebase 데이터 다시 가져오기
+            console.log('페이지가 캐시에서 복원됨 - Firebase 데이터 다시 가져오기');
+            fetchUserMeetingInfo().then(async () => {
+                const userGender = sessionStorage.getItem('userGender');
+                if (userGender) {
+                    await updateMeetingAvailability(userGender);
+                }
+            });
+        }
+    }
+});
+
+// 모바일에서 탭 전환 시 데이터 새로고침
+document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+        // 페이지가 다시 보이게 되었을 때
+        const politicalType = sessionStorage.getItem('politicalType');
+        if (politicalType) {
+            console.log('페이지가 다시 활성화됨 - Firebase 데이터 새로고침');
+            fetchUserMeetingInfo().then(async () => {
+                const userGender = sessionStorage.getItem('userGender');
+                if (userGender) {
+                    await updateMeetingAvailability(userGender);
+                }
+            });
         }
     }
 });
