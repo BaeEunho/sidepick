@@ -6,170 +6,81 @@
     <title>회원가입 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth-styles.css">
-    <!-- Pikaday CSS -->
-    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/pikaday/css/pikaday.css">
+    <!-- Air Datepicker CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.css">
     <style>
-        /* Pikaday 커스텀 스타일 - 모던하고 깔끔한 디자인 */
-        .pika-single {
+        /* Air Datepicker 커스텀 스타일 - 모던하고 깔끔한 디자인 */
+        .air-datepicker {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
             box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
             border: 1px solid #e5e7eb !important;
             border-radius: 16px !important;
-            background: white !important;
-            font-size: 16px !important;
-            width: 350px !important;
         }
         
-        /* 헤더 스타일 */
-        .pika-title {
-            padding: 16px 12px !important;
-            background: #f9fafb !important;
+        /* 네비게이션 스타일 */
+        .air-datepicker-nav {
+            padding: 12px !important;
             border-bottom: 1px solid #e5e7eb !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: space-between !important;
-            gap: 12px !important;
+            background: #f9fafb !important;
         }
         
         /* 월/년 선택 */
-        .pika-label {
+        .air-datepicker-nav--title {
+            cursor: pointer !important;
             color: #111827 !important;
             font-weight: 600 !important;
-            position: relative !important;
-            padding-right: 20px !important;
         }
         
-        /* 월/년 선택 드롭다운 화살표 추가 */
-        .pika-label:after {
-            content: '▼' !important;
-            position: absolute !important;
-            right: 8px !important;
-            top: 50% !important;
-            transform: translateY(-50%) !important;
-            font-size: 12px !important;
-            color: #6b7280 !important;
-            pointer-events: none !important;
-        }
-        
-        .pika-label:hover:after {
+        .air-datepicker-nav--title:hover {
             color: #4F46E5 !important;
         }
         
-        /* select 요소 스타일 */
-        .pika-select {
-            cursor: pointer !important;
-            border: 1px solid #e5e7eb !important;
-            border-radius: 6px !important;
-            padding: 8px 28px 8px 12px !important;
-            appearance: none !important;
-            -webkit-appearance: none !important;
-            -moz-appearance: none !important;
-            background: white !important;
-            font-weight: 600 !important;
-            color: #111827 !important;
+        /* 이전/다음 버튼에서 텍스트 숨기기 */
+        .air-datepicker-nav--action[data-action='prev']::after,
+        .air-datepicker-nav--action[data-action='next']::after {
+            display: none !important;
+        }
+        
+        /* 이전/다음 버튼 스타일 */
+        .air-datepicker-nav--action {
+            color: #6b7280 !important;
             transition: all 0.2s ease !important;
-            font-size: 16px !important;
-            height: 40px !important;
         }
         
-        .pika-select:hover {
-            border-color: #4F46E5 !important;
-            background: #f9fafb !important;
-        }
-        
-        .pika-select:focus {
-            outline: none !important;
-            border-color: #4F46E5 !important;
-            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
-        }
-        
-        /* 요일 헤더 */
-        .pika-table abbr[title] {
-            text-decoration: none;
-            font-weight: 600;
-            color: #6b7280;
-            font-size: 14px !important;
-        }
-        
-        /* 테이블 패딩 조정 */
-        .pika-table {
-            margin: 12px !important;
-        }
-        
-        .pika-table td {
-            padding: 2px !important;
+        .air-datepicker-nav--action:hover {
+            color: #4F46E5 !important;
         }
         
         /* 날짜 셀 스타일 */
-        .pika-button {
+        .air-datepicker-cell {
             border-radius: 8px !important;
             transition: all 0.2s ease !important;
-            background: white !important;
-            color: #111827 !important;
-            font-weight: 400 !important;
-            width: 42px !important;
-            height: 42px !important;
-            line-height: 42px !important;
-            font-size: 15px !important;
         }
         
-        .pika-button:hover {
+        .air-datepicker-cell:hover {
             background: #f3f4f6 !important;
-            color: #111827 !important;
         }
         
-        .is-selected .pika-button {
+        .air-datepicker-cell.-selected- {
             background: #4F46E5 !important;
             color: white !important;
-            font-weight: 600 !important;
-            box-shadow: none !important;
         }
         
-        .is-today .pika-button {
+        .air-datepicker-cell.-current- {
             color: #4F46E5 !important;
             font-weight: 600 !important;
         }
         
-        /* 비활성 날짜 */
-        .is-disabled .pika-button {
-            color: #d1d5db !important;
-            cursor: not-allowed !important;
-            opacity: 0.5 !important;
-        }
-        
-        /* 네비게이션 버튼 */
-        .pika-prev, .pika-next {
-            color: #6b7280 !important;
-            font-size: 20px !important;
-            background: white !important;
-            border: 1px solid #e5e7eb !important;
+        /* 버튼 스타일 */
+        .air-datepicker-button {
             border-radius: 8px !important;
-            width: 40px !important;
-            height: 40px !important;
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-            cursor: pointer !important;
+            font-weight: 500 !important;
             transition: all 0.2s ease !important;
         }
         
-        .pika-prev:hover, .pika-next:hover {
-            color: #4F46E5 !important;
-            background: #f3f4f6 !important;
-            border-color: #4F46E5 !important;
-        }
-        
-        /* 화살표 아이콘 추가 */
-        .pika-prev:before {
-            content: '‹' !important;
-            font-size: 24px !important;
-            line-height: 1 !important;
-        }
-        
-        .pika-next:before {
-            content: '›' !important;
-            font-size: 24px !important;
-            line-height: 1 !important;
+        .air-datepicker-button:hover {
+            background: #4F46E5 !important;
+            color: white !important;
         }
         
         /* 생년월일 입력 필드 스타일 */
@@ -195,10 +106,9 @@
     <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
-    <!-- Pikaday JS -->
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/locale/ko.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
+    <!-- Air Datepicker JS -->
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/air-datepicker.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.3.5/locale/ko.js"></script>
 </head>
 <body>
     <!-- 헤더 -->
@@ -227,7 +137,7 @@
 
                         <div class="form-group">
                             <label for="birth">생년월일</label>
-                            <input type="text" id="birth" name="birth" placeholder="생년월일을 선택하세요" required>
+                            <input type="text" id="birth" name="birth" placeholder="생년월일을 선택하세요" required readonly>
                             <span class="input-hint">20세 이상만 가입 가능합니다 (한국 나이 기준)</span>
                             <span class="error-message" id="birth-error"></span>
                         </div>
@@ -319,43 +229,41 @@
     </section>
 
     <script>
-        // 페이지 로드 시 Pikaday 초기화
-        window.addEventListener('DOMContentLoaded', function() {
+        // 페이지 로드 시 Air Datepicker 초기화
+        document.addEventListener('DOMContentLoaded', function() {
             const today = new Date();
             const maxDate = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
             const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
             
-            // 한국어 설정
-            moment.locale('ko');
-            
-            // Pikaday 한국어 번역
-            const i18n = {
-                previousMonth : '',  // 빈 문자열로 설정하여 화살표만 표시
-                nextMonth     : '',  // 빈 문자열로 설정하여 화살표만 표시
-                months        : ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'],
-                weekdays      : ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
-                weekdaysShort : ['일','월','화','수','목','금','토']
+            // localeKo가 정의되어 있는지 확인하고, 없으면 기본값 사용
+            const koreanLocale = typeof localeKo !== 'undefined' ? localeKo : {
+                days: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
+                daysShort: ['일', '월', '화', '수', '목', '금', '토'],
+                daysMin: ['일', '월', '화', '수', '목', '금', '토'],
+                months: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+                monthsShort: ['1월', '2월', '3월', '4월', '5월', '6월', '7월', '8월', '9월', '10월', '11월', '12월'],
+                today: '오늘',
+                clear: '지우기',
+                dateFormat: 'yyyy-MM-dd',
+                timeFormat: 'HH:mm',
+                firstDay: 0
             };
             
-            // Pikaday 초기화
-            const picker = new Pikaday({
-                field: document.getElementById('birth'),
-                format: 'YYYY-MM-DD',
+            // Air Datepicker 초기화
+            const datepicker = new AirDatepicker('#birth', {
+                locale: koreanLocale,
+                dateFormat: 'yyyy-MM-dd',
                 maxDate: maxDate,
                 minDate: minDate,
-                yearRange: [minDate.getFullYear(), maxDate.getFullYear()],
-                showMonthAfterYear: true,
-                showDaysInNextAndPreviousMonths: true,
-                enableSelectionDaysInNextAndPreviousMonths: true,
-                i18n: i18n,
-                firstDay: 0, // 일요일부터 시작
-                onSelect: function(date) {
+                view: 'days',
+                minView: 'days',
+                selectedDates: [new Date(today.getFullYear() - 25, 0, 1)],
+                autoClose: true,
+                buttons: ['today', 'clear'],
+                onSelect: function({date, formattedDate, datepicker}) {
                     validateAge();
                 }
             });
-            
-            // 기본값 설정 (25세)
-            picker.setDate(new Date(today.getFullYear() - 25, 0, 1));
         });
 
         function validateAge() {
