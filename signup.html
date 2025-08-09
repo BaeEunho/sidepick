@@ -13,60 +13,15 @@
             position: relative;
         }
         
-        /* 모든 플랫폼에서 통일된 디자인 */
+        /* 기본 date input 숨기기 */
         input[type="date"] {
-            appearance: none;
-            -webkit-appearance: none;
-            -moz-appearance: none;
-            width: 100%;
-            padding: 12px 16px;
-            font-size: 16px;
-            border: 1px solid #e5e7eb;
-            border-radius: 8px;
-            background: white;
-            cursor: pointer;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-        }
-        
-        /* 모바일 디바이스에서 네이티브 피커 사용 */
-        @media (max-width: 768px) {
-            input[type="date"] {
-                /* 모바일에서는 네이티브 피커 사용 */
-                appearance: auto;
-                -webkit-appearance: auto;
-            }
-        }
-        
-        /* 데스크탑 크롬/엣지 스타일 */
-        input[type="date"]::-webkit-calendar-picker-indicator {
-            cursor: pointer;
-            padding: 4px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-        }
-        
-        input[type="date"]::-webkit-calendar-picker-indicator:hover {
-            opacity: 1;
-        }
-        
-        input[type="date"]:hover {
-            border-color: #4F46E5;
-        }
-        
-        input[type="date"]:focus {
-            outline: none;
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        
-        /* 폴백용 커스텀 셋렉트 */
-        .birth-selects {
             display: none;
-            gap: 8px;
         }
         
-        .birth-selects.show {
+        /* 모든 플랫폼에서 사용할 셀렉트 박스 */
+        .birth-selects {
             display: flex;
+            gap: 8px;
         }
         
         .birth-selects select {
@@ -77,13 +32,67 @@
             border-radius: 8px;
             background: white;
             cursor: pointer;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            transition: all 0.2s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            padding-right: 36px;
+            /* iOS 터치 최적화 */
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
         }
         
-        /* 날짜 형식 안내 */
-        .date-format-hint {
+        .birth-selects select:hover {
+            border-color: #4F46E5;
+        }
+        
+        .birth-selects select:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        /* 연도 셀렉트는 조금 더 넓게 */
+        .birth-selects select#birth-year {
+            flex: 1.2;
+        }
+        
+        /* 모바일에서도 동일한 스타일 유지 */
+        @media (max-width: 768px) {
+            .birth-selects {
+                gap: 6px;
+            }
+            
+            .birth-selects select {
+                padding: 14px 36px 14px 12px;
+                font-size: 16px; /* iOS 자동 확대 방지 */
+                /* iOS 기본 스타일 제거 */
+                -webkit-appearance: none;
+                border-radius: 8px;
+                background-color: white;
+            }
+        }
+        
+        /* iOS 특별 처리 */
+        @supports (-webkit-touch-callout: none) {
+            .birth-selects select {
+                /* iOS에서 화살표 이미지가 제대로 보이도록 */
+                background-size: 12px 12px;
+                /* iOS에서 select 터치 영역 확대 */
+                min-height: 44px;
+            }
+        }
+        
+        /* 디버깅용 - 나중에 제거 가능 */
+        .debug-info {
+            display: none;
             font-size: 12px;
             color: #6b7280;
-            margin-top: 4px;
+            margin-top: 8px;
         }
         
     </style>
@@ -123,7 +132,7 @@
                                 <input type="date" id="birth" name="birth" required 
                                        max="" min="" 
                                        onchange="validateAge()">
-                                <!-- 폴백용 셋렉트 박스 (구형 브라우저용) -->
+                                <!-- 모든 플랫폼에서 사용할 셋렉트 박스 -->
                                 <div class="birth-selects" id="birth-selects">
                                     <select id="birth-year" onchange="updateDateFromSelects()">
                                         <option value="">연도</option>
@@ -240,30 +249,29 @@
             birthInput.max = maxDate.toISOString().split('T')[0];
             birthInput.min = minDate.toISOString().split('T')[0];
             
-            // HTML5 date input 지원 확인
-            const isDateSupported = () => {
-                const input = document.createElement('input');
-                input.type = 'date';
-                return input.type === 'date';
-            };
-            
-            // 구형 브라우저를 위한 폴백
-            if (!isDateSupported()) {
-                // date input을 숨기고 select 박스 표시
-                birthInput.style.display = 'none';
-                birthSelects.classList.add('show');
-                
-                // 셋렉트 박스 초기화
-                initSelectBoxes();
-            }
+            // 모든 플랫폼에서 셀렉트 박스 사용
+            initSelectBoxes();
             
             // 기본값 설정 (25세)
             const defaultDate = new Date(today.getFullYear() - 25, 0, 1);
             birthInput.value = defaultDate.toISOString().split('T')[0];
-            validateAge();
+            
+            // 셀렉트 박스에 기본값 설정 - initSelectBoxes 이후에 실행
+            setTimeout(() => {
+                const yearSelect = document.getElementById('birth-year');
+                const monthSelect = document.getElementById('birth-month');
+                const daySelect = document.getElementById('birth-day');
+                
+                yearSelect.value = today.getFullYear() - 25;
+                monthSelect.value = 1;
+                daySelect.value = 1;
+                
+                // 날짜 업데이트 트리거
+                updateDateFromSelects();
+            }, 50);
         });
         
-        // 셋렉트 박스 초기화 (폴백용)
+        // 셋렉트 박스 초기화
         function initSelectBoxes() {
             const yearSelect = document.getElementById('birth-year');
             const monthSelect = document.getElementById('birth-month');
@@ -289,13 +297,13 @@
                 monthSelect.appendChild(option);
             }
             
-            // 일 옵션 추가
-            updateDayOptions();
-            
-            // 기본값 설정
-            yearSelect.value = today.getFullYear() - 25;
-            monthSelect.value = 1;
-            daySelect.value = 1;
+            // 일 옵션 추가 (31일까지 기본 생성)
+            for (let day = 1; day <= 31; day++) {
+                const option = document.createElement('option');
+                option.value = day;
+                option.textContent = day + '일';
+                daySelect.appendChild(option);
+            }
         }
         
         // 일 옵션 업데이트 (월에 따라)
@@ -304,11 +312,17 @@
             const monthSelect = document.getElementById('birth-month');
             const daySelect = document.getElementById('birth-day');
             
-            const year = parseInt(yearSelect.value) || 2000;
-            const month = parseInt(monthSelect.value) || 1;
+            if (!yearSelect.value || !monthSelect.value) {
+                return; // 연도와 월이 선택되지 않으면 업데이트하지 않음
+            }
+            
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
             const daysInMonth = new Date(year, month, 0).getDate();
             
-            const currentDay = daySelect.value;
+            const currentDay = parseInt(daySelect.value) || 0;
+            
+            // 기존 옵션 제거하고 새로 생성
             daySelect.innerHTML = '<option value="">일</option>';
             
             for (let day = 1; day <= daysInMonth; day++) {
@@ -318,9 +332,12 @@
                 daySelect.appendChild(option);
             }
             
-            // 이전 선택값 복원
-            if (currentDay && currentDay <= daysInMonth) {
+            // 이전 선택값 복원 (유효한 경우에만)
+            if (currentDay > 0 && currentDay <= daysInMonth) {
                 daySelect.value = currentDay;
+            } else if (currentDay > daysInMonth) {
+                // 이전 선택값이 새로운 월의 일수보다 크면 마지막 날 선택
+                daySelect.value = daysInMonth;
             }
         }
         
@@ -331,14 +348,26 @@
             const daySelect = document.getElementById('birth-day');
             const birthInput = document.getElementById('birth');
             
-            if (monthSelect.value) {
+            // 월이 변경되면 일 옵션 업데이트
+            if (monthSelect.value && yearSelect.value) {
                 updateDayOptions();
             }
             
+            // 모든 값이 선택되면 hidden input 업데이트
             if (yearSelect.value && monthSelect.value && daySelect.value) {
-                const date = new Date(yearSelect.value, monthSelect.value - 1, daySelect.value);
-                birthInput.value = date.toISOString().split('T')[0];
-                validateAge();
+                const year = parseInt(yearSelect.value);
+                const month = parseInt(monthSelect.value);
+                const day = parseInt(daySelect.value);
+                
+                // 날짜 유효성 검사
+                const date = new Date(year, month - 1, day);
+                if (date.getDate() === day) { // 유효한 날짜인지 확인
+                    birthInput.value = date.toISOString().split('T')[0];
+                    validateAge();
+                } else {
+                    // 유효하지 않은 날짜면 일 수 조정
+                    updateDayOptions();
+                }
             }
         }
 
