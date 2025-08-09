@@ -11,309 +11,74 @@
     <style>
         /* Pikaday 커스텀 스타일 - 모던하고 깔끔한 디자인 */
         .pika-single {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
-            border: 1px solid #e5e7eb;
-            border-radius: 16px;
-            overflow: hidden;
-            margin-top: 8px;
-            z-index: 9999;
-            padding: 0 !important;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif !important;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12) !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 16px !important;
+            background: white !important;
         }
-        
-        /* 달력 컨테이너가 전체를 차지하도록 */
-        .pika-lendar {
-            margin: 0 !important;
-            padding: 0 !important;
-            width: 100% !important;
-        }
-        
-        /* 테이블 전체 너비 조정 */
-        .pika-table {
-            width: 100%;
-            table-layout: fixed;
-            margin: 0;
-        }
-        
-
         
         /* 헤더 스타일 */
-        .pika-label {
-            background: #f9fafb;
-            color: #111827;
-            font-weight: 600;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 4px 8px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-            position: relative;
-        }
-        
-        .pika-label:hover {
-            background: #e5e7eb;
-            color: #4F46E5;
-        }
-        
-        /* 드롭다운 화살표 추가 */
-        .pika-label:after {
-            content: '▼';
-            font-size: 10px;
-            margin-left: 6px;
-            opacity: 0.6;
-        }
-        
         .pika-title {
-            background: #f9fafb;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e7eb;
-            text-align: center;
+            padding: 12px !important;
+            background: #f9fafb !important;
+            border-bottom: 1px solid #e5e7eb !important;
         }
         
-        /* 커스텀 드롭다운 스타일 */
-        .pika-select {
-            background: white;
-            border: 1px solid #e5e7eb;
-            border-radius: 6px;
-            padding: 6px 10px;
-            font-size: 14px;
-            font-weight: 600;
-            color: #111827;
-            cursor: pointer;
-            outline: none;
-            transition: all 0.2s ease;
-        }
-        
-        .pika-select:hover {
-            border-color: #4F46E5;
-            background: #f9fafb;
-        }
-        
-        .pika-select:focus {
-            border-color: #4F46E5;
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
-        }
-        
-        
-        /* 이전/다음 버튼 - iOS 터치 영역 확대 */
-        .pika-prev, .pika-next {
-            background-color: transparent;
-            border: none;
-            cursor: pointer;
-            opacity: 0.7;
-            position: absolute;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-            z-index: 10;
-            font-size: 0; /* 텍스트 숨기기 */
-            color: transparent; /* 텍스트 투명하게 */
-        }
-        
-        .pika-prev {
-            left: 10px;
-        }
-        
-        .pika-next {
-            right: 10px;
-        }
-        
-        /* 화살표 아이콘 추가 */
-        .pika-prev:after {
-            content: '‹';
-            font-size: 24px;
-            color: #6b7280;
-        }
-        
-        .pika-next:after {
-            content: '›';
-            font-size: 24px;
-            color: #6b7280;
-        }
-        
-        .pika-prev:hover, .pika-next:hover {
-            opacity: 1;
-            background-color: #f3f4f6;
-            border-radius: 8px;
-        }
-        
-        .pika-prev:hover:after, .pika-next:hover:after {
-            color: #4F46E5;
-        }
-        
-        /* 연/월 선택을 위한 빠른 네비게이션 추가 */
-        .pika-title {
-            position: relative;
-        }
-        
+        /* 월/년 선택 */
         .pika-label {
-            cursor: pointer;
-            -webkit-tap-highlight-color: rgba(0,0,0,0.1);
-        }
-        
-        /* iOS Safari 터치 이벤트 최적화 */
-        @supports (-webkit-touch-callout: none) {
-            .pika-button,
-            .pika-prev,
-            .pika-next {
-                cursor: pointer;
-                -webkit-user-select: none;
-                user-select: none;
-            }
+            color: #111827 !important;
+            font-weight: 600 !important;
         }
         
         /* 요일 헤더 */
-        .pika-week {
-            color: #6b7280;
-            font-size: 14px;
-            font-weight: 500;
-            text-align: center;
-        }
-        
-        .pika-week abbr {
+        .pika-table abbr[title] {
             text-decoration: none;
-            display: block;
-            padding: 10px 0;
+            font-weight: 600;
+            color: #6b7280;
         }
         
-        /* 날짜 스타일 */
+        /* 날짜 셀 스타일 */
         .pika-button {
-            color: #374151;
-            background: transparent;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            padding: 10px;
-            font-size: 14px;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            width: 40px;
-            height: 40px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border: none;
-            outline: none;
+            border-radius: 8px !important;
+            transition: all 0.2s ease !important;
+            background: white !important;
+            color: #111827 !important;
+            font-weight: 400 !important;
         }
         
         .pika-button:hover {
-            background: #f3f4f6;
-            color: #111827;
-            font-weight: 600;
+            background: #f3f4f6 !important;
+            color: #111827 !important;
         }
         
-        /* 선택된 날짜 */
         .is-selected .pika-button {
             background: #4F46E5 !important;
             color: white !important;
-            font-weight: 600;
-            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+            font-weight: 600 !important;
+            box-shadow: none !important;
         }
         
-        /* 오늘 날짜 */
         .is-today .pika-button {
-            color: #4F46E5;
-            font-weight: 600;
-            position: relative;
-        }
-        
-        .is-today .pika-button:after {
-            content: '';
-            position: absolute;
-            bottom: 2px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 4px;
-            height: 4px;
-            background: #4F46E5;
-            border-radius: 50%;
+            color: #4F46E5 !important;
+            font-weight: 600 !important;
         }
         
         /* 비활성 날짜 */
         .is-disabled .pika-button {
-            color: #d1d5db;
-            background: transparent;
-            cursor: not-allowed;
-            opacity: 0.5;
+            color: #d1d5db !important;
+            cursor: not-allowed !important;
+            opacity: 0.5 !important;
         }
         
-        /* 다른 달 날짜 */
-        .is-outside-current-month .pika-button {
-            color: #d1d5db;
+        /* 네비게이션 버튼 */
+        .pika-prev, .pika-next {
+            color: #6b7280 !important;
+            font-size: 20px !important;
         }
         
-        /* 달력 전체 너비 사용 */
-        .pika-table thead {
-            background: #f9fafb;
-        }
-        
-        .pika-table tbody {
-            background: white;
-        }
-        
-        /* 날짜 셀이 전체 너비를 사용하도록 */
-        .pika-table td {
-            padding: 0 !important;
-            border: none;
-        }
-        
-        .pika-table th {
-            padding: 10px 0;
-        }
-        
-        
-        /* 연월 레이블에 밑줄 효과 */
-        .pika-label {
-            text-decoration: underline;
-            text-decoration-style: dotted;
-            text-decoration-color: #d1d5db;
-            text-underline-offset: 3px;
-        }
-        
-        /* 펄스 애니메이션 */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0.4);
-            }
-            50% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.2);
-            }
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(79, 70, 229, 0);
-            }
-        }
-        
-        /* 모바일 최적화 */
-        @media (max-width: 768px) {
-            .pika-single {
-                font-size: 16px !important;
-                width: 100%;
-                max-width: 340px;
-                left: 50% !important;
-                transform: translateX(-50%);
-            }
-            
-            .pika-button {
-                width: 44px;
-                height: 44px;
-                font-size: 16px;
-            }
-            
-            .pika-title {
-                padding: 16px 0;
-            }
-            
-            .pika-label {
-                font-size: 18px;
-            }
+        .pika-prev:hover, .pika-next:hover {
+            color: #4F46E5 !important;
         }
         
         /* 생년월일 입력 필드 스타일 */
@@ -340,7 +105,8 @@
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
     <!-- Pikaday JS -->
-    <script src="https://cdn.jsdelivr.net/npm/moment/min/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/locale/ko.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/pikaday/pikaday.js"></script>
 </head>
 <body>
@@ -468,7 +234,10 @@
             const maxDate = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
             const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
             
-            // Pikaday 한국어 설정
+            // 한국어 설정
+            moment.locale('ko');
+            
+            // Pikaday 한국어 번역
             const i18n = {
                 previousMonth : '이전달',
                 nextMonth     : '다음달',
@@ -477,44 +246,25 @@
                 weekdaysShort : ['일','월','화','수','목','금','토']
             };
             
-            const birthInput = document.getElementById('birth');
-            birthInput.setAttribute('readonly', true);
-            
-            // 모든 브라우저에서 Pikaday 사용
+            // Pikaday 초기화
             const picker = new Pikaday({
-                field: birthInput,
+                field: document.getElementById('birth'),
                 format: 'YYYY-MM-DD',
                 maxDate: maxDate,
                 minDate: minDate,
-                defaultDate: new Date(today.getFullYear() - 25, 0, 1),
-                setDefaultDate: true,
-                firstDay: 0, // 일요일부터 시작
-                i18n: i18n,
                 yearRange: [minDate.getFullYear(), maxDate.getFullYear()],
-                theme: 'sidepick-theme',
-                showYearDropdown: true, // 연도 드롭다운 표시
-                showMonthDropdown: true, // 월 드롭다운 표시
+                showMonthAfterYear: true,
+                showDaysInNextAndPreviousMonths: true,
+                enableSelectionDaysInNextAndPreviousMonths: true,
+                i18n: i18n,
+                firstDay: 0, // 일요일부터 시작
                 onSelect: function(date) {
                     validateAge();
-                },
-                onOpen: function() {
-                    // iOS에서 터치 이벤트 개선
-                    if (/iPhone|iPad|iPod/.test(navigator.userAgent)) {
-                        const cal = this._o.container || document.body;
-                        const buttons = cal.querySelectorAll('.pika-button, .pika-prev, .pika-next');
-                        buttons.forEach(btn => {
-                            btn.style.cursor = 'pointer';
-                            btn.addEventListener('touchstart', function(e) {
-                                e.preventDefault();
-                                this.click();
-                            }, { passive: false });
-                        });
-                    }
-                    
-                    // Pikaday는 기본적으로 드롭다운을 지원하지 않으므로 그대로 둠
-                    // 연/월은 화살표로 변경하거나 레이블 클릭 시 선택 가능
                 }
             });
+            
+            // 기본값 설정 (25세)
+            picker.setDate(new Date(today.getFullYear() - 25, 0, 1));
         });
 
         function validateAge() {
