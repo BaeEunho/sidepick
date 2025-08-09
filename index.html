@@ -2074,7 +2074,7 @@
         async function updateMeetingCounts() {
             try {
                 const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
+                    ? 'http://localhost:3000' 
                     : 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -2341,7 +2341,7 @@
                 // Firebase에서 실제 참가자 수 확인
                 try {
                     const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
+                    ? 'http://localhost:3000' 
                     : 'https://sidepick.onrender.com';
                     
                     const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -2551,7 +2551,7 @@
                 const token = localStorage.getItem('authToken');
                 if (token) {
                     const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
+                    ? 'http://localhost:3000' 
                     : 'https://sidepick.onrender.com';
                         
                     try {
@@ -2889,7 +2889,7 @@
             try {
                 const userGender = sessionStorage.getItem('userGender');
                 const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
+                    ? 'http://localhost:3000' 
                     : 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);

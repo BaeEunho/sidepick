@@ -7,6 +7,43 @@
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="payment-complete-styles.css">
     <style>
+        /* 헤더 버튼 padding 조정 */
+        .auth-buttons .logout-btn {
+            padding: 6px 12px;
+            font-size: 14px;
+        }
+        
+        .auth-buttons .user-profile {
+            padding: 4px 12px;
+        }
+        
+        .nav-btn {
+            padding: 6px 16px;
+            font-size: 14px;
+        }
+        
+        /* 모바일에서 헤더 간격 조정 */
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+            }
+            
+            .auth-buttons {
+                gap: 8px;
+            }
+            
+            .auth-buttons .logout-btn,
+            .auth-buttons .user-profile {
+                padding: 4px 8px;
+                font-size: 13px;
+            }
+            
+            .nav-cta .nav-btn {
+                padding: 4px 12px;
+                font-size: 13px;
+            }
+        }
+        
         /* 액션 버튼 컨테이너 */
         .action-buttons {
             display: flex;
@@ -110,8 +147,8 @@
                             <path d="M25 40L35 50L55 30" stroke="#10B981" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </div>
-                    <h1>예약이 접수되었습니다!</h1>
-                    <p>무통장입금 확인 후 예약이 최종 확정됩니다.</p>
+                    <h1>소개팅 신청이 완료되었습니다!</h1>
+                    <p>아래 계좌로 입금하시면 참가가 확정됩니다.</p>
                 </div>
 
                 <!-- 입금 안내 -->
@@ -151,7 +188,6 @@
                     <div class="summary-card">
                         <div class="summary-header">
                             <h3 id="booking-title">-</h3>
-                            <span class="booking-number" id="booking-number">예약번호: -</span>
                         </div>
                         
                         <div class="summary-details">
@@ -271,31 +307,22 @@
     <script>
         // 페이지 로드 시 정보 표시
         document.addEventListener('DOMContentLoaded', function() {
-            // pendingBooking에서 데이터 가져오기
-            const pendingBooking = JSON.parse(sessionStorage.getItem('pendingBooking') || '{}');
-            const userState = AuthManager.getUserState();
-            const userProfile = userState.profile || {};
+            // 모임 정보 가져오기
+            const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
+            const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
             
             // 예약 정보 표시
-            document.getElementById('booking-title').textContent = pendingBooking.title || '-';
-            document.getElementById('booking-number').textContent = '예약번호: ' + (pendingBooking.bookingId || '-');
+            document.getElementById('booking-title').textContent = meetingInfo.title || '-';
             
-            // 날짜에서 시간 정보 분리
-            const dateInfo = pendingBooking.date || '';
-            const dateMatch = dateInfo.match(/(.+?)\s*\(.*?\)\s*(.+)/);
-            if (dateMatch) {
-                document.getElementById('booking-date').textContent = dateMatch[1];
-                document.getElementById('booking-time').textContent = dateMatch[2];
-            } else {
-                document.getElementById('booking-date').textContent = dateInfo;
-                document.getElementById('booking-time').textContent = '-';
-            }
-            
-            document.getElementById('booking-location').textContent = pendingBooking.location || '-';
-            document.getElementById('booking-participant').textContent = userProfile.name || '-';
+            // 날짜와 시간 표시
+            document.getElementById('booking-date').textContent = meetingInfo.date || '-';
+            document.getElementById('booking-time').textContent = meetingInfo.time || '-';
+            document.getElementById('booking-location').textContent = meetingInfo.location || '-';
+            document.getElementById('booking-participant').textContent = participantInfo.name || '-';
             
             // 입금 정보 표시
-            document.getElementById('depositor-name').textContent = userProfile.name || '-';
+            document.getElementById('depositor-name').textContent = participantInfo.name || '-';
             
             // 입금 기한 (3일 후)
             const deadline = new Date();

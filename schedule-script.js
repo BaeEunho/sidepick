@@ -21,7 +21,7 @@ async function fetchAttendanceFromServer() {
     console.log('fetchAttendanceFromServer 호출됨');
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
         console.log('API URL:', `${API_URL}/api/meetings/attendance`);
         
@@ -123,7 +123,7 @@ async function fetchUserMeetingInfo() {
         const token = localStorage.getItem('authToken');
         if (token) {
             const API_URL = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3001' 
+                ? 'http://localhost:3000' 
                 : 'https://sidepick.onrender.com';
                 
             try {
@@ -174,7 +174,7 @@ function getOrientationFromCode(code) {
 }
 
 // 페이지 로드 시 실행
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOMContentLoaded 이벤트 발생');
     
     // DataSystem 초기화
@@ -213,13 +213,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 displayUserGender(userGender);
             }
             
-            // 사용자의 모임 신청 정보 가져오기
-            fetchUserMeetingInfo().then(async () => {
-                // 성별에 따른 신청 가능 여부 표시
-                if (userGender) {
-                    await updateMeetingAvailability(userGender);
-                }
-            });
+            // 사용자의 모임 신청 정보 가져오기 (중요: await 추가)
+            await fetchUserMeetingInfo();
+            
+            // 성별에 따른 신청 가능 여부 표시
+            if (userGender) {
+                await updateMeetingAvailability(userGender);
+            }
         } else {
             // 비로그인 또는 테스트 미완료 사용자도 일정 조회 가능
             // 기본 상태로 모든 모임 표시
@@ -350,7 +350,7 @@ function displayUserGender(gender) {
 async function updateParticipantCounts() {
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
         
         const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -458,7 +458,7 @@ window.applyMeeting = async function(button) {
         const token = localStorage.getItem('authToken');
         if (token) {
             const API_URL = window.location.hostname === 'localhost' 
-                ? 'http://localhost:3001' 
+                ? 'http://localhost:3000' 
                 : 'https://sidepick.onrender.com';
                 
             const response = await fetch(`${API_URL}/api/user/meetings`, {
@@ -508,7 +508,7 @@ window.applyMeeting = async function(button) {
     // 2. Firebase에서 실제 참가자 수 확인 (마감 여부)
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
         
         const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -578,7 +578,7 @@ async function updateMeetingAvailability(userGender) {
     
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
         
         const response = await fetch(`${API_URL}/api/meetings/attendance`);
@@ -693,7 +693,8 @@ async function updateMeetingAvailability(userGender) {
             console.log('신청 가능 처리: currentCount < 4');
             console.log('Button before update:', applyBtn.textContent);
             applyBtn.textContent = '신청하기';
-            applyBtn.classList.remove('waiting', 'confirmed', 'notify-btn');
+            applyBtn.classList.remove('waiting', 'confirmed', 'notify-btn', 'disabled');
+            applyBtn.disabled = false;
             applyBtn.onclick = () => window.applyMeeting(applyBtn);
             console.log('Button after update:', applyBtn.textContent);
         }

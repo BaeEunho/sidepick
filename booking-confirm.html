@@ -35,7 +35,7 @@
         <div class="container">
             <div class="booking-header">
                 <h1>예약 확인</h1>
-                <p>선택하신 모임 정보를 확인하고 결제를 진행해주세요</p>
+                <p>선택하신 모임 정보를 확인하고 신청을 완료해주세요</p>
             </div>
             
             <div class="booking-content">
@@ -111,7 +111,7 @@
                     <!-- 버튼 영역 -->
                     <div class="button-group">
                         <button class="btn-secondary" onclick="history.back()">이전으로</button>
-                        <button class="btn-primary" id="proceed-payment" onclick="proceedToPayment()">결제 진행하기</button>
+                        <button class="btn-primary" id="proceed-payment" onclick="proceedToPayment()">신청 완료하기</button>
                     </div>
                 </div>
             </div>
@@ -170,7 +170,7 @@
                 // Firebase API에서 사용자 모임 정보 가져오기
                 const token = localStorage.getItem('authToken');
                 const API_URL = window.location.hostname === 'localhost' 
-                    ? 'http://localhost:3001' 
+                    ? 'http://localhost:3000' 
                     : 'https://sidepick.onrender.com';
                     
                 const response = await fetch(`${API_URL}/api/user/meetings`, {
@@ -294,8 +294,18 @@
             };
             sessionStorage.setItem('selectedMeeting', JSON.stringify(selectedMeeting));
             
-            // 결제 페이지로 이동
-            window.location.href = 'payment.html';
+            // 주문 정보 생성 (payment.html을 건너뛰므로 여기서 생성)
+            const orderData = {
+                orderId: 'ORD-' + Date.now(),
+                method: 'bank_transfer',
+                amount: 45000,
+                status: 'payment_pending',
+                createdAt: new Date().toISOString()
+            };
+            sessionStorage.setItem('orderData', JSON.stringify(orderData));
+            
+            // 완료 페이지로 바로 이동
+            window.location.href = 'payment-complete.html';
         }
     </script>
 </body>

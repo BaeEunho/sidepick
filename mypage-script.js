@@ -57,7 +57,7 @@ async function syncWithServer() {
     
     try {
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
             
         // 서버에서 사용자 정보 가져오기
@@ -295,7 +295,7 @@ async function loadUpcomingMeetings() {
         // 서버에서 사용자 정보 가져오기
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/user/meetings`, {
@@ -762,7 +762,7 @@ async function deleteAccount() {
         const userState = AuthManager.getUserState();
         const token = localStorage.getItem('authToken'); // localStorage에서 토큰 가져오기
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
         const response = await fetch(`${API_URL}/api/auth/delete-account`, {
             method: 'DELETE',
@@ -1452,7 +1452,7 @@ async function cancelMeeting(meetingId) {
     try {
         const token = localStorage.getItem('authToken');
         const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3001' 
+            ? 'http://localhost:3000' 
             : 'https://sidepick.onrender.com';
             
         const response = await fetch(`${API_URL}/api/meetings/cancel/${meetingId}`, {
