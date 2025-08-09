@@ -32,6 +32,171 @@
             margin-bottom: 20px;
         }
         
+        /* 축별 점수 스타일 */
+        .axis-scores {
+            margin: 30px 0;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .axis-scores h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .axis-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .axis-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 12px;
+            text-align: center;
+        }
+        
+        .axis-item h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 8px;
+        }
+        
+        .axis-score {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 4px;
+        }
+        
+        .axis-detail {
+            font-size: 12px;
+            color: #888;
+        }
+        
+        /* 연애 특징 스타일 */
+        .relationship-traits {
+            margin: 30px 0;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .relationship-traits h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .relationship-traits ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .relationship-traits li {
+            padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
+            color: #555;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        .relationship-traits li:last-child {
+            border-bottom: none;
+        }
+        
+        .relationship-traits li:before {
+            content: "💕";
+            position: absolute;
+            left: 0;
+            top: 10px;
+        }
+        
+        /* 대화 주제 스타일 */
+        .conversation-topics {
+            margin: 30px 0;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .conversation-topics h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .topics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+        
+        .good-topics, .avoid-topics {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 12px;
+        }
+        
+        .good-topics {
+            background: #e8f5e9;
+        }
+        
+        .avoid-topics {
+            background: #ffebee;
+        }
+        
+        .good-topics h4, .avoid-topics h4 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .good-topics ul, .avoid-topics ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        
+        .good-topics li, .avoid-topics li {
+            padding: 8px 0;
+            font-size: 14px;
+            color: #555;
+            position: relative;
+            padding-left: 20px;
+            line-height: 1.5;
+        }
+        
+        .good-topics li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #4caf50;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        .avoid-topics li:before {
+            content: "✗";
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #f44336;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        
+        @media (max-width: 768px) {
+            .axis-grid, .topics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        
         .result-type {
             text-align: center;
             margin-bottom: 20px;
@@ -74,12 +239,22 @@
         
         #result-features li {
             padding: 10px 0;
+            padding-left: 25px;
+            position: relative;
             border-bottom: 1px solid #f0f0f0;
             color: #555;
         }
         
         #result-features li:last-child {
             border-bottom: none;
+        }
+        
+        #result-features li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #4caf50;
+            font-weight: bold;
         }
         
         .matching-types {
@@ -198,6 +373,38 @@
                 </ul>
             </div>
 
+            <div class="axis-scores" id="axis-scores" style="display: none;">
+                <h3>세부 성향 분석</h3>
+                <div class="axis-grid" id="axis-grid">
+                    <!-- 축별 점수가 여기에 동적으로 추가됩니다 -->
+                </div>
+            </div>
+
+            <div class="relationship-traits" id="relationship-traits" style="display: none;">
+                <h3>연애에서의 특징</h3>
+                <ul id="relationship-traits-list">
+                    <!-- 연애 특징이 여기에 동적으로 추가됩니다 -->
+                </ul>
+            </div>
+
+            <div class="conversation-topics" id="conversation-topics" style="display: none;">
+                <h3>추천 대화 주제</h3>
+                <div class="topics-grid">
+                    <div class="good-topics">
+                        <h4>💚 이런 대화를 즐겨요</h4>
+                        <ul id="good-topics-list">
+                            <!-- 좋은 대화 주제가 여기에 동적으로 추가됩니다 -->
+                        </ul>
+                    </div>
+                    <div class="avoid-topics">
+                        <h4>💔 이런 대화는 피해주세요</h4>
+                        <ul id="avoid-topics-list">
+                            <!-- 피해야 할 대화 주제가 여기에 동적으로 추가됩니다 -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
             <div class="matching-types">
                 <h3>잘 맞는 성향</h3>
                 <div class="type-badges" id="matching-types">
@@ -280,7 +487,9 @@
                         icon: "🌐",
                         description: "자유로운 시장경제를 신뢰하면서도 사회적 다양성을 적극 지지하는 성향입니다.",
                         features: ["개방적 시장경제 지지", "사회적 다양성 중시", "적극적 시민 참여", "진보적 사회 정책 선호"],
-                        matching: ["MPTS", "GPOS", "MPON"]
+                        matching: ["MPTS", "GPOS", "MPON"],
+                        goodTopics: ["창업과 혁신적인 비즈니스", "다양성과 포용의 가치", "글로벌 트렌드와 문화", "사회적 기업과 윤리적 소비"],
+                        avoidTopics: ["획일적인 사고방식", "과도한 규제나 통제", "편견이나 차별적 발언", "변화를 거부하는 태도"]
                     },
                     "MPON": {
                         title: "테크노 자유주의자",
@@ -443,6 +652,62 @@
                 ).join('');
             }
             
+            // 축별 점수 표시 (axisScores가 있는 경우)
+            if (result.axisScores) {
+                const axisSection = document.getElementById('axis-scores');
+                const axisGrid = document.getElementById('axis-grid');
+                
+                axisGrid.innerHTML = Object.values(result.axisScores).map(axis => `
+                    <div class="axis-item">
+                        <h4>${axis.label}</h4>
+                        <p class="axis-score">${axis.score}</p>
+                        <p class="axis-detail">${axis.detail}</p>
+                    </div>
+                `).join('');
+                
+                axisSection.style.display = 'block';
+            }
+            
+            // 연애 특징 표시
+            if (result.relationshipTraits && result.relationshipTraits.length > 0) {
+                const relationshipSection = document.getElementById('relationship-traits');
+                const relationshipList = document.getElementById('relationship-traits-list');
+                
+                relationshipList.innerHTML = result.relationshipTraits.map(trait => 
+                    `<li>${trait}</li>`
+                ).join('');
+                
+                relationshipSection.style.display = 'block';
+            }
+            
+            // 대화 주제 표시
+            // goodTopics나 avoidTopics가 없는 경우 기본값 사용
+            const goodTopics = result.goodTopics || getDefaultGoodTopics(typeCode);
+            const avoidTopics = result.avoidTopics || getDefaultAvoidTopics(typeCode);
+            
+            console.log('대화 주제 데이터:', { goodTopics, avoidTopics });
+            
+            if ((goodTopics && goodTopics.length > 0) || 
+                (avoidTopics && avoidTopics.length > 0)) {
+                const topicsSection = document.getElementById('conversation-topics');
+                
+                if (goodTopics && goodTopics.length > 0) {
+                    const goodTopicsList = document.getElementById('good-topics-list');
+                    goodTopicsList.innerHTML = goodTopics.map(topic => 
+                        `<li>${topic}</li>`
+                    ).join('');
+                }
+                
+                if (avoidTopics && avoidTopics.length > 0) {
+                    const avoidTopicsList = document.getElementById('avoid-topics-list');
+                    avoidTopicsList.innerHTML = avoidTopics.map(topic => 
+                        `<li>${topic}</li>`
+                    ).join('');
+                }
+                
+                topicsSection.style.display = 'block';
+            }
+            
             // 현재 타입 코드를 세션에 저장 (공유 기능을 위해)
             sessionStorage.setItem('politicalType', typeCode);
         }
@@ -505,6 +770,48 @@
                     notification.remove();
                 }, 300);
             }, 3000);
+        }
+        
+        // 기본 좋은 대화 주제 제공
+        function getDefaultGoodTopics(typeCode) {
+            const orientation = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'].includes(typeCode) ? 'progressive' : 'conservative';
+            
+            if (orientation === 'progressive') {
+                return [
+                    "사회 혁신과 변화",
+                    "다양성과 포용성",
+                    "환경 보호와 지속가능성",
+                    "인권과 평등"
+                ];
+            } else {
+                return [
+                    "전통과 문화의 가치",
+                    "안정과 질서의 중요성",
+                    "가족과 공동체",
+                    "국가 발전과 안보"
+                ];
+            }
+        }
+        
+        // 기본 피해야 할 대화 주제 제공
+        function getDefaultAvoidTopics(typeCode) {
+            const orientation = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'].includes(typeCode) ? 'progressive' : 'conservative';
+            
+            if (orientation === 'progressive') {
+                return [
+                    "전통만을 고집하는 태도",
+                    "차별과 배제",
+                    "변화에 대한 무조건적 거부",
+                    "권위주의적 사고"
+                ];
+            } else {
+                return [
+                    "전통의 무조건적 부정",
+                    "급진적 변화 추구",
+                    "무질서와 혼란",
+                    "권위에 대한 무분별한 도전"
+                ];
+            }
         }
         
         // political-test-script.js를 동적으로 로드
