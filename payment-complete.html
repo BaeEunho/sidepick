@@ -271,20 +271,31 @@
     <script>
         // 페이지 로드 시 정보 표시
         document.addEventListener('DOMContentLoaded', function() {
-            const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
-            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
-            const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
+            // pendingBooking에서 데이터 가져오기
+            const pendingBooking = JSON.parse(sessionStorage.getItem('pendingBooking') || '{}');
+            const userState = AuthManager.getUserState();
+            const userProfile = userState.profile || {};
             
             // 예약 정보 표시
-            document.getElementById('booking-title').textContent = meetingInfo.title || '-';
-            document.getElementById('booking-number').textContent = '예약번호: ' + (orderData.orderId || '-');
-            document.getElementById('booking-date').textContent = meetingInfo.date || '-';
-            document.getElementById('booking-time').textContent = meetingInfo.time || '-';
-            document.getElementById('booking-location').textContent = meetingInfo.location || '-';
-            document.getElementById('booking-participant').textContent = participantInfo.name || '-';
+            document.getElementById('booking-title').textContent = pendingBooking.title || '-';
+            document.getElementById('booking-number').textContent = '예약번호: ' + (pendingBooking.bookingId || '-');
+            
+            // 날짜에서 시간 정보 분리
+            const dateInfo = pendingBooking.date || '';
+            const dateMatch = dateInfo.match(/(.+?)\s*\(.*?\)\s*(.+)/);
+            if (dateMatch) {
+                document.getElementById('booking-date').textContent = dateMatch[1];
+                document.getElementById('booking-time').textContent = dateMatch[2];
+            } else {
+                document.getElementById('booking-date').textContent = dateInfo;
+                document.getElementById('booking-time').textContent = '-';
+            }
+            
+            document.getElementById('booking-location').textContent = pendingBooking.location || '-';
+            document.getElementById('booking-participant').textContent = userProfile.name || '-';
             
             // 입금 정보 표시
-            document.getElementById('depositor-name').textContent = participantInfo.name || '-';
+            document.getElementById('depositor-name').textContent = userProfile.name || '-';
             
             // 입금 기한 (3일 후)
             const deadline = new Date();

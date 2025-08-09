@@ -6,6 +6,29 @@
     <title>회원가입 - 사이드픽</title>
     <link rel="stylesheet" href="styles.css">
     <link rel="stylesheet" href="auth-styles.css">
+    <style>
+        /* iOS 날짜 입력 개선 */
+        @supports (-webkit-touch-callout: none) {
+            /* iOS Safari only */
+            input[type="date"] {
+                -webkit-appearance: none;
+                appearance: none;
+                background-color: white;
+                font-size: 16px; /* iOS 자동 줌 방지 */
+                min-height: 44px; /* iOS 터치 영역 최소 크기 */
+            }
+            
+            input[type="date"]::-webkit-date-and-time-value {
+                text-align: left;
+            }
+            
+            /* 날짜 선택기가 열려있을 때 스크롤 방지 */
+            input[type="date"]:focus {
+                outline: none;
+                border-color: #4F46E5;
+            }
+        }
+    </style>
     <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
@@ -37,7 +60,7 @@
 
                         <div class="form-group">
                             <label for="birth">생년월일</label>
-                            <input type="date" id="birth" name="birth" required max="2004-12-31" onchange="validateAge()">
+                            <input type="date" id="birth" name="birth" required max="2004-12-31" onchange="validateAge()" onblur="validateAge()">
                             <span class="input-hint">만 20세 이상만 가입 가능합니다</span>
                             <span class="error-message" id="birth-error"></span>
                         </div>
@@ -136,6 +159,27 @@
             const maxDate = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
             const maxDateString = maxDate.toISOString().split('T')[0];
             document.getElementById('birth').setAttribute('max', maxDateString);
+            
+            // iOS 날짜 입력 문제 해결
+            const birthInput = document.getElementById('birth');
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+            
+            if (isIOS) {
+                // iOS에서 날짜 입력 시 포커스 유지
+                birthInput.addEventListener('touchstart', function(e) {
+                    e.stopPropagation();
+                });
+                
+                birthInput.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    this.focus();
+                });
+                
+                // 값이 변경될 때마다 검증
+                birthInput.addEventListener('input', function() {
+                    validateAge();
+                });
+            }
         });
 
         function validateAge() {
