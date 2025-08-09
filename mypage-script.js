@@ -18,7 +18,6 @@ document.addEventListener('DOMContentLoaded', function() {
 async function refreshData() {
     const now = new Date();
     console.log(`\n[${now.toLocaleTimeString()}] 마이페이지 데이터 새로고침 시작`);
-    showSyncStatus('loading', '데이터 동기화 중...');
     
     try {
         // 서버에서 최신 정보 가져오기
@@ -39,9 +38,7 @@ async function refreshData() {
         
         // 마지막 업데이트 시간 표시
         updateLastUpdateTime();
-        
-        // 성공 시 동기화 상태 숨기기
-        hideSyncStatus();
+
         
         console.log('마이페이지 데이터 새로고침 완료\n');
         

@@ -324,17 +324,31 @@
             top: 20px;
             right: 20px;
             background: #10B981;
+            height: 40px;
+            width: 250px;
             color: white;
-            padding: 12px 24px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            padding: 8px 16px;
+            border-radius: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
             transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1000;
+            font-size: 14px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
         
         .copy-notification.show {
             transform: translateX(0);
+        }
+        
+        .copy-notification:before {
+            content: "✓";
+            font-size: 16px;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -345,9 +359,6 @@
             <div class="logo">
                 <a href="index.html">사이드픽</a>
             </div>
-            <ul class="nav-menu">
-                <li><a href="political-test.html">다시 테스트하기</a></li>
-            </ul>
         </nav>
     </header>
 
@@ -413,9 +424,8 @@
             </div>
         </div>
 
-        <div class="result-actions">
-            <button class="action-btn primary" onclick="goToMatching()">소개팅 일정 확인하기</button>
-            <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
+        <div class="result-actions" id="result-actions">
+            <!-- 버튼들이 JavaScript로 동적으로 추가됩니다 -->
         </div>
     </div>
 
@@ -710,6 +720,9 @@
             
             // 현재 타입 코드를 세션에 저장 (공유 기능을 위해)
             sessionStorage.setItem('politicalType', typeCode);
+            
+            // 로그인 상태에 따라 버튼 표시
+            updateActionButtons();
         }
         
         // 소개팅 일정 페이지로 이동
@@ -770,6 +783,31 @@
                     notification.remove();
                 }, 300);
             }, 3000);
+        }
+        
+        // 로그인 상태에 따라 버튼 업데이트
+        function updateActionButtons() {
+            const actionsContainer = document.getElementById('result-actions');
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            
+            if (isLoggedIn) {
+                // 로그인한 사용자
+                actionsContainer.innerHTML = `
+                    <button class="action-btn primary" onclick="goToMatching()">소개팅 일정 확인하기</button>
+                    <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
+                `;
+            } else {
+                // 로그인하지 않은 사용자
+                actionsContainer.innerHTML = `
+                    <button class="action-btn primary" onclick="goToIndex()">사이드픽 알아보기</button>
+                    <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
+                `;
+            }
+        }
+        
+        // 메인 페이지로 이동
+        function goToIndex() {
+            window.location.href = 'index.html';
         }
         
         // 기본 좋은 대화 주제 제공
