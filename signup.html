@@ -8,43 +8,181 @@
     <link rel="stylesheet" href="auth-styles.css">
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
     <style>
-        /* Flatpickr 커스텀 스타일 */
+        /* Flatpickr 커스텀 스타일 - 모던하고 깔끔한 디자인 */
         .flatpickr-calendar {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            border: none;
-            border-radius: 12px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.12);
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            overflow: hidden;
+            margin-top: 8px;
         }
         
-        .flatpickr-day.selected {
-            background: #4F46E5;
-            border-color: #4F46E5;
-        }
-        
-        .flatpickr-day.today {
-            border-color: #4F46E5;
+        /* 상단 네비게이션 */
+        .flatpickr-months {
+            background: #f9fafb;
+            border-bottom: 1px solid #e5e7eb;
+            padding: 12px 0;
         }
         
         .flatpickr-months .flatpickr-month {
-            color: #333;
+            background: transparent;
+            color: #111827;
+            height: 40px;
         }
         
-        .flatpickr-current-month .flatpickr-monthDropdown-months,
-        .flatpickr-current-month .numInputWrapper {
+        .flatpickr-current-month {
+            font-size: 16px;
+            font-weight: 600;
+            color: #111827;
+            padding: 0;
+        }
+        
+        .flatpickr-current-month select {
+            font-weight: 600;
+            color: #111827;
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 6px;
+            padding: 4px 8px;
+            margin: 0 4px;
+            cursor: pointer;
+        }
+        
+        .flatpickr-current-month select:hover {
+            border-color: #4F46E5;
+        }
+        
+        .flatpickr-current-month select:focus {
+            outline: none;
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        /* 이전/다음 버튼 */
+        .flatpickr-prev-month,
+        .flatpickr-next-month {
+            padding: 8px;
+            top: 12px;
+        }
+        
+        .flatpickr-prev-month:hover,
+        .flatpickr-next-month:hover {
+            background: white;
+            border-radius: 6px;
+        }
+        
+        .flatpickr-prev-month svg,
+        .flatpickr-next-month svg {
+            fill: #6b7280 !important;
+            width: 16px;
+            height: 16px;
+        }
+        
+        .flatpickr-prev-month:hover svg,
+        .flatpickr-next-month:hover svg {
+            fill: #4F46E5 !important;
+        }
+        
+        /* 요일 헤더 */
+        .flatpickr-weekdays {
+            background: #f9fafb;
+            height: 40px;
+        }
+        
+        .flatpickr-weekday {
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 13px;
+        }
+        
+        /* 날짜 그리드 */
+        .flatpickr-days {
+            padding: 8px;
+        }
+        
+        .dayContainer {
+            padding: 0;
+            gap: 2px;
+        }
+        
+        /* 개별 날짜 */
+        .flatpickr-day {
+            color: #374151;
+            font-size: 14px;
+            font-weight: 500;
+            height: 36px;
+            line-height: 36px;
+            margin: 2px;
+            border-radius: 8px;
+            border: 1px solid transparent;
+        }
+        
+        .flatpickr-day:hover {
+            background: #f3f4f6;
+            border-color: #e5e7eb;
+        }
+        
+        /* 오늘 날짜 */
+        .flatpickr-day.today {
+            border-color: #4F46E5;
+            color: #4F46E5;
             font-weight: 600;
         }
         
-        /* 모바일에서 Flatpickr 최적화 */
+        .flatpickr-day.today:hover {
+            background: #EEF2FF;
+            border-color: #4F46E5;
+        }
+        
+        /* 선택된 날짜 */
+        .flatpickr-day.selected,
+        .flatpickr-day.selected:hover {
+            background: #4F46E5;
+            border-color: #4F46E5;
+            color: white;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
+        }
+        
+        /* 비활성 날짜 */
+        .flatpickr-day.disabled,
+        .flatpickr-day.disabled:hover {
+            color: #d1d5db;
+            background: transparent;
+            border-color: transparent;
+            cursor: not-allowed;
+        }
+        
+        /* 다른 달 날짜 */
+        .flatpickr-day.prevMonthDay,
+        .flatpickr-day.nextMonthDay {
+            color: #d1d5db;
+        }
+        
+        /* 모바일 최적화 */
         @media (max-width: 768px) {
             .flatpickr-calendar {
                 font-size: 16px !important;
+                width: 100%;
+                max-width: 340px;
+                left: 50% !important;
+                transform: translateX(-50%);
             }
             
             .flatpickr-day {
-                height: 40px;
-                line-height: 40px;
+                height: 44px;
+                line-height: 44px;
+                font-size: 16px;
+            }
+            
+            .flatpickr-months {
+                padding: 16px 0;
+            }
+            
+            .flatpickr-current-month {
+                font-size: 18px;
             }
         }
         
@@ -52,10 +190,20 @@
         #birth {
             background-color: white;
             cursor: pointer;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%234F46E5' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%236b7280' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'%3E%3C/rect%3E%3Cline x1='16' y1='2' x2='16' y2='6'%3E%3C/line%3E%3Cline x1='8' y1='2' x2='8' y2='6'%3E%3C/line%3E%3Cline x1='3' y1='10' x2='21' y2='10'%3E%3C/line%3E%3C/svg%3E");
             background-repeat: no-repeat;
             background-position: right 12px center;
-            padding-right: 40px;
+            padding-right: 44px;
+            transition: all 0.2s ease;
+        }
+        
+        #birth:hover {
+            border-color: #4F46E5;
+        }
+        
+        #birth:focus {
+            border-color: #4F46E5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
     </style>
     <script src="auth-system.js"></script>
