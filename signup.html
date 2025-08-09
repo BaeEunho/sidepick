@@ -199,6 +199,7 @@
                 minDate: minDate,
                 defaultDate: new Date(today.getFullYear() - 25, 0, 1), // 기본값: 25년 전 1월 1일
                 disableMobile: true, // 모바일에서도 Flatpickr 사용
+                monthSelectorType: "dropdown", // 월·연도 선택을 드롭다운으로 변경
                 onChange: function(selectedDates, dateStr, instance) {
                     validateAge();
                 },
@@ -206,6 +207,29 @@
                     // iOS에서 추가 스타일 적용
                     if (/iPad|iPhone|iPod/.test(navigator.userAgent)) {
                         instance.calendarContainer.style.fontSize = '16px';
+                    }
+
+                     // 연도 input을 select로 교체
+                    const currentYearElement = instance.currentYearElement; // <input class="numInput cur-year">
+                    if (currentYearElement && currentYearElement.tagName === "INPUT") {
+                        const currentYear = new Date().getFullYear();
+                        const yearSelect = document.createElement('select');
+
+                        for (let y = currentYear; y >= currentYear - 100; y--) {
+                            const option = document.createElement('option');
+                            option.value = y;
+                            option.textContent = y;
+                            if (y === instance.currentYear) {
+                                option.selected = true;
+                            }
+                            yearSelect.appendChild(option);
+                        }
+
+                        yearSelect.addEventListener('change', function () {
+                            instance.changeYear(parseInt(this.value, 10));
+                        });
+
+                        currentYearElement.parentNode.replaceChild(yearSelect, currentYearElement);
                     }
                 },
                 closeOnSelect: false
