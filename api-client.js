@@ -3,15 +3,6 @@ const API_BASE_URL = window.location.hostname === 'localhost'
     ? 'http://localhost:3000/api' 
     : 'https://sidepick.onrender.com/api';
 
-// ApiClient 객체로 export
-window.ApiClient = {
-    signup,
-    login,
-    savePoliticalType,
-    getUserInfo,
-    getMeetings
-};
-
 // API 호출 헬퍼 함수
 async function apiCall(endpoint, options = {}) {
     const token = localStorage.getItem('authToken');
@@ -136,3 +127,12 @@ function logoutUser() {
     // 메인 페이지로 이동
     window.location.href = 'index.html';
 }
+
+// ApiClient 객체로 export
+window.ApiClient = {
+    signup,
+    login,
+    savePoliticalType,
+    getUserInfo,
+    getMeetings
+};
