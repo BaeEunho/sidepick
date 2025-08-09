@@ -29,6 +29,50 @@
         .pika-label {
             color: #111827 !important;
             font-weight: 600 !important;
+            position: relative !important;
+            padding-right: 20px !important;
+        }
+        
+        /* 월/년 선택 드롭다운 화살표 추가 */
+        .pika-label:after {
+            content: '▼' !important;
+            position: absolute !important;
+            right: 5px !important;
+            top: 50% !important;
+            transform: translateY(-50%) !important;
+            font-size: 10px !important;
+            color: #6b7280 !important;
+            pointer-events: none !important;
+        }
+        
+        .pika-label:hover:after {
+            color: #4F46E5 !important;
+        }
+        
+        /* select 요소 스타일 */
+        .pika-select {
+            cursor: pointer !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 4px !important;
+            padding: 4px 24px 4px 8px !important;
+            appearance: none !important;
+            -webkit-appearance: none !important;
+            -moz-appearance: none !important;
+            background: white !important;
+            font-weight: 600 !important;
+            color: #111827 !important;
+            transition: all 0.2s ease !important;
+        }
+        
+        .pika-select:hover {
+            border-color: #4F46E5 !important;
+            background: #f9fafb !important;
+        }
+        
+        .pika-select:focus {
+            outline: none !important;
+            border-color: #4F46E5 !important;
+            box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.1) !important;
         }
         
         /* 요일 헤더 */
@@ -75,10 +119,33 @@
         .pika-prev, .pika-next {
             color: #6b7280 !important;
             font-size: 20px !important;
+            background: white !important;
+            border: 1px solid #e5e7eb !important;
+            border-radius: 6px !important;
+            width: 32px !important;
+            height: 32px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            cursor: pointer !important;
+            transition: all 0.2s ease !important;
         }
         
         .pika-prev:hover, .pika-next:hover {
             color: #4F46E5 !important;
+            background: #f3f4f6 !important;
+            border-color: #4F46E5 !important;
+        }
+        
+        /* 화살표 아이콘 추가 */
+        .pika-prev:after {
+            content: '←' !important;
+            font-size: 16px !important;
+        }
+        
+        .pika-next:after {
+            content: '→' !important;
+            font-size: 16px !important;
         }
         
         /* 생년월일 입력 필드 스타일 */
