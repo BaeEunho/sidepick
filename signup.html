@@ -76,7 +76,7 @@
 
                         <div class="form-group">
                             <label for="birth">생년월일</label>
-                            <input type="date" id="birth" name="birth" required max="2004-12-31" onchange="validateAge()" onblur="validateAge()" onclick="this.showPicker?.()">
+                            <input type="date" id="birth" name="birth" required onchange="validateAge()" onblur="validateAge()" onclick="this.showPicker?.()">
                             <span class="input-hint">만 20세 이상만 가입 가능합니다</span>
                             <span class="error-message" id="birth-error"></span>
                         </div>
@@ -189,11 +189,6 @@
                 birthInput.addEventListener('click', function(e) {
                     e.stopPropagation();
                     this.focus();
-                    // 날짜 선택기 강제 열기
-                    if (this.type === 'date') {
-                        this.type = 'text';
-                        this.type = 'date';
-                    }
                 });
                 
                 // focus 이벤트에서도 처리
@@ -213,10 +208,6 @@
                 // change 이벤트 추가
                 birthInput.addEventListener('change', function() {
                     validateAge();
-                    // 선택 완료 후 blur 처리
-                    setTimeout(() => {
-                        this.blur();
-                    }, 100);
                 });
             }
         });
