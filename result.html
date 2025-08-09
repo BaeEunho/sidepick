@@ -322,7 +322,7 @@
         .copy-notification {
             position: fixed;
             top: 20px;
-            right: 20px;
+            left:60px;
             background: #10B981;
             height: 40px;
             width: 250px;
@@ -330,7 +330,6 @@
             padding: 8px 16px;
             border-radius: 6px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transform: translateX(400px);
             transition: transform 0.3s ease;
             z-index: 1000;
             font-size: 14px;
@@ -800,7 +799,6 @@
                 // 로그인하지 않은 사용자
                 actionsContainer.innerHTML = `
                     <button class="action-btn primary" onclick="goToIndex()">사이드픽 알아보기</button>
-                    <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
                 `;
             }
         }
