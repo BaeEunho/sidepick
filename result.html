@@ -1,262 +1,516 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <!-- Google Tag Manager -->
-    <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-    new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-    j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-    'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-    })(window,document,'script','dataLayer','GTM-NBFJXK8L');</script>
-    <!-- End Google Tag Manager -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>SidePick 정치 성향 결과</title>
-    <meta name="description" content="당신의 정치 성향 분석 결과를 확인해보세요">
-    <link rel="stylesheet" href="result-style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>정치 성향 결과 - 사이드픽</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="test-styles.css">
     <style>
-        /* 버튼을 링크처럼 보이게 하는 스타일 */
-        button.action-link {
-            background: none;
-            border: none;
-            color: inherit;
-            font: inherit;
-            cursor: pointer;
-            text-decoration: none;
+        .result-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .result-header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .result-header h1 {
+            font-size: 24px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .result-card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .result-type {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .type-icon {
+            font-size: 60px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        #result-title {
+            font-size: 28px;
+            color: #333;
+            margin: 0;
+        }
+        
+        .result-description {
+            font-size: 16px;
+            line-height: 1.6;
+            color: #666;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .result-details {
+            margin: 30px 0;
+        }
+        
+        .result-details h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        #result-features {
+            list-style: none;
             padding: 0;
         }
-        button.action-link:hover {
-            text-decoration: underline;
+        
+        #result-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f0f0f0;
+            color: #555;
+        }
+        
+        #result-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .matching-types {
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 1px solid #f0f0f0;
+        }
+        
+        .matching-types h3 {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .type-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .type-badge {
+            background: #f0f0f0;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+        
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+        
+        .action-btn {
+            flex: 1;
+            padding: 16px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .action-btn.primary {
+            background: #4F46E5;
+            color: white;
+        }
+        
+        .action-btn.primary:hover {
+            background: #4338CA;
+        }
+        
+        .action-btn.secondary {
+            background: #F3F4F6;
+            color: #374151;
+        }
+        
+        .action-btn.secondary:hover {
+            background: #E5E7EB;
+        }
+
+        /* 복사 알림 스타일 */
+        .copy-notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #10B981;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+        
+        .copy-notification.show {
+            transform: translateX(0);
         }
     </style>
 </head>
 <body>
     <!-- 헤더 -->
     <header class="header">
-        <div class="container">
+        <nav class="nav-container">
             <div class="logo">
-                <h1><a href="index.html">SidePick</a></h1>
+                <a href="index.html">사이드픽</a>
             </div>
-            <nav class="nav">
-                <a href="test.html" class="nav-link">다시 테스트하기</a>
-            </nav>
-        </div>
+            <ul class="nav-menu">
+                <li><a href="political-test.html">다시 테스트하기</a></li>
+            </ul>
+        </nav>
     </header>
 
-    <!-- 메인 결과 섹션 -->
-    <section class="hero-result">
-        <div class="container">
-            <div class="result-header">
-                <h2 class="result-label">당신의 정치 성향</h2>
-                <h1 id="personality-name" class="personality-name">시장 다원주의자</h1>
-                <div id="personality-code" class="personality-code">MPOS</div>
-                <p id="personality-motto" class="personality-motto">
-                    "자유로운 경쟁과 다양성이 사회를 발전시킨다"
-                </p>
-            </div>
+    <!-- 결과 컨테이너 -->
+    <div class="result-container">
+        <div class="result-header">
+            <h1>당신의 정치 성향은</h1>
         </div>
-    </section>
+        
+        <div class="result-card">
+            <div class="result-type">
+                <span class="type-icon" id="type-icon">🌱</span>
+                <h2 id="result-title">로딩중...</h2>
+            </div>
+            <p id="result-description" class="result-description">
+                결과를 불러오는 중입니다...
+            </p>
+            
+            <div class="result-details">
+                <h3>주요 특징</h3>
+                <ul id="result-features">
+                    <li>특징을 불러오는 중...</li>
+                </ul>
+            </div>
 
-    <!-- 차트 섹션 -->
-    <section class="chart-section">
-        <div class="container">
-            <h2 class="section-title">4개 축 분석 결과</h2>
-            <div class="axis-descriptions">
-                <div class="axis-item">
-                    <h4>경제관</h4>
-                    <div class="axis-scale">
-                        <span class="scale-left">정부개입</span>
-                        <div class="scale-bar">
-                            <div id="economic-indicator" class="scale-indicator"></div>
-                        </div>
-                        <span class="scale-right">시장경제</span>
-                    </div>
-                </div>
-                <div class="axis-item">
-                    <h4>사회관</h4>
-                    <div class="axis-scale">
-                        <span class="scale-left">보수사회</span>
-                        <div class="scale-bar">
-                            <div id="social-indicator" class="scale-indicator"></div>
-                        </div>
-                        <span class="scale-right">진보사회</span>
-                    </div>
-                </div>
-                <div class="axis-item">
-                    <h4>문화관</h4>
-                    <div class="axis-scale">
-                        <span class="scale-left">전통문화</span>
-                        <div class="scale-bar">
-                            <div id="cultural-indicator" class="scale-indicator"></div>
-                        </div>
-                        <span class="scale-right">개방문화</span>
-                    </div>
-                </div>
-                <div class="axis-item">
-                    <h4>참여관</h4>
-                    <div class="axis-scale">
-                        <span class="scale-left">전문가주도</span>
-                        <div class="scale-bar">
-                            <div id="participation-indicator" class="scale-indicator"></div>
-                        </div>
-                        <span class="scale-right">시민참여</span>
-                    </div>
+            <div class="matching-types">
+                <h3>잘 맞는 성향</h3>
+                <div class="type-badges" id="matching-types">
+                    <span class="type-badge">로딩중...</span>
                 </div>
             </div>
         </div>
-    </section>
 
-    <!-- 성향 상세 설명 -->
-    <section class="description-section">
-        <div class="container">
-            <div class="description-grid">
-                <div class="description-main">
-                    <h2 class="section-title">성향 설명</h2>
-                    <p id="personality-description" class="personality-description">
-                        당신은 자유로운 시장경제를 신뢰하면서도 사회적 다양성을 적극 지지하는 성향입니다. 
-                        경제적 효율성과 사회적 평등이 조화를 이룰 수 있다고 믿으며, 개인의 자유와 사회적 책임을 균형있게 추구합니다.
-                    </p>
-                </div>
-                <div class="core-values">
-                    <h3>핵심 가치관</h3>
-                    <ul id="core-values-list" class="values-list">
-                        <li>경제적 자유와 공정한 경쟁</li>
-                        <li>사회적 다양성과 포용성</li>
-                        <li>시민 참여와 민주적 의사결정</li>
-                    </ul>
-                </div>
-            </div>
+        <div class="result-actions">
+            <button class="action-btn primary" onclick="goToMatching()">소개팅 일정 확인하기</button>
+            <button class="action-btn secondary" onclick="shareResult()">결과 공유하기</button>
         </div>
-    </section>
+    </div>
 
-    <!-- 일상에서 드러나는 특징 -->
-    <section class="traits-section">
-        <div class="container">
-            <h2 class="section-title">일상에서 이런 모습이에요</h2>
-            <div id="daily-traits" class="traits-grid">
-                <div class="trait-card">
-                    <div class="trait-icon">💼</div>
-                    <p>스타트업과 사회적 기업에 관심이 많음</p>
-                </div>
-                <div class="trait-card">
-                    <div class="trait-icon">🌈</div>
-                    <p>다양성과 포용성을 다룬 뉴스에 긍정적 반응</p>
-                </div>
-                <div class="trait-card">
-                    <div class="trait-icon">🆕</div>
-                    <p>새로운 정책이나 제도 실험을 지지함</p>
-                </div>
-                <div class="trait-card">
-                    <div class="trait-icon">🗳️</div>
-                    <p>시민 참여형 정책 결정 과정을 선호함</p>
-                </div>
-            </div>
-        </div>
-    </section>
+    <script>
+        // 페이지 로드 시 결과 표시
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAndDisplayResult();
+        });
 
-    <!-- 호환성 섹션 -->
-    <section class="compatibility-section">
-        <div class="container">
-            <h2 class="section-title">이런 성향과 잘 맞아요</h2>
-            <div id="compatible-types" class="compatibility-grid">
-                <div class="compatibility-card">
-                    <div class="compatibility-header">
-                        <h3>참여 자유주의자</h3>
-                        <span class="compatibility-code">MPTS</span>
-                    </div>
-                    <p class="compatibility-reason">경제 철학과 참여 의식 공유</p>
-                </div>
-                <div class="compatibility-card">
-                    <div class="compatibility-header">
-                        <h3>참여 사회민주주의자</h3>
-                        <span class="compatibility-code">GPOS</span>
-                    </div>
-                    <p class="compatibility-reason">사회적 가치와 참여 정신 일치</p>
-                </div>
-                <div class="compatibility-card">
-                    <div class="compatibility-header">
-                        <h3>테크노 자유주의자</h3>
-                        <span class="compatibility-code">MPON</span>
-                    </div>
-                    <p class="compatibility-reason">진보적 가치관과 개방성 공유</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 대화 주제 섹션 -->
-    <section class="topics-section">
-        <div class="container">
-            <div class="topics-grid">
-                <div class="good-topics">
-                    <h3>🗣️ 이런 주제로 대화하면 재미있어요</h3>
-                    <ul id="good-topics-list" class="topics-list">
-                        <li>사회적 기업과 임팩트 투자</li>
-                        <li>다양성 정책과 차별 금지</li>
-                        <li>시민 참여형 정책 실험</li>
-                        <li>글로벌 트렌드와 혁신</li>
-                    </ul>
-                </div>
-                <div class="sensitive-topics">
-                    <h3>⚠️ 이런 주제는 조심스럽게 접근해요</h3>
-                    <ul id="sensitive-topics-list" class="topics-list">
-                        <li>전통적 가족관과 성 역할</li>
-                        <li>강한 정부 통제나 규제</li>
-                        <li>배타적 민족주의</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- CTA 섹션 -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2>당신과 가치관이 맞는 사람을 만나보세요</h2>
-                <p>SidePick에서 정치 성향이 비슷한 사람들과 의미 있는 관계를 시작하세요</p>
+        function loadAndDisplayResult() {
+            // URL 파라미터 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            const resultCode = urlParams.get('result');
+            
+            let politicalType = null;
+            let resultData = null;
+            
+            if (resultCode) {
+                // URL에서 결과 코드가 있으면 사용
+                politicalType = resultCode;
+            } else {
+                // 없으면 sessionStorage에서 가져오기
+                politicalType = sessionStorage.getItem('politicalType');
+            }
+            
+            if (!politicalType) {
+                // localStorage에서 테스트 결과 가져오기
+                const savedResult = localStorage.getItem('sidepick-test-result');
+                if (savedResult) {
+                    try {
+                        const data = JSON.parse(savedResult);
+                        politicalType = data.type?.code;
+                        resultData = data.type;
+                    } catch (e) {
+                        console.error('저장된 결과 파싱 실패:', e);
+                    }
+                }
+            }
+            
+            if (!politicalType) {
+                // 결과가 없으면 테스트 페이지로 리다이렉트
+                alert('테스트 결과를 찾을 수 없습니다. 테스트를 다시 진행해주세요.');
+                window.location.href = 'political-test.html';
+                return;
+            }
+            
+            // 결과 데이터 표시
+            displayResult(politicalType, resultData);
+        }
+        
+        function displayResult(typeCode, savedData) {
+            // political-test-script.js의 resultTypes 데이터 사용
+            let result = null;
+            
+            // 먼저 window.resultTypes에서 찾기
+            if (window.resultTypes && window.resultTypes[typeCode]) {
+                result = window.resultTypes[typeCode];
+            } 
+            // 없으면 저장된 데이터 사용
+            else if (savedData) {
+                result = savedData;
+            }
+            // 그것도 없으면 기본 resultTypes 정의
+            else {
+                // 기본 resultTypes 정의 (political-test-script.js에서 복사)
+                const resultTypes = {
+                    "MPOS": {
+                        title: "시장 다원주의자",
+                        icon: "🌐",
+                        description: "자유로운 시장경제를 신뢰하면서도 사회적 다양성을 적극 지지하는 성향입니다.",
+                        features: ["개방적 시장경제 지지", "사회적 다양성 중시", "적극적 시민 참여", "진보적 사회 정책 선호"],
+                        matching: ["MPTS", "GPOS", "MPON"]
+                    },
+                    "MPON": {
+                        title: "테크노 자유주의자",
+                        icon: "🚀",
+                        description: "기술 혁신과 전문가 주도의 효율적인 사회를 추구하는 성향입니다.",
+                        features: ["기술 혁신 중시", "전문가 의견 존중", "효율성 추구", "데이터 기반 의사결정"],
+                        matching: ["MPTN", "GPON", "MPOS"]
+                    },
+                    "MPTS": {
+                        title: "참여 자유주의자",
+                        icon: "🗣️",
+                        description: "시장경제 체제 내에서 시민들의 적극적인 참여를 중시하는 성향입니다.",
+                        features: ["시민 참여 민주주의", "시장경제 지지", "사회 혁신 추구", "풀뿌리 운동 지지"],
+                        matching: ["MPOS", "GPTS", "GPOS"]
+                    },
+                    "MPTN": {
+                        title: "엘리트 자유주의자",
+                        icon: "🎓",
+                        description: "전문성과 능력을 바탕으로 한 사회 운영을 지지하는 성향입니다.",
+                        features: ["능력주의 사회", "전문가 리더십", "효율적 거버넌스", "혁신과 성장 중시"],
+                        matching: ["MPON", "GPTN", "MCON"]
+                    },
+                    "MCOS": {
+                        title: "문화 보수주의자",
+                        icon: "🏛️",
+                        description: "시장경제를 지지하면서도 전통적 가치와 문화를 중시하는 성향입니다.",
+                        features: ["전통 문화 보존", "시장경제 원칙", "점진적 변화 선호", "가족 가치 중시"],
+                        matching: ["MCON", "GCOS", "MCTS"]
+                    },
+                    "MCON": {
+                        title: "온건 보수주의자",
+                        icon: "⚖️",
+                        description: "균형잡힌 시각으로 안정과 발전을 동시에 추구하는 성향입니다.",
+                        features: ["균형과 안정 추구", "실용주의적 접근", "점진적 개혁 지지", "사회 질서 중시"],
+                        matching: ["MCOS", "GCON", "MPTN"]
+                    },
+                    "MCTS": {
+                        title: "풀뿌리 보수주의자",
+                        icon: "🌾",
+                        description: "지역 공동체와 전통적 가치를 바탕으로 한 참여를 중시하는 성향입니다.",
+                        features: ["지역 공동체 중시", "전통 가치 존중", "시민 자치 강조", "실생활 중심 정치"],
+                        matching: ["MCOS", "GCTS", "GCOS"]
+                    },
+                    "MCTN": {
+                        title: "전통 보수주의자",
+                        icon: "👑",
+                        description: "전통적 권위와 검증된 방식을 통한 사회 운영을 선호하는 성향입니다.",
+                        features: ["전통과 권위 존중", "검증된 방식 선호", "위계질서 중시", "급진적 변화 경계"],
+                        matching: ["MCON", "GCTN", "GCON"]
+                    },
+                    "GPOS": {
+                        title: "참여 사회민주주의자",
+                        icon: "🤝",
+                        description: "정부의 적극적 역할과 시민 참여를 통한 평등사회를 추구하는 성향입니다.",
+                        features: ["복지국가 지향", "시민 참여 강조", "사회적 연대 중시", "평등과 정의 추구"],
+                        matching: ["GPTS", "MPOS", "GPON"]
+                    },
+                    "GPON": {
+                        title: "전문가 사회민주주의자",
+                        icon: "📊",
+                        description: "전문적 지식을 바탕으로 한 정부 주도의 사회 발전을 추구하는 성향입니다.",
+                        features: ["전문가 주도 정책", "과학적 계획 수립", "효율적 복지 시스템", "증거 기반 정책"],
+                        matching: ["GPTN", "MPON", "GPOS"]
+                    },
+                    "GPTS": {
+                        title: "민중 진보주의자",
+                        icon: "✊",
+                        description: "풀뿌리 민주주의와 직접 행동을 통한 사회 변혁을 추구하는 성향입니다.",
+                        features: ["직접 민주주의", "노동자 권익 보호", "급진적 개혁 지지", "사회 운동 참여"],
+                        matching: ["GPOS", "MPTS", "GCTS"]
+                    },
+                    "GPTN": {
+                        title: "계획 진보주의자",
+                        icon: "📋",
+                        description: "체계적 계획과 전문성을 통한 진보적 사회 건설을 추구하는 성향입니다.",
+                        features: ["계획경제 요소 도입", "전문가 거버넌스", "장기적 사회 설계", "과학적 진보 추구"],
+                        matching: ["GPON", "MPTN", "GCON"]
+                    },
+                    "GCOS": {
+                        title: "온건 국가주의자",
+                        icon: "🏛️",
+                        description: "국가의 역할을 중시하면서도 전통과 안정을 추구하는 성향입니다.",
+                        features: ["강한 정부 역할", "사회 안정 중시", "전통 가치 보호", "국가 주도 발전"],
+                        matching: ["GCON", "MCOS", "GCTS"]
+                    },
+                    "GCON": {
+                        title: "권위 보수주의자",
+                        icon: "⚔️",
+                        description: "강력한 리더십과 질서를 통한 국가 발전을 추구하는 성향입니다.",
+                        features: ["강력한 리더십", "법과 질서 강조", "국가 안보 우선", "전통적 권위 존중"],
+                        matching: ["GCTN", "GCOS", "MCON"]
+                    },
+                    "GCTS": {
+                        title: "민족 보수주의자",
+                        icon: "🇰🇷",
+                        description: "민족 정체성과 전통 문화를 바탕으로 한 국가 발전을 추구하는 성향입니다.",
+                        features: ["민족 정체성 강조", "전통 문화 계승", "애국심 고취", "자주적 발전 추구"],
+                        matching: ["GCOS", "MCTS", "GCTN"]
+                    },
+                    "GCTN": {
+                        title: "위계 보수주의자",
+                        icon: "🏰",
+                        description: "전통적 위계질서와 엘리트 주도의 국가 운영을 지지하는 성향입니다.",
+                        features: ["위계질서 존중", "엘리트 통치", "전통적 가치관", "안정적 사회 구조"],
+                        matching: ["GCON", "MCTN", "GCTS"]
+                    }
+                };
                 
-                <div class="cta-buttons">
-                    <a href="#" id="get-matching-btn" class="cta-btn primary">
-                        나와 맞는 사람 찾아보기
-                    </a>
-                    <button id="share-result-btn" class="cta-btn secondary">
-                        결과 공유하기
-                    </button>
-                </div>
-
-                <div class="additional-actions">
-                    <button class="action-link" id="copy-test-link-btn">친구도 테스트해보기</button>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- 푸터 -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-main">
-                    <div class="logo">
-                        <h3>SidePick</h3>
-                        <p>정치 성향 기반 매칭 서비스</p>
-                    </div>
-                    <div class="footer-links">
-                        <a href="index.html">홈</a>
-                        <a href="test.html">테스트</a>
-                        <a href="#">서비스 소개</a>
-                        <a href="#">개인정보처리방침</a>
-                    </div>
-                </div>
-                <div class="footer-bottom">
-                    <p>&copy; 2024 SidePick. All rights reserved.</p>
-                </div>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript 파일들 -->
-    <script src="result-data.js"></script>
-    <script src="result-script.js"></script>
+                result = resultTypes[typeCode];
+            }
+            
+            if (!result) {
+                alert('해당 정치 성향 정보를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 결과 표시
+            document.getElementById('type-icon').textContent = result.icon || '🎯';
+            document.getElementById('result-title').textContent = result.title || typeCode;
+            document.getElementById('result-description').textContent = result.description || '설명이 없습니다.';
+            
+            // 특징 표시
+            const featuresList = document.getElementById('result-features');
+            if (result.features && result.features.length > 0) {
+                featuresList.innerHTML = result.features.map(feature => `<li>${feature}</li>`).join('');
+            } else if (result.dailyTraits && result.dailyTraits.length > 0) {
+                featuresList.innerHTML = result.dailyTraits.map(trait => `<li>${trait}</li>`).join('');
+            }
+            
+            // 잘 맞는 성향 표시
+            const matchingTypes = document.getElementById('matching-types');
+            if (result.matching && result.matching.length > 0) {
+                // 성향 코드를 실제 이름으로 변환
+                const typeNames = {
+                    "MPOS": "시장 다원주의자",
+                    "MPON": "테크노 자유주의자",
+                    "MPTS": "참여 자유주의자",
+                    "MPTN": "엘리트 자유주의자",
+                    "MCOS": "문화 보수주의자",
+                    "MCON": "온건 보수주의자",
+                    "MCTS": "풀뿌리 보수주의자",
+                    "MCTN": "전통 보수주의자",
+                    "GPOS": "참여 사회민주주의자",
+                    "GPON": "전문가 사회민주주의자",
+                    "GPTS": "민중 진보주의자",
+                    "GPTN": "계획 진보주의자",
+                    "GCOS": "온건 국가주의자",
+                    "GCON": "권위 보수주의자",
+                    "GCTS": "민족 보수주의자",
+                    "GCTN": "위계 보수주의자"
+                };
+                
+                matchingTypes.innerHTML = result.matching.map(code => {
+                    const name = typeNames[code] || code;
+                    return `<span class="type-badge">${name}</span>`;
+                }).join('');
+            } else if (result.compatibleTypes && result.compatibleTypes.length > 0) {
+                matchingTypes.innerHTML = result.compatibleTypes.map(type => 
+                    `<span class="type-badge">${type.name}</span>`
+                ).join('');
+            }
+            
+            // 현재 타입 코드를 세션에 저장 (공유 기능을 위해)
+            sessionStorage.setItem('politicalType', typeCode);
+        }
+        
+        // 소개팅 일정 페이지로 이동
+        function goToMatching() {
+            const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+            if (!isLoggedIn) {
+                alert('로그인이 필요한 서비스입니다.');
+                window.location.href = 'login.html?redirect=meeting-schedule.html';
+                return;
+            }
+            
+            window.location.href = 'meeting-schedule.html';
+        }
+        
+        // 결과 공유하기
+        function shareResult() {
+            const politicalType = sessionStorage.getItem('politicalType');
+            if (!politicalType) {
+                alert('결과를 찾을 수 없습니다.');
+                return;
+            }
+            
+            // 공유 URL 생성
+            const shareUrl = `${window.location.origin}/result.html?result=${politicalType}`;
+            
+            // 클립보드에 복사
+            if (navigator.clipboard) {
+                navigator.clipboard.writeText(shareUrl).then(() => {
+                    showCopyNotification('결과 링크가 복사되었습니다!');
+                }).catch(() => {
+                    prompt('결과 링크를 복사하세요:', shareUrl);
+                });
+            } else {
+                prompt('결과 링크를 복사하세요:', shareUrl);
+            }
+        }
+        
+        // 복사 알림 표시
+        function showCopyNotification(message) {
+            const existingNotification = document.querySelector('.copy-notification');
+            if (existingNotification) {
+                existingNotification.remove();
+            }
+            
+            const notification = document.createElement('div');
+            notification.className = 'copy-notification';
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 10);
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+                setTimeout(() => {
+                    notification.remove();
+                }, 300);
+            }, 3000);
+        }
+        
+        // political-test-script.js를 동적으로 로드
+        const script = document.createElement('script');
+        script.src = 'political-test-script.js';
+        document.head.appendChild(script);
+    </script>
 </body>
 </html>
