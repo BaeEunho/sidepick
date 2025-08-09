@@ -40,12 +40,7 @@ async function apiCall(endpoint, options = {}) {
 
 // 회원가입 API
 async function signup(userData) {
-    // 실제 로컬 인증 시스템 사용
-    if (window.AuthSystem) {
-        return await window.AuthSystem.signup(userData);
-    }
-    
-    // 폴백: 기존 API 호출
+    // 서버 API만 사용
     return await apiCall('/auth/signup', {
         method: 'POST',
         body: JSON.stringify(userData)
@@ -54,12 +49,7 @@ async function signup(userData) {
 
 // 로그인 API
 async function login(email, password) {
-    // 실제 로컬 인증 시스템 사용
-    if (window.AuthSystem) {
-        return await window.AuthSystem.login(email, password);
-    }
-    
-    // 폴백: 기존 API 호출
+    // 서버 API만 사용
     return await apiCall('/auth/login', {
         method: 'POST',
         body: JSON.stringify({ email, password })
@@ -68,12 +58,7 @@ async function login(email, password) {
 
 // 정치 성향 저장 API
 async function savePoliticalType(politicalType, testResult) {
-    // 실제 로컬 인증 시스템 사용
-    if (window.AuthSystem) {
-        return await window.AuthSystem.savePoliticalType(politicalType, testResult);
-    }
-    
-    // 폴백: 기존 API 호출
+    // 서버 API만 사용
     return await apiCall('/auth/save-political-type', {
         method: 'POST',
         body: JSON.stringify({ politicalType })

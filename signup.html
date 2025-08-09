@@ -96,9 +96,6 @@
         }
         
     </style>
-    <script src="auth-system.js"></script>
-    <script src="auth-check.js"></script>
-    <script src="api-client.js"></script>
     <!-- 날짜 선택기 JS -->
 </head>
 <body>
@@ -119,7 +116,7 @@
                 <p class="auth-subtitle">가치관이 맞는 사람들과의 만남이 시작됩니다</p>
 
                 <!-- 회원가입 폼 -->
-                <form class="auth-form" id="email-signup-form" onsubmit="handleSignup(event)">
+                <form class="auth-form" id="email-signup-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">이름</label>
@@ -235,9 +232,21 @@
         </div>
     </section>
 
+    <!-- 스크립트 로드 -->
+    <script src="auth-system.js"></script>
+    <script src="auth-check.js"></script>
+    <script src="api-client.js"></script>
+    
     <script>
-        // 크로스 플랫폼 날짜 선택기 초기화
+        // DOMContentLoaded 이벤트
         document.addEventListener('DOMContentLoaded', function() {
+            // 폼 이벤트 리스너 추가
+            const signupForm = document.getElementById('email-signup-form');
+            if (signupForm) {
+                signupForm.addEventListener('submit', handleSignup);
+            }
+            
+            // 크로스 플랫폼 날짜 선택기 초기화
             const today = new Date();
             const maxDate = new Date(today.getFullYear() - 20, today.getMonth(), today.getDate());
             const minDate = new Date(today.getFullYear() - 100, today.getMonth(), today.getDate());
@@ -408,7 +417,7 @@
             }
         }
 
-        async function handleSignup(event) {
+        window.handleSignup = async function(event) {
             event.preventDefault();
             
             // 이메일 인증 확인
@@ -472,39 +481,53 @@
             }
 
             try {
+                // API URL 설정
+                const API_URL = window.location.hostname === 'localhost' 
+                    ? 'http://localhost:3000' 
+                    : 'https://sidepick.onrender.com';
+                
                 // API 호출
-                const result = await ApiClient.signup({
-                    name: name,
-                    email: email,
-                    password: password,
-                    phone: phone,
-                    birthDate: birthDate.toISOString().split('T')[0],
-                    gender: gender,
-                    marketingConsent: termsMarketing
+                const response = await fetch(`${API_URL}/api/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        name: name,
+                        email: email,
+                        password: password,
+                        phone: phone,
+                        birthdate: birthDate.toISOString().split('T')[0],  // birthdate로 변경 (소문자)
+                        gender: gender,
+                        marketingAgree: termsMarketing  // marketingConsent를 marketingAgree로 변경
+                    })
                 });
+                
+                const result = await response.json();
 
                 if (result.success) {
                     alert('회원가입이 완료되었습니다!\n정치 성향 테스트를 진행해주세요.');
                     
-                    // 자동 로그인 처리
-                    const loginResult = await ApiClient.login(email, password);
-                    if (loginResult.success) {
-                        await AuthSystem.setUserData(loginResult.user, loginResult.token);
-                        // 성향 테스트 페이지로 이동
-                        window.location.href = 'political-test.html?from=signup';
-                    } else {
-                        // 로그인 실패 시 로그인 페이지로 이동
-                        window.location.href = 'login.html?signup=success';
+                    // 세션 데이터 저장
+                    if (result.data && result.data.user) {
+                        sessionStorage.setItem('isLoggedIn', 'true');
+                        sessionStorage.setItem('userEmail', result.data.user.email);
+                        sessionStorage.setItem('userProfile', JSON.stringify(result.data.user));
+                        sessionStorage.setItem('userGender', result.data.user.gender);
+                        
+                        if (result.data.token) {
+                            localStorage.setItem('authToken', result.data.token);
+                        }
                     }
+                    
+                    // 성향 테스트 페이지로 이동
+                    window.location.href = 'political-test.html?from=signup';
                 } else {
                     alert(result.message || '회원가입에 실패했습니다.');
                 }
             } catch (error) {
                 console.error('Signup error:', error);
-                
-                // 백엔드가 없는 경우 처리
-                alert('현재 서버 연결이 불가능합니다. 관리자에게 문의하세요.');
-                console.error('Server connection failed:', error);
+                alert('서버 연결에 실패했습니다. 잠시 후 다시 시도해주세요.');
             }
         }
 
