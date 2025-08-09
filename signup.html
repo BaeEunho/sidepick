@@ -322,7 +322,7 @@
 
                         <div class="form-group">
                             <label for="birth">생년월일</label>
-                            <input type="text" id="birth" name="birth" placeholder="생년월일을 선택하세요" required readonly>
+                            <input type="text" id="birth" name="birth" placeholder="생년월일을 선택하세요" required>
                             <span class="input-hint">20세 이상만 가입 가능합니다 (한국 나이 기준)</span>
                             <span class="error-message" id="birth-error"></span>
                         </div>
@@ -432,9 +432,10 @@
             // 모바일 감지
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
+            const birthInput = document.getElementById('birth');
+            
             if (isMobile) {
                 // 모바일에서는 네이티브 date input 사용
-                const birthInput = document.getElementById('birth');
                 birthInput.type = 'date';
                 birthInput.max = maxDate.toISOString().split('T')[0];
                 birthInput.min = minDate.toISOString().split('T')[0];
@@ -444,6 +445,7 @@
                 birthInput.style.paddingRight = '12px';
             } else {
                 // 데스크톱에서는 Pikaday 사용
+                birthInput.setAttribute('readonly', true);
                 const picker = new Pikaday({
                     field: document.getElementById('birth'),
                     format: 'YYYY-MM-DD',
