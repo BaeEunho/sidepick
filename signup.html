@@ -216,7 +216,7 @@
             const birthError = document.getElementById('birth-error');
             const submitBtn = document.querySelector('.auth-submit-btn');
             
-            if (!birthInput.value) {
+            if (!birthInput.value || isNaN(birthDate.getTime())) {
                 birthError.textContent = '';
                 return;
             }
