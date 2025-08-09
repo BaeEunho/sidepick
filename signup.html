@@ -198,7 +198,7 @@
                 maxDate: maxDate,
                 minDate: minDate,
                 defaultDate: new Date(today.getFullYear() - 25, 0, 1), // 기본값: 25년 전 1월 1일
-                disableMobile: false, // 모바일에서도 Flatpickr 사용
+                disableMobile: true, // 모바일에서도 Flatpickr 사용
                 onChange: function(selectedDates, dateStr, instance) {
                     validateAge();
                 },
