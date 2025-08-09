@@ -204,10 +204,6 @@
                                 <span class="value" id="booking-location">-</span>
                             </div>
                             <div class="detail-row">
-                                <span class="label">참가자</span>
-                                <span class="value" id="booking-participant">-</span>
-                            </div>
-                            <div class="detail-row">
                                 <span class="label">결제 금액</span>
                                 <span class="value price">45,000원</span>
                             </div>
@@ -305,8 +301,37 @@
     </footer>
 
     <script>
+        // 서버와 데이터 동기화
+    async function syncWithServer() {
+        const authToken = localStorage.getItem('authToken');
+        const userEmail = sessionStorage.getItem('userEmail');
+        if (!authToken && !userEmail) return;
+        
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://sidepick.onrender.com';
+            
+        // 서버에서 사용자 정보 가져오기
+        const response = await fetch(`${API_URL}/api/user/profile`, {
+            headers: {
+                'Authorization': `Bearer ${authToken || ''}`
+            }
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            
+            // 프로필 정보 업데이트
+            if (data.profile) {
+                document.getElementById("depositor-name").innerText = data.profile.name
+            }
+        }
+    }
+
         // 페이지 로드 시 정보 표시
         document.addEventListener('DOMContentLoaded', function() {
+            syncWithServer()
+
             // 모임 정보 가져오기
             const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
             const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
