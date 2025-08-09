@@ -247,7 +247,8 @@ const questions = [
 ];
 
 // 16가지 성향 타입 정의 (전역 변수로 이동)
-const resultTypes = {
+// window 객체에도 저장하여 다른 페이지에서 접근 가능하도록 함
+const resultTypes = window.resultTypes = {
     "MPOS": {
         title: "시장 다원주의자",
         icon: "🌐",
@@ -926,56 +927,10 @@ function previousQuestion() {
 
 // 결과 표시
 function showResult() {
-    document.getElementById('test-questions').style.display = 'none';
-    document.getElementById('test-result').style.display = 'block';
-    document.querySelector('.test-progress').style.display = 'none';
-    
     // 답변 점수 계산
     const scores = calculateScores();
     const typeCode = generateTypeCode(scores);
     const result = resultTypes[typeCode];
-    
-    // 전역 변수에 저장 (goToMatching에서 사용)
-    window.currentTypeCode = typeCode;
-    window.currentResult = result;
-    
-    // 축별 점수도 세션스토리지에 저장 (마이페이지에서 사용)
-    sessionStorage.setItem('testScores', JSON.stringify(scores));
-    sessionStorage.setItem('axisScores', JSON.stringify(result.axisScores));
-    
-    // 결과 화면 업데이트
-    document.getElementById('result-title').textContent = result.title;
-    document.querySelector('.type-icon').textContent = result.icon;
-    document.getElementById('result-description').textContent = result.description;
-    
-    const featuresList = document.getElementById('result-features');
-    featuresList.innerHTML = result.features.map(feature => `<li>${feature}</li>`).join('');
-    
-    // 성향 코드를 실제 이름으로 변환하는 맵
-    const typeNames = {
-        "MPOS": "시장 다원주의자",
-        "MPON": "테크노 자유주의자",
-        "MPTS": "참여 자유주의자",
-        "MPTN": "엘리트 자유주의자",
-        "MCOS": "문화 보수주의자",
-        "MCON": "온건 보수주의자", 
-        "MCTS": "풀뿌리 보수주의자",
-        "MCTN": "전통 보수주의자",
-        "GPOS": "참여 사회민주주의자",
-        "GPON": "전문가 사회민주주의자",
-        "GPTS": "민중 진보주의자",
-        "GPTN": "계획 진보주의자",
-        "GCOS": "온건 국가주의자",
-        "GCON": "권위 보수주의자",
-        "GCTS": "민족 보수주의자",
-        "GCTN": "위계 보수주의자"
-    };
-    
-    const matchingTypes = document.querySelector('.type-badges');
-    matchingTypes.innerHTML = result.matching.map(typeCode => {
-        const typeName = typeNames[typeCode] || typeCode;
-        return `<span class="type-badge">${typeName}</span>`;
-    }).join('');
     
     // 테스트 완료 상태를 즉시 저장
     const orientation = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'].includes(typeCode) ? 'progressive' : 'conservative';
@@ -990,68 +945,50 @@ function showResult() {
         AuthManager.setTestComplete(typeData);
     }
     
-    // 추가로 상세 정보도 저장 (마이페이지용)
+    // 결과 데이터를 localStorage에 저장 (result.html에서 사용)
+    // result-data.js의 personalityResults 구조에 맞게 변환
+    const personalityResult = {
+        code: typeCode,
+        name: result.title,
+        motto: "당신만의 특별한 정치 성향",
+        bgColor: orientation === 'progressive' ? '#3498db' : '#e74c3c',
+        coreValues: result.features.slice(0, 3),
+        description: result.description,
+        dailyTraits: result.features,
+        compatibleTypes: result.matching.map(code => ({
+            code: code,
+            name: resultTypes[code]?.title || code,
+            reason: "유사한 가치관"
+        })),
+        goodTopics: result.goodTopics || [],
+        sensitiveTopics: result.avoidTopics || [],
+        axes: {
+            economic: scores.economic,
+            social: scores.social, 
+            cultural: scores.cultural,
+            participation: scores.participation
+        },
+        percentage: 0
+    };
+    
+    const testResult = {
+        type: personalityResult,
+        scores: scores
+    };
+    localStorage.setItem('sidepick-test-result', JSON.stringify(testResult));
+    
+    // 세션 스토리지에도 저장
+    sessionStorage.setItem('testScores', JSON.stringify(scores));
+    sessionStorage.setItem('axisScores', JSON.stringify(result.axisScores));
     sessionStorage.setItem('testResultDetail', JSON.stringify(result));
     sessionStorage.setItem('userAnswers', JSON.stringify(answers));
+    sessionStorage.setItem('politicalType', typeCode);
     
-    // 서버에 정치 성향 저장 (데모 모드에서는 localStorage에만 저장)
+    // 서버에 정치 성향 저장
     savePoliticalTypeToServer(typeCode);
     
-    // 새로운 섹션들을 동적으로 추가
-    const resultCard = document.querySelector('.result-card');
-    
-    // 축별 점수 추가
-    const axisSection = document.createElement('div');
-    axisSection.className = 'axis-scores';
-    axisSection.innerHTML = `
-        <h3>세부 성향 분석</h3>
-        <div class="axis-grid">
-            ${Object.values(result.axisScores).map(axis => `
-                <div class="axis-item">
-                    <h4>${axis.label}</h4>
-                    <p class="axis-score">${axis.score}</p>
-                    <p class="axis-detail">${axis.detail}</p>
-                </div>
-            `).join('')}
-        </div>
-    `;
-    
-    // 연애 성향 추가
-    const relationshipSection = document.createElement('div');
-    relationshipSection.className = 'relationship-traits';
-    relationshipSection.innerHTML = `
-        <h3>연애에서의 특징</h3>
-        <ul>
-            ${result.relationshipTraits.map(trait => `<li>${trait}</li>`).join('')}
-        </ul>
-    `;
-    
-    // 대화 주제 추가
-    const topicsSection = document.createElement('div');
-    topicsSection.className = 'conversation-topics';
-    topicsSection.innerHTML = `
-        <h3>추천 대화 주제</h3>
-        <div class="topics-grid">
-            <div class="good-topics">
-                <h4>💚 이런 대화를 즐겨요</h4>
-                <ul>
-                    ${result.goodTopics.map(topic => `<li>${topic}</li>`).join('')}
-                </ul>
-            </div>
-            <div class="avoid-topics">
-                <h4>💔 이런 대화는 피해주세요</h4>
-                <ul>
-                    ${result.avoidTopics.map(topic => `<li>${topic}</li>`).join('')}
-                </ul>
-            </div>
-        </div>
-    `;
-    
-    // 요소들을 결과 카드에 추가
-    const matchingSection = document.querySelector('.matching-types');
-    resultCard.insertBefore(axisSection, matchingSection);
-    resultCard.insertBefore(relationshipSection, matchingSection);
-    resultCard.insertBefore(topicsSection, matchingSection);
+    // result.html로 리다이렉트
+    window.location.href = 'result.html';
 }
 
 // 질문별 방향성 데이터
@@ -1266,5 +1203,43 @@ function saveToLocalStorageOnly(politicalType) {
     if (userEmail) {
         localStorage.setItem(`politicalType_${userEmail}`, politicalType);
         console.log('정치 성향이 로컬에 저장되었습니다. (데모 모드)');
+    }
+}
+
+// 소개팅 일정 페이지로 이동
+function goToMatching() {
+    // 인증 상태 확인
+    const isLoggedIn = sessionStorage.getItem('isLoggedIn') === 'true';
+    if (!isLoggedIn) {
+        alert('로그인이 필요한 서비스입니다.');
+        window.location.href = 'login.html?redirect=meeting-schedule.html';
+        return;
+    }
+    
+    window.location.href = 'meeting-schedule.html';
+}
+
+// 결과 공유하기
+function shareResult() {
+    const politicalType = sessionStorage.getItem('politicalType');
+    if (!politicalType) {
+        alert('결과를 찾을 수 없습니다.');
+        return;
+    }
+    
+    // 공유 URL 생성
+    const shareUrl = `${window.location.origin}/result.html?result=${politicalType}`;
+    
+    // 클립보드에 복사
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(shareUrl).then(() => {
+            showCopyNotification('결과 링크가 복사되었습니다!');
+        }).catch(() => {
+            // 폴백: 프롬프트로 표시
+            prompt('결과 링크를 복사하세요:', shareUrl);
+        });
+    } else {
+        // 구형 브라우저 대응
+        prompt('결과 링크를 복사하세요:', shareUrl);
     }
 }
