@@ -159,15 +159,13 @@
             // 기본 정보 필드 업데이트
             document.getElementById('name').value = userState.profile.name || '';
             
-            // 나이 계산 (생년월일로부터)
+            // 나이 계산 (한국식 나이)
             const birthDate = userState.profile.birthdate ? new Date(userState.profile.birthdate) : null;
             if (birthDate) {
                 const today = new Date();
-                const age = today.getFullYear() - birthDate.getFullYear();
-                const monthDiff = today.getMonth() - birthDate.getMonth();
-                const dayDiff = today.getDate() - birthDate.getDate();
-                const actualAge = (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) ? age - 1 : age;
-                document.getElementById('age').value = actualAge + '세';
+                // 한국식 나이 계산: 현재 연도 - 출생 연도 + 1
+                const koreanAge = today.getFullYear() - birthDate.getFullYear() + 1;
+                document.getElementById('age').value = koreanAge + '세';
             } else {
                 document.getElementById('age').value = '정보 없음';
             }
@@ -245,13 +243,13 @@
                     title: '진보 성향 소개팅',
                     date: '8월 23일 (토) 15:00',
                     location: '강남역 파티룸',
-                    age: '25-32세'
+                    age: '20 - 39세'
                 },
                 'conservative': {
                     title: '보수 성향 소개팅',
                     date: '8월 30일 (토) 15:00',
                     location: '강남역 파티룸',
-                    age: '27-35세'
+                    age: '20 - 39세'
                 }
             };
             

@@ -800,9 +800,9 @@ async function deleteAccount() {
     } catch (error) {
         console.error('회원 탈퇴 중 오류:', error);
         
-        // 데모 모드에서는 로컬 데이터만 삭제하고 성공 처리
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            alert('회원 탈퇴가 완료되었습니다.\n(데모 모드: 로컬 데이터만 삭제됨)');
+        // 네트워크 오류 시에도 회원 탈퇴 처리
+        if (confirm('서버 연결에 실패했습니다.\n로컬 데이터를 삭제하고 탈퇴 처리하시겠습니까?')) {
+            alert('회원 탈퇴가 완료되었습니다.\n그동안 사이드픽을 이용해 주셔서 감사합니다.');
             
             // 모든 로컬 데이터 삭제
             sessionStorage.clear();
@@ -811,8 +811,6 @@ async function deleteAccount() {
             // 메인 페이지로 이동
             window.location.href = 'index.html';
         } else {
-            alert('회원 탈퇴 처리 중 오류가 발생했습니다.\n잠시 후 다시 시도해 주세요.');
-            
             // 버튼 복원
             if (event.target) {
                 event.target.textContent = '회원 탈퇴';

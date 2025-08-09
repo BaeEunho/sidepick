@@ -241,7 +241,7 @@
                         <div class="form-group">
                             <label for="birth">생년월일</label>
                             <input type="text" id="birth" name="birth" placeholder="생년월일을 선택하세요" required readonly>
-                            <span class="input-hint">만 20세 이상만 가입 가능합니다</span>
+                            <span class="input-hint">20세 이상만 가입 가능합니다 (한국 나이 기준)</span>
                             <span class="error-message" id="birth-error"></span>
                         </div>
                     </div>
@@ -375,6 +375,20 @@
 
                         yearSelect.addEventListener('change', function () {
                             instance.changeYear(parseInt(this.value, 10));
+                            // 연도 선택 시 즉시 나이 검증
+                            const selectedYear = parseInt(this.value, 10);
+                            const currentYear = new Date().getFullYear();
+                            const koreanAge = currentYear - selectedYear + 1;
+                            
+                            const birthError = document.getElementById('birth-error');
+                            if (koreanAge < 20) {
+                                alert(`${selectedYear}년생은 한국 나이 ${koreanAge}세로 가입이 불가능합니다.\n20세 이상만 가입 가능합니다.`);
+                                birthError.textContent = '20세 이상만 가입 가능합니다. (한국 나이 기준)';
+                                birthError.style.color = '#dc2626';
+                            } else {
+                                birthError.textContent = `가입 가능한 연령입니다. (한국 나이 ${koreanAge}세)`;
+                                birthError.style.color = '#10b981';
+                            }
                         });
 
                         currentYearElement.parentNode.replaceChild(yearSelect, currentYearElement);
@@ -389,28 +403,30 @@
             const birthError = document.getElementById('birth-error');
             const submitBtn = document.querySelector('.auth-submit-btn');
             
-            if (!birthInput.value || isNaN(birthDate.getTime())) {
+            if (!birthInput.value) {
                 birthError.textContent = '';
                 return;
             }
             
             const birthDate = new Date(birthInput.value);
+            if (isNaN(birthDate.getTime())) {
+                birthError.textContent = '';
+                return;
+            }
+            
             const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            const dayDiff = today.getDate() - birthDate.getDate();
+            // 한국식 나이 계산: 현재 연도 - 출생 연도 + 1
+            const koreanAge = today.getFullYear() - birthDate.getFullYear() + 1;
             
-            const isUnder20 = age < 20 || (age === 20 && monthDiff < 0) || (age === 20 && monthDiff === 0 && dayDiff < 0);
-            
-            if (isUnder20) {
-                birthError.textContent = '만 20세 이상만 가입 가능합니다.';
+            if (koreanAge < 20) {
+                birthError.textContent = '20세 이상만 가입 가능합니다. (한국 나이 기준)';
                 birthError.style.color = '#dc2626';
                 birthInput.style.borderColor = '#dc2626';
                 submitBtn.disabled = true;
                 submitBtn.style.opacity = '0.5';
                 submitBtn.style.cursor = 'not-allowed';
             } else {
-                birthError.textContent = '가입 가능한 연령입니다.';
+                birthError.textContent = `가입 가능한 연령입니다. (한국 나이 ${koreanAge}세)`;
                 birthError.style.color = '#10b981';
                 birthInput.style.borderColor = '#e5e7eb';
                 submitBtn.disabled = false;
@@ -432,12 +448,11 @@
             const birthInput = document.getElementById('birth');
             const birthDate = new Date(birthInput.value);
             const today = new Date();
-            const age = today.getFullYear() - birthDate.getFullYear();
-            const monthDiff = today.getMonth() - birthDate.getMonth();
-            const dayDiff = today.getDate() - birthDate.getDate();
+            // 한국식 나이 계산: 현재 연도 - 출생 연도 + 1
+            const koreanAge = today.getFullYear() - birthDate.getFullYear() + 1;
             
-            if (age < 20 || (age === 20 && monthDiff < 0) || (age === 20 && monthDiff === 0 && dayDiff < 0)) {
-                alert('만 20세 이상만 가입 가능합니다.');
+            if (koreanAge < 20) {
+                alert('20세 이상만 가입 가능합니다. (한국 나이 기준)');
                 birthInput.focus();
                 return;
             }
