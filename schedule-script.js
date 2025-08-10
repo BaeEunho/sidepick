@@ -786,6 +786,12 @@ function showPaymentModal(orientation, card) {
     if (modal) {
         modal.style.display = 'flex';
         console.log('Modal display set to flex');
+        
+        // 모바일에서 body 스크롤 방지
+        document.body.style.overflow = 'hidden';
+        document.body.style.position = 'fixed';
+        document.body.style.width = '100%';
+        document.body.style.top = `-${window.scrollY}px`;
     } else {
         console.error('Modal element not found!');
     }
@@ -793,7 +799,16 @@ function showPaymentModal(orientation, card) {
 
 // 모달 닫기 함수
 window.closePaymentModal = function() {
-    document.getElementById('paymentModal').style.display = 'none';
+    const modal = document.getElementById('paymentModal');
+    modal.style.display = 'none';
+    
+    // body 스크롤 복원
+    const scrollY = document.body.style.top;
+    document.body.style.position = '';
+    document.body.style.top = '';
+    document.body.style.width = '';
+    document.body.style.overflow = '';
+    window.scrollTo(0, parseInt(scrollY || '0') * -1);
 }
 
 // 계좌번호 복사 함수
@@ -833,10 +848,22 @@ function fallbackCopyToClipboard(text) {
     document.body.removeChild(textArea);
 }
 
-// 모달 외부 클릭시 닫기
-window.onclick = function(event) {
+// 모달 외부 클릭/터치시 닫기
+document.addEventListener('DOMContentLoaded', function() {
     const modal = document.getElementById('paymentModal');
-    if (event.target === modal) {
-        closePaymentModal();
+    if (modal) {
+        modal.addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePaymentModal();
+            }
+        });
+        
+        // 모바일 터치 이벤트 지원
+        modal.addEventListener('touchstart', function(event) {
+            if (event.target === this) {
+                event.preventDefault();
+                closePaymentModal();
+            }
+        });
     }
-}
+});

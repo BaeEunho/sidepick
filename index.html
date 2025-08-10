@@ -968,6 +968,8 @@
             z-index: 99999;
             justify-content: center;
             align-items: center;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         .payment-modal-content {
@@ -975,12 +977,15 @@
             border-radius: 20px;
             max-width: 480px;
             width: 90%;
-            max-height: 80vh;
+            max-height: 90vh;
             overflow: hidden;
             position: relative;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             padding: 0;
             animation: modalSlideIn 0.3s ease-out;
+            margin: 20px auto;
+            overflow-y: auto;
+            -webkit-overflow-scrolling: touch;
         }
 
         @keyframes modalSlideIn {
@@ -3408,12 +3413,28 @@
             document.getElementById('modal-depositor-name').textContent = userProfile.name || '이름';
             
             // 모달 표시
-            document.getElementById('paymentModal').style.display = 'flex';
+            const modal = document.getElementById('paymentModal');
+            modal.style.display = 'flex';
+            
+            // 모바일에서 body 스크롤 방지
+            document.body.style.overflow = 'hidden';
+            document.body.style.position = 'fixed';
+            document.body.style.width = '100%';
+            document.body.style.top = `-${window.scrollY}px`;
         }
         
         // 모달 닫기 함수
         function closePaymentModal() {
-            document.getElementById('paymentModal').style.display = 'none';
+            const modal = document.getElementById('paymentModal');
+            modal.style.display = 'none';
+            
+            // body 스크롤 복원
+            const scrollY = document.body.style.top;
+            document.body.style.position = '';
+            document.body.style.top = '';
+            document.body.style.width = '';
+            document.body.style.overflow = '';
+            window.scrollTo(0, parseInt(scrollY || '0') * -1);
         }
         
         // 계좌번호 복사 함수
@@ -3453,10 +3474,17 @@
             document.body.removeChild(textArea);
         }
         
-        // 모달 외부 클릭시 닫기
-        window.addEventListener('click', function(event) {
-            const modal = document.getElementById('paymentModal');
-            if (event.target === modal) {
+        // 모달 외부 클릭/터치시 닫기
+        document.getElementById('paymentModal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                closePaymentModal();
+            }
+        });
+        
+        // 모바일 터치 이벤트 지원
+        document.getElementById('paymentModal').addEventListener('touchstart', function(event) {
+            if (event.target === this) {
+                event.preventDefault();
                 closePaymentModal();
             }
         });
