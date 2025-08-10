@@ -1036,6 +1036,15 @@ app.post('/api/auth/save-political-type', async (req, res) => {
         try {
             await collections.users.doc(decoded.email).update(updateData);
             console.log(`[SUCCESS] 정치 성향 저장 완료: ${decoded.email} -> ${politicalType}`);
+            
+            // 업데이트 직후 데이터 확인
+            const updatedDoc = await collections.users.doc(decoded.email).get();
+            const updatedData = updatedDoc.data();
+            console.log(`[VERIFY] 업데이트 후 정치 성향: ${updatedData.political_type}`);
+            console.log(`[VERIFY] 업데이트 후 테스트 완료 시간: ${updatedData.test_completed_at}`);
+            if (updatedData.axis_scores) {
+                console.log(`[VERIFY] 업데이트 후 axis_scores: ${JSON.stringify(updatedData.axis_scores)}`);
+            }
             console.log(`=== 정치 성향 저장 완료 ===\n`);
             
             res.json({
