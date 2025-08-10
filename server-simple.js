@@ -992,17 +992,27 @@ app.post('/api/auth/save-political-type', async (req, res) => {
         const token = authHeader.replace('Bearer ', '');
         const decoded = jwt.verify(token, JWT_SECRET);
         
-        console.log(`정치 성향 저장 요청: ${decoded.email} - ${politicalType}`);
+        console.log(`\n=== 정치 성향 저장 요청 ===`);
+        console.log(`이메일: ${decoded.email}`);
+        console.log(`정치 성향: ${politicalType}`);
+        console.log(`테스트 결과 포함: ${!!testResult}`);
+        if (testResult) {
+            console.log(`- axisScores: ${JSON.stringify(testResult.axisScores)}`);
+            console.log(`- userAnswers 개수: ${testResult.userAnswers ? testResult.userAnswers.length : 0}`);
+        }
         
         // 사용자 문서 존재 확인
         const userDoc = await collections.users.doc(decoded.email).get();
         if (!userDoc.exists) {
-            console.error(`사용자 문서를 찾을 수 없음: ${decoded.email}`);
+            console.error(`[ERROR] 사용자 문서를 찾을 수 없음: ${decoded.email}`);
+            console.log(`Firebase users 컬렉션에 ${decoded.email} 문서가 없습니다.`);
             return res.status(404).json({
                 success: false,
                 message: '사용자를 찾을 수 없습니다.'
             });
         }
+        
+        console.log(`사용자 문서 확인: ${decoded.email} 존재함`);
         
         // 업데이트할 데이터 준비
         const updateData = {
@@ -1020,15 +1030,22 @@ app.post('/api/auth/save-political-type', async (req, res) => {
             }
         }
         
+        console.log(`업데이트 데이터 준비 완료:`, JSON.stringify(updateData, null, 2));
+        
         // 사용자 정보 업데이트
-        await collections.users.doc(decoded.email).update(updateData);
-        
-        console.log(`정치 성향 저장 완료: ${decoded.email}`);
-        
-        res.json({
-            success: true,
-            message: '정치 성향이 저장되었습니다.'
-        });
+        try {
+            await collections.users.doc(decoded.email).update(updateData);
+            console.log(`[SUCCESS] 정치 성향 저장 완료: ${decoded.email} -> ${politicalType}`);
+            console.log(`=== 정치 성향 저장 완료 ===\n`);
+            
+            res.json({
+                success: true,
+                message: '정치 성향이 저장되었습니다.'
+            });
+        } catch (updateError) {
+            console.error(`[ERROR] Firebase 업데이트 실패:`, updateError);
+            throw updateError;
+        }
         
     } catch (error) {
         console.error('정치 성향 저장 오류:', error);

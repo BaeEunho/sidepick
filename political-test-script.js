@@ -927,10 +927,18 @@ function previousQuestion() {
 
 // 결과 표시
 function showResult() {
+    console.log('=== showResult 함수 시작 ===');
+    
     // 답변 점수 계산
     const scores = calculateScores();
     const typeCode = generateTypeCode(scores);
     const result = resultTypes[typeCode];
+    
+    console.log('계산된 결과:', {
+        typeCode,
+        scores,
+        result
+    });
     
     // 테스트 완료 상태를 즉시 저장
     const orientation = ['MPOS', 'MPON', 'MPTS', 'MPTN', 'GPOS', 'GPON', 'GPTS', 'GPTN'].includes(typeCode) ? 'progressive' : 'conservative';
@@ -984,11 +992,16 @@ function showResult() {
     sessionStorage.setItem('userAnswers', JSON.stringify(answers));
     sessionStorage.setItem('politicalType', typeCode);
     
-    // 서버에 정치 성향 저장
-    savePoliticalTypeToServer(typeCode);
-    
-    // result.html로 리다이렉트
-    window.location.href = 'result.html';
+    // 서버에 정치 성향 저장 (비동기 처리)
+    savePoliticalTypeToServer(typeCode).then(() => {
+        console.log('서버 저장 완료, result.html로 이동');
+        // result.html로 리다이렉트
+        window.location.href = 'result.html';
+    }).catch(error => {
+        console.error('서버 저장 실패:', error);
+        // 에러가 발생해도 결과 페이지로 이동
+        window.location.href = 'result.html';
+    });
 }
 
 // 질문별 방향성 데이터
@@ -1164,7 +1177,17 @@ function showCopyNotification(message) {
 
 // 서버에 정치 성향 저장
 async function savePoliticalTypeToServer(politicalType) {
+    console.log('=== savePoliticalTypeToServer 함수 시작 ===');
+    
     const userEmail = sessionStorage.getItem('userEmail');
+    const authToken = localStorage.getItem('authToken');
+    
+    console.log('저장 시작 정보:', {
+        userEmail,
+        politicalType,
+        hasAuthToken: !!authToken,
+        authTokenLength: authToken ? authToken.length : 0
+    });
     
     try {
         // 테스트 결과 데이터 수집
@@ -1194,11 +1217,9 @@ async function savePoliticalTypeToServer(politicalType) {
                     sessionStorage.setItem('politicalType', politicalType);
                 } else {
                     console.error('정치 성향 저장 실패:', response.message);
-                    alert(`정치 성향 저장 실패: ${response.message}\n\n이메일: ${userEmail}`);
                 }
             } catch (apiError) {
                 console.error('API 호출 에러:', apiError);
-                alert(`API 호출 중 오류 발생:\n${apiError.message}\n\n이메일: ${userEmail}`);
                 throw apiError;
             }
         } else if (typeof savePoliticalType === 'function') {
