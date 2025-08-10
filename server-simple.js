@@ -700,7 +700,35 @@ app.get('/api/admin/users', async (req, res) => {
                     orientation: booking.orientation,
                     status: booking.status,
                     appliedAt: booking.appliedAt
-                }));
+                }))
+                // 최신순으로 정렬 (appliedAt 기준)
+                .sort((a, b) => {
+                    // Firebase Timestamp 처리
+                    let dateA = new Date(0);
+                    let dateB = new Date(0);
+                    
+                    if (a.appliedAt) {
+                        if (a.appliedAt._seconds) {
+                            dateA = new Date(a.appliedAt._seconds * 1000);
+                        } else if (a.appliedAt.toDate) {
+                            dateA = a.appliedAt.toDate();
+                        } else {
+                            dateA = new Date(a.appliedAt);
+                        }
+                    }
+                    
+                    if (b.appliedAt) {
+                        if (b.appliedAt._seconds) {
+                            dateB = new Date(b.appliedAt._seconds * 1000);
+                        } else if (b.appliedAt.toDate) {
+                            dateB = b.appliedAt.toDate();
+                        } else {
+                            dateB = new Date(b.appliedAt);
+                        }
+                    }
+                    
+                    return dateB - dateA; // 내림차순 (최신이 먼저)
+                });
             
             console.log(`${user.email}의 모임 신청:`, userBookings.length, '개');
             
