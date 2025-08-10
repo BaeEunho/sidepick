@@ -209,37 +209,75 @@
             
             // Firebase에서 데이터를 못 가져온 경우 sessionStorage 확인
             if (!bookingInfo) {
+                // URL 파라미터 확인 (새로 신청하는 경우)
+                const orientation = urlParams.get('orientation');
+                const reapply = urlParams.get('reapply');
+                
+                console.log('URL params:', { bookingId, orientation, reapply });
+                
                 // 기존 방식 - pendingBooking 먼저 확인, 없으면 selectedMeeting
                 const pendingBooking = sessionStorage.getItem('pendingBooking');
                 const selectedMeeting = sessionStorage.getItem('selectedMeeting');
                 
+                console.log('SessionStorage data:', {
+                    pendingBooking: pendingBooking ? 'exists' : 'null',
+                    selectedMeeting: selectedMeeting ? 'exists' : 'null'
+                });
+                
                 if (pendingBooking) {
-                    bookingInfo = JSON.parse(pendingBooking);
+                    try {
+                        bookingInfo = JSON.parse(pendingBooking);
+                        console.log('Using pendingBooking:', bookingInfo);
+                    } catch (e) {
+                        console.error('pendingBooking parse error:', e);
+                    }
                 } else if (selectedMeeting) {
-                    // selectedMeeting에서 가져온 경우 형식 맞추기
-                    const meeting = JSON.parse(selectedMeeting);
+                    try {
+                        // selectedMeeting에서 가져온 경우 형식 맞추기
+                        const meeting = JSON.parse(selectedMeeting);
+                        console.log('Using selectedMeeting:', meeting);
+                        bookingInfo = {
+                            meetingId: meeting.id || meeting.meetingId || `meeting_${Date.now()}`,
+                            title: meeting.title,
+                            date: meeting.date,
+                            location: meeting.location,
+                            orientation: meeting.orientation || orientation
+                        };
+                        // pendingBooking에도 저장
+                        sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
+                    } catch (e) {
+                        console.error('selectedMeeting parse error:', e);
+                    }
+                } else if (orientation) {
+                    // URL에 orientation이 있으면 기본 정보 생성
+                    console.log('Creating default booking info from URL orientation:', orientation);
                     bookingInfo = {
-                        meetingId: meeting.id || meeting.meetingId || `meeting_${Date.now()}`,
-                        title: meeting.title,
-                        date: meeting.date,
-                        location: meeting.location,
-                        orientation: meeting.orientation
+                        meetingId: `meeting_${orientation}_${Date.now()}`,
+                        title: `${orientation === 'progressive' ? '진보' : '보수'} 성향 소개팅`,
+                        date: '8월 23일 토요일',
+                        location: '강남역 파티룸',
+                        orientation: orientation
                     };
-                    // pendingBooking에도 저장
+                    // sessionStorage에 저장
                     sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
+                    sessionStorage.setItem('selectedMeeting', JSON.stringify(bookingInfo));
                 } else {
                     // appliedMeetings에서 시도
                     const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                    const orientation = sessionStorage.getItem('currentOrientation') || 'progressive';
+                    const currentOrientation = sessionStorage.getItem('currentOrientation') || 'progressive';
                     
-                    if (appliedMeetings[orientation]) {
-                        const meetingData = appliedMeetings[orientation];
+                    console.log('Checking appliedMeetings:', appliedMeetings);
+                    
+                    if (appliedMeetings[currentOrientation]) {
+                        const meetingData = appliedMeetings[currentOrientation];
                         bookingInfo = {
                             meetingId: meetingData.meetingId,
-                            title: meetingData.title || `${orientation === 'progressive' ? '진보' : '보수'} 성향 모임`,
+                            title: meetingData.title || `${currentOrientation === 'progressive' ? '진보' : '보수'} 성향 모임`,
                             date: meetingData.date || '날짜 미정',
-                            location: meetingData.location || '장소 미정'
+                            location: meetingData.location || '장소 미정',
+                            orientation: currentOrientation
                         };
+                        console.log('Using appliedMeetings:', bookingInfo);
                     }
                 }
             }

@@ -446,9 +446,10 @@
                     
                     alert('모임 신청이 완료되었습니다!');
                     
-                    // 결제 완료 페이지로 바로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
+                    // booking-confirm 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
                     setTimeout(() => {
-                        window.location.href = 'payment-complete.html';
+                        const bookingId = result.data?.bookingId || '';
+                        window.location.href = `booking-confirm.html?bookingId=${bookingId}&orientation=${orientation}`;
                     }, 100);
                 } else {
                     console.error('API 응답 실패:', result.message);
@@ -493,9 +494,10 @@
                 };
                 sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
                 
-                // 결제 완료 페이지로 바로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
+                // booking-confirm 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
                 setTimeout(() => {
-                    window.location.href = 'payment-complete.html';
+                    const bookingId = bookingInfo.bookingId || '';
+                    window.location.href = `booking-confirm.html?bookingId=${bookingId}&orientation=${orientation}`;
                 }, 100);
             }
         }

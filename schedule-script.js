@@ -652,9 +652,9 @@ async function updateMeetingAvailability(userGender) {
                     sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
                     if (bookingId) {
                         sessionStorage.setItem('currentBookingId', bookingId);
-                        window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                        window.location.href = `booking-confirm.html?bookingId=${bookingId}&orientation=${meetingOrientation}`;
                     } else {
-                        window.location.href = `booking-confirm.html?reapply=true`;
+                        window.location.href = `booking-confirm.html?reapply=true&orientation=${meetingOrientation}`;
                     }
                 };
             } else if (status === 'payment_pending') {
@@ -672,7 +672,7 @@ async function updateMeetingAvailability(userGender) {
                         window.location.href = `payment.html?bookingId=${bookingId}`;
                     } else {
                         // bookingId가 없으면 booking-confirm으로 이동
-                        window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                        window.location.href = `booking-confirm.html?orientation=${meetingOrientation}`;
                     }
                 };
             } else if (status === 'paid') {
