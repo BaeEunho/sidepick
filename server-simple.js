@@ -994,6 +994,16 @@ app.post('/api/auth/save-political-type', async (req, res) => {
         
         console.log(`정치 성향 저장 요청: ${decoded.email} - ${politicalType}`);
         
+        // 사용자 문서 존재 확인
+        const userDoc = await collections.users.doc(decoded.email).get();
+        if (!userDoc.exists) {
+            console.error(`사용자 문서를 찾을 수 없음: ${decoded.email}`);
+            return res.status(404).json({
+                success: false,
+                message: '사용자를 찾을 수 없습니다.'
+            });
+        }
+        
         // 업데이트할 데이터 준비
         const updateData = {
             political_type: politicalType,

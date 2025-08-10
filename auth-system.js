@@ -235,6 +235,15 @@ const AuthSystem = {
         }));
         sessionStorage.setItem('userGender', user.gender);
         
+        // 나이 계산 및 저장
+        if (user.birthdate) {
+            const birthDate = new Date(user.birthdate);
+            const today = new Date();
+            // 한국식 나이 계산
+            const age = today.getFullYear() - birthDate.getFullYear() + 1;
+            sessionStorage.setItem('userAge', age.toString());
+        }
+        
         if (user.politicalType) {
             sessionStorage.setItem('politicalType', user.politicalType);
         }
@@ -254,6 +263,7 @@ const AuthSystem = {
         sessionStorage.removeItem('userEmail');
         sessionStorage.removeItem('userProfile');
         sessionStorage.removeItem('userGender');
+        sessionStorage.removeItem('userAge');
         sessionStorage.removeItem('appliedMeetings');
         localStorage.removeItem(this.CURRENT_USER);
         localStorage.removeItem('authToken');

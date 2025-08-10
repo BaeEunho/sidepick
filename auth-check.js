@@ -188,6 +188,15 @@ window.AuthManager = {
         if (profile.gender) {
             sessionStorage.setItem('userGender', profile.gender);
         }
+        
+        // 나이 계산 및 저장
+        if (profile.birthdate) {
+            const birthDate = new Date(profile.birthdate);
+            const today = new Date();
+            // 한국식 나이 계산
+            const age = today.getFullYear() - birthDate.getFullYear() + 1;
+            sessionStorage.setItem('userAge', age.toString());
+        }
     },
 
     // 로그아웃
@@ -198,6 +207,7 @@ window.AuthManager = {
             sessionStorage.removeItem('userEmail');
             sessionStorage.removeItem('userProfile');
             sessionStorage.removeItem('userGender');
+            sessionStorage.removeItem('userAge');
             sessionStorage.removeItem('appliedMeetings');
             
             // 로컬 스토리지의 토큰과 자동 로그인 정보도 삭제
@@ -254,7 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 // AuthManager로 로그인 처리
                 AuthManager.login(rememberData.email, {
                     name: rememberData.name,
-                    email: rememberData.email
+                    email: rememberData.email,
+                    birthdate: rememberData.birthdate,
+                    gender: rememberData.gender
                 });
                 
                 console.log('자동 로그인 성공');

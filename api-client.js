@@ -24,11 +24,25 @@ async function apiCall(endpoint, options = {}) {
     };
     
     try {
+        console.log(`API 호출: ${API_BASE_URL}${endpoint}`, finalOptions);
         const response = await fetch(`${API_BASE_URL}${endpoint}`, finalOptions);
-        const data = await response.json();
+        
+        // 응답 텍스트를 먼저 읽기
+        const responseText = await response.text();
+        console.log('응답 텍스트:', responseText);
+        
+        // JSON 파싱 시도
+        let data;
+        try {
+            data = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error('JSON 파싱 오류:', parseError);
+            throw new Error(`서버 응답을 파싱할 수 없습니다: ${responseText}`);
+        }
         
         if (!response.ok) {
-            throw new Error(data.message || '요청 처리 중 오류가 발생했습니다.');
+            console.error('API 에러 응답:', response.status, data);
+            throw new Error(data.message || `요청 처리 중 오류가 발생했습니다. (${response.status})`);
         }
         
         return data;

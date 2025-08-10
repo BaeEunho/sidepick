@@ -1185,12 +1185,21 @@ async function savePoliticalTypeToServer(politicalType) {
         // api-client.js의 savePoliticalType 함수 사용
         if (typeof window.ApiClient !== 'undefined' && window.ApiClient.savePoliticalType) {
             console.log('ApiClient.savePoliticalType 사용');
-            const response = await window.ApiClient.savePoliticalType(politicalType, testResult);
-            
-            if (response.success) {
-                console.log('정치 성향이 서버에 저장되었습니다.');
-            } else {
-                console.error('정치 성향 저장 실패:', response.message);
+            try {
+                const response = await window.ApiClient.savePoliticalType(politicalType, testResult);
+                
+                if (response.success) {
+                    console.log('정치 성향이 서버에 저장되었습니다.');
+                    // 세션에도 저장
+                    sessionStorage.setItem('politicalType', politicalType);
+                } else {
+                    console.error('정치 성향 저장 실패:', response.message);
+                    alert(`정치 성향 저장 실패: ${response.message}\n\n이메일: ${userEmail}`);
+                }
+            } catch (apiError) {
+                console.error('API 호출 에러:', apiError);
+                alert(`API 호출 중 오류 발생:\n${apiError.message}\n\n이메일: ${userEmail}`);
+                throw apiError;
             }
         } else if (typeof savePoliticalType === 'function') {
             console.log('전역 savePoliticalType 함수 사용');

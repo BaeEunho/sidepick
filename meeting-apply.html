@@ -201,7 +201,7 @@
         async function fetchParticipantCounts() {
             try {
                 const API_URL = window.location.hostname === 'localhost' ? 
-                    'http://localhost:3001' : 'https://sidepick.onrender.com';
+                    'http://localhost:3000' : 'https://sidepick.onrender.com';
                 
                 const response = await fetch(`${API_URL}/api/meetings/attendance`);
                 const data = await response.json();

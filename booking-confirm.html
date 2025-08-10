@@ -9,6 +9,7 @@
     <script src="auth-system.js"></script>
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
+    <script src="payment-simple.js"></script>
     <!-- data-system.js 제거 - Firebase 직접 사용 -->
 </head>
 <body>
@@ -302,6 +303,47 @@
             sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
         });
 
+        // completePayment 함수 정의
+        async function completePayment(bookingId) {
+            try {
+                // 주문 정보 생성
+                const orderData = {
+                    orderId: 'ORD-' + Date.now(),
+                    method: 'bank_transfer',
+                    amount: 45000,
+                    status: 'payment_pending',
+                    createdAt: new Date().toISOString()
+                };
+                
+                sessionStorage.setItem('orderData', JSON.stringify(orderData));
+                
+                // processPayment 함수 확인
+                if (typeof processPayment !== 'undefined') {
+                    const success = await processPayment();
+                    if (success) {
+                        if (bookingId) {
+                            window.location.href = `payment-complete.html?bookingId=${bookingId}`;
+                        } else {
+                            window.location.href = 'payment-complete.html';
+                        }
+                        return;
+                    }
+                }
+                
+                // processPayment가 없거나 실패한 경우에도 완료 페이지로 이동
+                if (bookingId) {
+                    window.location.href = `payment-complete.html?bookingId=${bookingId}`;
+                } else {
+                    // bookingId가 없으면 세션스토리지 방식으로 이동
+                    window.location.href = 'payment-complete.html';
+                }
+                
+            } catch (error) {
+                console.error('처리 중 오류 발생:', error);
+                alert('처리 중 오류가 발생했습니다. 다시 시도해주세요.');
+            }
+        }
+
         // 결제 진행하기
         async function proceedToPayment() {
             const agreeCheckbox = document.getElementById('agree-checkbox');
@@ -373,7 +415,7 @@
             // 기존 예약이 있으면 바로 결제 페이지로
             if (existingBookingId) {
                 sessionStorage.setItem('currentBookingId', existingBookingId);
-                window.location.href = `payment.html?bookingId=${existingBookingId}`;
+                window.location.href = `payment-complete.html?bookingId=${existingBookingId}`;
                 return;
             }
             
@@ -405,10 +447,7 @@
                 const result = await response.json();
                 
                 if (result.success && result.data && result.data.bookingId) {
-                    // 예약 ID를 세션에 저장
-                    sessionStorage.setItem('currentBookingId', result.data.bookingId);
-                    // 결제 페이지로 이동
-                    window.location.href = `payment.html?bookingId=${result.data.bookingId}`;
+                    completePayment(result.data.bookingId)
                 } else {
                     throw new Error('예약 ID를 받지 못했습니다');
                 }
