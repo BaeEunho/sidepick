@@ -225,13 +225,14 @@
                 console.log('로그인 응답:', data);
                 
                 if (response.ok && data.success) {
+                    console.log(data)
                     // 로그인 상태 유지 설정
                     if (remember) {
                         // 로컬 스토리지에 로그인 정보 저장 (7일간 유지)
                         const rememberData = {
-                            email: response.data.user.email,
-                            token: response.data.token,
-                            name: response.data.user.name,
+                            email: data.data.user.email,
+                            token: data.data.token,
+                            name: data.data.user.name,
                             expiry: new Date().getTime() + (7 * 24 * 60 * 60 * 1000) // 7일
                         };
                         localStorage.setItem('rememberMe', JSON.stringify(rememberData));

@@ -1204,8 +1204,10 @@ app.get('/api/bookings/:bookingId', async (req, res) => {
         console.log('예약 정보 찾음:', booking);
         
         // 보안: 인증된 경우 본인 예약인지 확인
-        if (userEmail && booking.userEmail !== userEmail) {
+        if (userEmail && booking.userEmail.toLowerCase() !== userEmail.toLowerCase()) {
             console.log('권한 없음 - 다른 사용자의 예약');
+            console.log('Booking email:', booking.userEmail);
+            console.log('User email:', userEmail);
             return res.status(403).json({ 
                 success: false, 
                 message: '이 예약에 대한 권한이 없습니다.' 

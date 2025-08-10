@@ -316,6 +316,9 @@
                 return;
             }
             
+            console.log('Auth token exists:', !!authToken);
+            console.log('User email:', userEmail);
+            
             const API_URL = window.location.hostname === 'localhost' 
                 ? 'http://localhost:3000' 
                 : 'https://sidepick.onrender.com';
@@ -365,6 +368,7 @@
             }
             
             try {
+                console.log('Fetching booking:', bookingId);
                 // 서버에서 예약 정보 가져오기
                 const response = await fetch(`${API_URL}/api/bookings/${bookingId}`, {
                     headers: {
@@ -373,7 +377,14 @@
                 });
                 
                 if (!response.ok) {
-                    throw new Error('예약 정보를 가져올 수 없습니다.');
+                    console.error('API 응답 오류:', response.status, response.statusText);
+                    if (response.status === 403) {
+                        throw new Error('예약 정보에 대한 권한이 없습니다.');
+                    } else if (response.status === 404) {
+                        throw new Error('예약 정보를 찾을 수 없습니다.');
+                    } else {
+                        throw new Error('예약 정보를 가져올 수 없습니다.');
+                    }
                 }
                 
                 const data = await response.json();

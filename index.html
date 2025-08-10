@@ -2617,7 +2617,8 @@
                                         // (관리자가 임의로 다른 성향 모임에 배치할 수도 있음)
                                         userMeetingInfo[meeting.orientation] = {
                                             status: meeting.status,
-                                            meetingId: meeting.id || meeting.meetingId
+                                            id: meeting.id,  // 실제 bookingId
+                                            meetingId: meeting.meetingId  // meetingId도 따로 저장
                                         };
                                         console.log(`✓ Added ${meeting.orientation} meeting with status ${meeting.status} to userMeetingInfo`);
                                         console.log('현재 userMeetingInfo:', JSON.stringify(userMeetingInfo));
@@ -2769,7 +2770,7 @@
                     button.onclick = function() {
                         console.log('Payment continue button clicked for:', orientation);
                         // bookingId가 있으면 전달
-                        const bookingId = applicationData.meetingId || applicationData.id;
+                        const bookingId = applicationData.id || applicationData.meetingId;
                         if (bookingId) {
                             sessionStorage.setItem('currentBookingId', bookingId);
                             window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
@@ -2791,7 +2792,7 @@
                     button.onclick = null;
                     button.onclick = function() {
                         console.log('Payment info button clicked for:', orientation);
-                        const bookingId = applicationData.meetingId || applicationData.id;
+                        const bookingId = applicationData.id || applicationData.meetingId;
                         if (bookingId) {
                             sessionStorage.setItem('currentBookingId', bookingId);
                             window.location.href = `payment.html?bookingId=${bookingId}`;

@@ -144,7 +144,8 @@ async function fetchUserMeetingInfo() {
                             if (meeting.status !== 'cancelled') {
                                 userMeetingInfo[meeting.orientation] = {
                                     status: meeting.status,
-                                    meetingId: meeting.id
+                                    id: meeting.id,  // 실제 bookingId
+                                    meetingId: meeting.meetingId  // meetingId도 따로 저장
                                 };
                             }
                         });
@@ -638,7 +639,7 @@ async function updateMeetingAvailability(userGender) {
                 // 결제 에러 후 재신청 가능하도록 처리
                 applyBtn.onclick = () => {
                     // 기존 신청 정보로 결제 페이지로 이동
-                    const bookingId = userMeetingInfo[meetingOrientation].meetingId;
+                    const bookingId = userMeetingInfo[meetingOrientation].id || userMeetingInfo[meetingOrientation].meetingId;
                     const meetingInfo = {
                         id: bookingId,
                         title: card.querySelector('h4').textContent,
@@ -668,7 +669,7 @@ async function updateMeetingAvailability(userGender) {
                 applyBtn.style.backgroundColor = '#8B5CF6';
                 applyBtn.onclick = () => {
                     // 결제 페이지로 바로 이동 (bookingId가 있으면 전달)
-                    const bookingId = userMeetingInfo[meetingOrientation].meetingId;
+                    const bookingId = userMeetingInfo[meetingOrientation].id || userMeetingInfo[meetingOrientation].meetingId;
                     if (bookingId) {
                         sessionStorage.setItem('currentBookingId', bookingId);
                         window.location.href = `payment.html?bookingId=${bookingId}`;
