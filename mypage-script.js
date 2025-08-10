@@ -106,12 +106,13 @@ async function syncWithServer() {
                     appliedMeetings[meeting.orientation] = {
                         appliedAt: meeting.appliedAt,
                         status: meeting.status,
-                        meetingId: meeting.id,
+                        id: meeting.id,  // 이것이 실제 bookingId
+                        meetingId: meeting.meetingId,  // 실제 meetingId
                         title: meeting.title,
                         date: meeting.date,
                         location: meeting.location,
                         time: meeting.time,
-                        bookingId: meeting.bookingId
+                        bookingId: meeting.id  // 호환성을 위해 bookingId도 저장
                     };
                 });
                 sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
@@ -160,14 +161,16 @@ function updateLastUpdateTime() {
 
 // 프로필 정보 로드
 function loadUserProfile() {
-    const userState = AuthManager.getUserState();
-    const profile = userState.profile;
+    // sessionStorage에서 직접 가져오기 (서버 동기화 후 업데이트된 데이터)
+    const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+    const userEmail = sessionStorage.getItem('userEmail');
     
-    document.getElementById('profile-name').textContent = profile.name || '-';
-    document.getElementById('profile-email').textContent = profile.email || '-';
-    document.getElementById('profile-phone').textContent = profile.phone || '-';
+    document.getElementById('profile-name').textContent = userProfile.name || '-';
+    document.getElementById('profile-email').textContent = userProfile.email || userEmail || '-';
+    document.getElementById('profile-phone').textContent = userProfile.phone || '-';
     document.getElementById('profile-gender').textContent = 
-        profile.gender === 'male' ? '남성' : '여성';
+        userProfile.gender === 'male' ? '남성' : 
+        userProfile.gender === 'female' ? '여성' : '-';
 }
 
 // 정치 성향 정보 로드
@@ -1468,7 +1471,9 @@ async function cancelMeeting(meetingId) {
             // sessionStorage에서 해당 모임 정보를 완전히 삭제
             const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
             for (const orientation in appliedMeetings) {
-                if (appliedMeetings[orientation].meetingId === meetingId) {
+                // bookingId로 비교 (id 또는 bookingId로 저장되어 있을 수 있음)
+                const meeting = appliedMeetings[orientation];
+                if (meeting.bookingId === meetingId || meeting.id === meetingId || meeting.meetingId === meetingId) {
                     delete appliedMeetings[orientation];
                     sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
                     break;

@@ -1484,15 +1484,30 @@ app.delete('/api/meetings/cancel/:meetingId', async (req, res) => {
         
         console.log('디코드된 사용자 이메일:', decoded.email);
         
-        // 해당 사용자의 예약 찾기
-        const bookingsSnapshot = await collections.bookings
-            .where('userEmail', '==', decoded.email)
-            .where('meetingId', '==', meetingId)
-            .get();
+        // 먼저 bookingId로 직접 조회 시도
+        let bookingDoc = await collections.bookings.doc(meetingId).get();
+        let bookingRef = null;
         
-        console.log('찾은 booking 수:', bookingsSnapshot.size);
+        if (bookingDoc.exists && bookingDoc.data().userEmail === decoded.email) {
+            // bookingId로 찾았고, 본인의 예약이 맞음
+            bookingRef = bookingDoc.ref;
+            console.log('bookingId로 예약 찾음');
+        } else {
+            // bookingId로 못 찾았으면 meetingId로 검색
+            const bookingsSnapshot = await collections.bookings
+                .where('userEmail', '==', decoded.email)
+                .where('meetingId', '==', meetingId)
+                .get();
+            
+            console.log('meetingId로 찾은 booking 수:', bookingsSnapshot.size);
+            
+            if (!bookingsSnapshot.empty) {
+                bookingRef = bookingsSnapshot.docs[0].ref;
+                console.log('meetingId로 예약 찾음');
+            }
+        }
         
-        if (bookingsSnapshot.empty) {
+        if (!bookingRef) {
             // 모든 bookings를 확인해서 디버깅
             const allBookings = await collections.bookings
                 .where('userEmail', '==', decoded.email)
@@ -1511,14 +1526,10 @@ app.delete('/api/meetings/cancel/:meetingId', async (req, res) => {
         }
         
         // 예약 상태를 cancelled로 변경
-        const batch = db.batch();
-        bookingsSnapshot.forEach(doc => {
-            batch.update(doc.ref, { 
-                status: 'cancelled',
-                cancelledAt: admin.firestore.FieldValue.serverTimestamp()
-            });
+        await bookingRef.update({ 
+            status: 'cancelled',
+            cancelledAt: admin.firestore.FieldValue.serverTimestamp()
         });
-        await batch.commit();
         
         console.log(`모임 신청 취소 완료: ${decoded.email}, ${meetingId}`);
         
