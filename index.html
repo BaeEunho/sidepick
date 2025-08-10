@@ -2154,7 +2154,7 @@
                 </div>
                 <div class="footer-section">
                     <h3>서비스</h3>
-                    <a href="political-test.html">성향 테스트</a>
+                    <a href="javascript:void(0)" onclick="checkAndGoToTest()">성향 테스트</a>
                     <a href="#meetings">모임 일정</a>
                     <a href="#faq">자주 묻는 질문</a>
                 </div>
@@ -3488,6 +3488,21 @@
                 closePaymentModal();
             }
         });
+        
+        // 성향 테스트 링크 클릭 시 확인
+        function checkAndGoToTest() {
+            const politicalType = sessionStorage.getItem('politicalType');
+            
+            console.log('checkAndGoToTest - politicalType:', politicalType);
+            
+            // politicalType이 있으면 테스트 완료로 간주
+            if (politicalType) {
+                alert('이미 정치 성향 테스트를 완료하셨습니다.\n마이페이지에서 테스트 결과를 확인하실 수 있습니다.');
+                return false;
+            } else {
+                window.location.href = 'political-test.html';
+            }
+        }
     </script>
 
     

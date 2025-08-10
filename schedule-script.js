@@ -867,3 +867,18 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// 성향 테스트 링크 클릭 시 확인
+window.checkAndGoToTest = function() {
+    const politicalType = sessionStorage.getItem('politicalType');
+    
+    console.log('checkAndGoToTest - politicalType:', politicalType);
+    
+    // politicalType이 있으면 테스트 완료로 간주
+    if (politicalType) {
+        alert('이미 정치 성향 테스트를 완료하셨습니다.\n마이페이지에서 테스트 결과를 확인하실 수 있습니다.');
+        return false;
+    } else {
+        window.location.href = 'political-test.html';
+    }
+};

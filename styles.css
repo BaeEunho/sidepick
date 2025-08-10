@@ -244,10 +244,19 @@ ul {
 button.nav-btn,
 button.btn-mypage {
     background: none;
-    border: 1px solid var(--gray-300);
+    border: none;
     font-family: inherit;
     font-size: inherit;
     cursor: pointer;
+    padding: 0;
+    color: var(--gray-dark);
+    font-weight: 500;
+    transition: color 0.3s;
+}
+
+button.nav-btn:hover,
+button.btn-mypage:hover {
+    color: var(--secondary-blue);
 }
 
 button.mobile-mypage-btn {
