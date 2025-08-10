@@ -315,6 +315,10 @@
     <script>
         // 페이지 로드 시 주문 정보 표시
         document.addEventListener('DOMContentLoaded', function() {
+            // URL에서 bookingId 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            const bookingId = urlParams.get('bookingId');
+            
             // 필수 데이터 검증
             const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
             const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
@@ -324,6 +328,11 @@
                 alert('주문 정보가 올바르지 않습니다. 다시 시도해주세요.');
                 window.location.href = 'meeting-schedule.html';
                 return;
+            }
+            
+            // bookingId 저장 (완료 페이지로 전달하기 위해)
+            if (bookingId) {
+                sessionStorage.setItem('currentBookingId', bookingId);
             }
             
             // 주문 정보 표시
@@ -408,13 +417,24 @@
                 if (typeof processPayment !== 'undefined') {
                     const success = await processPayment();
                     if (success) {
-                        window.location.href = 'payment-complete.html';
+                        const storedBookingId = sessionStorage.getItem('currentBookingId');
+                        if (storedBookingId) {
+                            window.location.href = `payment-complete.html?bookingId=${storedBookingId}`;
+                        } else {
+                            window.location.href = 'payment-complete.html';
+                        }
                         return;
                     }
                 }
                 
                 // processPayment가 없거나 실패한 경우에도 완료 페이지로 이동
-                window.location.href = 'payment-complete.html';
+                const storedBookingId = sessionStorage.getItem('currentBookingId');
+                if (storedBookingId) {
+                    window.location.href = `payment-complete.html?bookingId=${storedBookingId}`;
+                } else {
+                    // bookingId가 없으면 세션스토리지 방식으로 이동
+                    window.location.href = 'payment-complete.html';
+                }
                 
             } catch (error) {
                 console.error('처리 중 오류 발생:', error);

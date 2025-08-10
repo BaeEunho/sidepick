@@ -638,8 +638,9 @@ async function updateMeetingAvailability(userGender) {
                 // 결제 에러 후 재신청 가능하도록 처리
                 applyBtn.onclick = () => {
                     // 기존 신청 정보로 결제 페이지로 이동
+                    const bookingId = userMeetingInfo[meetingOrientation].meetingId;
                     const meetingInfo = {
-                        id: userMeetingInfo[meetingOrientation].meetingId,
+                        id: bookingId,
                         title: card.querySelector('h4').textContent,
                         date: card.querySelector('.month').textContent + ' ' + 
                               card.querySelector('.day').textContent + '일 ' + 
@@ -651,7 +652,12 @@ async function updateMeetingAvailability(userGender) {
                         orientation: meetingOrientation
                     };
                     sessionStorage.setItem('selectedMeeting', JSON.stringify(meetingInfo));
-                    window.location.href = `booking-confirm.html?reapply=true`;
+                    if (bookingId) {
+                        sessionStorage.setItem('currentBookingId', bookingId);
+                        window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                    } else {
+                        window.location.href = `booking-confirm.html?reapply=true`;
+                    }
                 };
             } else if (status === 'payment_pending') {
                 // 결제 안내 완료, 입금 대기 중
@@ -661,8 +667,15 @@ async function updateMeetingAvailability(userGender) {
                 applyBtn.disabled = false;
                 applyBtn.style.backgroundColor = '#8B5CF6';
                 applyBtn.onclick = () => {
-                    // 입금 안내 페이지로 다시 이동 가능
-                    window.location.href = `booking-confirm.html?reapply=true`;
+                    // 결제 페이지로 바로 이동 (bookingId가 있으면 전달)
+                    const bookingId = userMeetingInfo[meetingOrientation].meetingId;
+                    if (bookingId) {
+                        sessionStorage.setItem('currentBookingId', bookingId);
+                        window.location.href = `payment.html?bookingId=${bookingId}`;
+                    } else {
+                        // bookingId가 없으면 booking-confirm으로 이동
+                        window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                    }
                 };
             } else if (status === 'paid') {
                 // 입금은 했지만 관리자 확인 대기 중

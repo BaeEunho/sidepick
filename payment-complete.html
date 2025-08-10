@@ -113,6 +113,10 @@
                 padding: 18px 24px;
             }
         }
+
+        #deposit-deadline {
+            text-align: end;
+        }
     </style>
     <script src="auth-check.js"></script>
 </head>
@@ -156,7 +160,7 @@
                     <h2>입금 안내</h2>
                     <div class="transfer-info-card">
                         <div class="info-row highlight">
-                            <span class="label">입금 계좌</span>
+                            <span class="label">계좌</span>
                             <span class="value">신한은행 110-386-140132</span>
                         </div>
                         <div class="info-row">
@@ -172,8 +176,8 @@
                             <span class="value" id="depositor-name">-</span>
                         </div>
                         <div class="info-row">
-                            <span class="label">입금 기한</span>
-                            <span class="value" id="deposit-deadline">-</span>
+                            <span class="label">기한</span>
+                            <span class="value" id="deposit-deadline">24시간 이내</span>
                         </div>
                     </div>
                     <div class="transfer-warning">
@@ -301,63 +305,106 @@
     </footer>
 
     <script>
-        // 서버와 데이터 동기화
-    async function syncWithServer() {
-        const authToken = localStorage.getItem('authToken');
-        const userEmail = sessionStorage.getItem('userEmail');
-        if (!authToken && !userEmail) return;
-        
-        const API_URL = window.location.hostname === 'localhost' 
-            ? 'http://localhost:3000' 
-            : 'https://sidepick.onrender.com';
-            
-        // 서버에서 사용자 정보 가져오기
-        const response = await fetch(`${API_URL}/api/user/profile`, {
-            headers: {
-                'Authorization': `Bearer ${authToken || ''}`
-            }
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            
-            // 프로필 정보 업데이트
-            if (data.profile) {
-                document.getElementById("depositor-name").innerText = data.profile.name
-            }
-        }
-    }
-
         // 페이지 로드 시 정보 표시
-        document.addEventListener('DOMContentLoaded', function() {
-            syncWithServer()
-
-            // 모임 정보 가져오기
-            const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
-            const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
-            const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
+        document.addEventListener('DOMContentLoaded', async function() {
+            const authToken = localStorage.getItem('authToken');
+            const userEmail = sessionStorage.getItem('userEmail');
             
-            // 예약 정보 표시
-            document.getElementById('booking-title').textContent = meetingInfo.title || '-';
+            if (!authToken && !userEmail) {
+                alert('로그인이 필요합니다.');
+                window.location.href = 'login.html';
+                return;
+            }
             
-            // 날짜와 시간 표시
-            document.getElementById('booking-date').textContent = meetingInfo.date || '-';
-            document.getElementById('booking-time').textContent = meetingInfo.time || '-';
-            document.getElementById('booking-location').textContent = meetingInfo.location || '-';
-            document.getElementById('booking-participant').textContent = participantInfo.name || '-';
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : 'https://sidepick.onrender.com';
             
-            // 입금 정보 표시
-            document.getElementById('depositor-name').textContent = participantInfo.name || '-';
+            // URL 파라미터에서 예약 ID 가져오기
+            const urlParams = new URLSearchParams(window.location.search);
+            let bookingId = urlParams.get('bookingId');
             
-            // 입금 기한 (3일 후)
-            const deadline = new Date();
-            deadline.setDate(deadline.getDate() + 3);
-            const deadlineStr = deadline.toLocaleDateString('ko-KR', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
-            document.getElementById('deposit-deadline').textContent = deadlineStr + '까지';
+            // bookingId가 없으면 세션스토리지에서 확인
+            if (!bookingId) {
+                bookingId = sessionStorage.getItem('currentBookingId');
+            }
+            
+            if (!bookingId) {
+                // 여전히 bookingId가 없으면 세션스토리지 방식으로 대체
+                console.log('bookingId가 없어 세션스토리지 방식으로 대체');
+                
+                // 세션스토리지에서 정보 가져오기
+                const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting') || '{}');
+                const participantInfo = JSON.parse(sessionStorage.getItem('participantInfo') || '{}');
+                const orderData = JSON.parse(sessionStorage.getItem('orderData') || '{}');
+                
+                if (!meetingInfo.title || !participantInfo.name) {
+                    alert('예약 정보를 찾을 수 없습니다.');
+                    window.location.href = 'meeting-schedule.html';
+                    return;
+                }
+                
+                // 세션스토리지 정보로 표시
+                document.getElementById('boo king-title').textContent = meetingInfo.title || '-';
+                document.getElementById('booking-date').textContent = meetingInfo.date || '-';
+                document.getElementById('booking-time').textContent = meetingInfo.time || '15:00';
+                document.getElementById('booking-location').textContent = meetingInfo.location || '-';
+                document.getElementById('depositor-name').textContent = participantInfo.name || '-';
+                
+                // 입금 기한은 현재 시간 기준 24시간
+                const deadline = new Date(Date.now() + 24 * 60 * 60 * 1000);
+                const year = deadline.getFullYear();
+                const month = String(deadline.getMonth() + 1).padStart(2, '0');
+                const day = String(deadline.getDate()).padStart(2, '0');
+                const hours = String(deadline.getHours()).padStart(2, '0');
+                const minutes = String(deadline.getMinutes()).padStart(2, '0');
+                const deadlineStr = `${year}.${month}.${day} ${hours}:${minutes}`;
+                document.getElementById('deposit-deadline').textContent = deadlineStr + '까지';
+                
+                return;
+            }
+            
+            try {
+                // 서버에서 예약 정보 가져오기
+                const response = await fetch(`${API_URL}/api/bookings/${bookingId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${authToken || ''}`
+                    }
+                });
+                
+                if (!response.ok) {
+                    throw new Error('예약 정보를 가져올 수 없습니다.');
+                }
+                
+                const data = await response.json();
+                const booking = data.booking;
+                
+                // 예약 정보 표시
+                document.getElementById('booking-title').textContent = booking.meeting.title || '-';
+                document.getElementById('booking-date').textContent = booking.meeting.date || '-';
+                document.getElementById('booking-time').textContent = booking.meeting.time || '-';
+                document.getElementById('booking-location').textContent = booking.meeting.location || '-';
+                
+                // 입금 정보 표시
+                document.getElementById('depositor-name').textContent = booking.user.name || '-';
+                
+                // 입금 기한 계산 (예약 시간으로부터 24시간)
+                const bookingTime = new Date(booking.createdAt);
+                console.log(bookingTime)
+                const deadline = new Date(bookingTime.getTime() + 24 * 60 * 60 * 1000);
+                const year = deadline.getFullYear();
+                const month = String(deadline.getMonth() + 1).padStart(2, '0');
+                const day = String(deadline.getDate()).padStart(2, '0');
+                const hours = String(deadline.getHours()).padStart(2, '0');
+                const minutes = String(deadline.getMinutes()).padStart(2, '0');
+                const deadlineStr = `${year}.${month}.${day} ${hours}:${minutes}`;
+                document.getElementById('deposit-deadline').textContent = deadlineStr + '까지';
+                
+            } catch (error) {
+                console.error('Error loading booking:', error);
+                alert('예약 정보를 불러오는데 실패했습니다.');
+                window.location.href = 'meeting-schedule.html';
+            }
         });
 
         // 계좌번호 복사

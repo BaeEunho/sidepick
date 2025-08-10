@@ -2768,8 +2768,14 @@
                     button.onclick = null;
                     button.onclick = function() {
                         console.log('Payment continue button clicked for:', orientation);
-                        // 결제 페이지로 이동
-                        window.location.href = 'booking-confirm.html?reapply=true';
+                        // bookingId가 있으면 전달
+                        const bookingId = applicationData.meetingId || applicationData.id;
+                        if (bookingId) {
+                            sessionStorage.setItem('currentBookingId', bookingId);
+                            window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                        } else {
+                            window.location.href = 'booking-confirm.html?reapply=true';
+                        }
                     };
                 } else if (status === 'payment_pending') {
                     console.log(`Setting button to payment_pending state for ${orientation}`);
@@ -2781,11 +2787,17 @@
                     button.removeAttribute('style');
                     button.setAttribute('style', 'background-color: #8B5CF6 !important; color: #ffffff !important; cursor: pointer !important;');
                     
-                    // 클릭 시 입금 안내 페이지로 다시 이동 가능
+                    // 클릭 시 결제 페이지로 바로 이동
                     button.onclick = null;
                     button.onclick = function() {
                         console.log('Payment info button clicked for:', orientation);
-                        window.location.href = 'booking-confirm.html?reapply=true';
+                        const bookingId = applicationData.meetingId || applicationData.id;
+                        if (bookingId) {
+                            sessionStorage.setItem('currentBookingId', bookingId);
+                            window.location.href = `payment.html?bookingId=${bookingId}`;
+                        } else {
+                            window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
+                        }
                     };
                 } else if (status === 'paid') {
                     console.log(`Setting button to paid state for ${orientation}`);

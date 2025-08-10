@@ -265,7 +265,7 @@
         });
 
         // 결제 진행하기
-        function proceedToPayment() {
+        async function proceedToPayment() {
             const agreeCheckbox = document.getElementById('agree-checkbox');
             
             if (!agreeCheckbox.checked) {
@@ -294,18 +294,91 @@
             };
             sessionStorage.setItem('selectedMeeting', JSON.stringify(selectedMeeting));
             
-            // 주문 정보 생성 (payment.html을 건너뛰므로 여기서 생성)
-            const orderData = {
-                orderId: 'ORD-' + Date.now(),
-                method: 'bank_transfer',
-                amount: 45000,
-                status: 'payment_pending',
-                createdAt: new Date().toISOString()
-            };
-            sessionStorage.setItem('orderData', JSON.stringify(orderData));
+            const authToken = localStorage.getItem('authToken');
+            const API_URL = window.location.hostname === 'localhost' 
+                ? 'http://localhost:3000' 
+                : 'https://sidepick.onrender.com';
             
-            // 완료 페이지로 바로 이동
-            window.location.href = 'payment-complete.html';
+            // 먼저 기존 예약이 있는지 확인
+            const urlParams = new URLSearchParams(window.location.search);
+            let existingBookingId = urlParams.get('bookingId');
+            
+            if (!existingBookingId) {
+                // URL에 bookingId가 없으면 서버에서 확인
+                try {
+                    const userMeetingsResponse = await fetch(`${API_URL}/api/user/meetings`, {
+                        headers: {
+                            'Authorization': `Bearer ${authToken}`
+                        }
+                    });
+                    
+                    if (userMeetingsResponse.ok) {
+                        const data = await userMeetingsResponse.json();
+                        if (data.meetings && data.meetings.length > 0) {
+                            // 같은 orientation의 활성 예약 찾기
+                            const activeBooking = data.meetings.find(m => 
+                                m.orientation === selectedMeeting.orientation && 
+                                (m.status === 'pending' || m.status === 'payment_pending')
+                            );
+                            
+                            if (activeBooking) {
+                                existingBookingId = activeBooking.id;
+                                console.log('기존 예약 발견:', existingBookingId, activeBooking.status);
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('기존 예약 확인 실패:', error);
+                }
+            }
+            
+            // 기존 예약이 있으면 바로 결제 페이지로
+            if (existingBookingId) {
+                sessionStorage.setItem('currentBookingId', existingBookingId);
+                window.location.href = `payment.html?bookingId=${existingBookingId}`;
+                return;
+            }
+            
+            // 기존 예약이 없으면 새로 생성
+            try {
+                const response = await fetch(`${API_URL}/api/meetings/apply`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authToken}`
+                    },
+                    body: JSON.stringify({
+                        meetingId: selectedMeeting.id,
+                        orientation: selectedMeeting.orientation,
+                        meetingInfo: {
+                            title: selectedMeeting.title,
+                            date: selectedMeeting.date,
+                            time: selectedMeeting.time,
+                            location: selectedMeeting.location
+                        },
+                        applicationData: participantInfo
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('예약 생성 실패');
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data && result.data.bookingId) {
+                    // 예약 ID를 세션에 저장
+                    sessionStorage.setItem('currentBookingId', result.data.bookingId);
+                    // 결제 페이지로 이동
+                    window.location.href = `payment.html?bookingId=${result.data.bookingId}`;
+                } else {
+                    throw new Error('예약 ID를 받지 못했습니다');
+                }
+                
+            } catch (error) {
+                console.error('예약 생성 오류:', error);
+                alert('예약 생성에 실패했습니다. 다시 시도해주세요.');
+            }
         }
     </script>
 </body>

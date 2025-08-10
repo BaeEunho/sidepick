@@ -602,6 +602,7 @@ app.post('/api/meetings/apply', async (req, res) => {
             appliedAt: admin.firestore.FieldValue.serverTimestamp(),
             meetingTitle: meetingInfo?.title || '모임',
             meetingDate: meetingInfo?.date || '날짜 미정',
+            meetingTime: meetingInfo?.time || '15:00',
             meetingLocation: meetingInfo?.location || '장소 미정',
             applicationData: applicationData
         };
@@ -1110,13 +1111,18 @@ app.get('/api/user/meetings', async (req, res) => {
                 status: booking.status,
                 updatedAt: booking.updatedAt
             });
-            userBookings.push(booking);
+            // bookingId를 포함하여 저장
+            userBookings.push({
+                bookingId: doc.id,
+                ...booking
+            });
         });
         
         console.log(`총 ${userBookings.length}개 모임 찾음`);
         
         const meetings = userBookings.map(booking => ({
-            id: booking.meetingId,
+            id: booking.bookingId,  // bookingId를 id로 반환
+            meetingId: booking.meetingId,  // meetingId도 따로 반환
             title: booking.meetingTitle || '모임',
             date: booking.meetingDate || '8월 23일 (토)',
             location: booking.meetingLocation || '강남역 파티룸',
@@ -1139,6 +1145,107 @@ app.get('/api/user/meetings', async (req, res) => {
         res.status(500).json({ 
             success: false, 
             message: '모임 조회 중 오류가 발생했습니다.' 
+        });
+    }
+});
+
+// 예약 정보 조회 API (payment-complete.html에서 사용)
+app.get('/api/bookings/:bookingId', async (req, res) => {
+    const { bookingId } = req.params;
+    const authHeader = req.headers.authorization;
+    
+    console.log(`=== 예약 정보 조회: ${bookingId} ===`);
+    
+    try {
+        // JWT 토큰 검증 (optional - 토큰이 있으면 검증)
+        let userEmail = null;
+        if (authHeader) {
+            try {
+                const token = authHeader.replace('Bearer ', '');
+                const decoded = jwt.verify(token, JWT_SECRET);
+                userEmail = decoded.email;
+                console.log('인증된 사용자:', userEmail);
+            } catch (error) {
+                console.log('토큰 검증 실패 (계속 진행):', error.message);
+            }
+        }
+        
+        // 예약 정보 조회 (bookingId로 먼저 시도, 없으면 meetingId로 검색)
+        let bookingDoc = await collections.bookings.doc(bookingId).get();
+        let booking = null;
+        let actualBookingId = bookingId;
+        
+        if (!bookingDoc.exists) {
+            console.log('bookingId로 찾지 못함, meetingId로 검색 시도:', bookingId);
+
+            console.log("collections all: ", collections.bookings)
+            
+            // meetingId로 검색
+            const bookingsByMeetingId = await collections.bookings
+                .where('meetingId', '==', bookingId)
+                .limit(1)
+                .get();
+            
+            if (!bookingsByMeetingId.empty) {
+                bookingDoc = bookingsByMeetingId.docs[0];
+                booking = bookingDoc.data();
+                actualBookingId = bookingDoc.id;
+                console.log('meetingId로 예약 찾음:', actualBookingId);
+            } else {
+                console.log('예약을 찾을 수 없음:', bookingId);
+                return res.status(404).json({ 
+                    success: false, 
+                    message: '예약 정보를 찾을 수 없습니다.' 
+                });
+            }
+        } else {
+            booking = bookingDoc.data();
+        }
+        console.log('예약 정보 찾음:', booking);
+        
+        // 보안: 인증된 경우 본인 예약인지 확인
+        if (userEmail && booking.userEmail !== userEmail) {
+            console.log('권한 없음 - 다른 사용자의 예약');
+            return res.status(403).json({ 
+                success: false, 
+                message: '이 예약에 대한 권한이 없습니다.' 
+            });
+        }
+        
+        // 사용자 정보 조회
+        const userDoc = await collections.users.doc(booking.userEmail).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        
+        res.json({
+            success: true,
+            booking: {
+                id: actualBookingId,  // 실제 bookingId 반환
+                meeting: {
+                    id: booking.meetingId,
+                    title: booking.meetingTitle || '모임',
+                    date: booking.meetingDate || '날짜 미정',
+                    time: booking.meetingTime || '15:00',
+                    location: booking.meetingLocation || '장소 미정',
+                    orientation: booking.orientation
+                },
+                user: {
+                    email: booking.userEmail,
+                    name: userData.name || booking.applicationData?.name || '이름 없음',
+                    phone: userData.phone || booking.applicationData?.phone || ''
+                },
+                status: booking.status,
+                createdAt: booking.appliedAt ? 
+                    (booking.appliedAt.toDate ? booking.appliedAt.toDate().toISOString() : booking.appliedAt) 
+                    : new Date().toISOString(),
+                paymentInfo: booking.paymentInfo || {}
+            }
+        });
+        
+    } catch (error) {
+        console.error('예약 조회 오류:', error);
+        res.status(500).json({ 
+            success: false, 
+            message: '예약 조회 중 오류가 발생했습니다.' 
         });
     }
 });
@@ -1634,6 +1741,88 @@ app.post('/api/admin/reset-password-temp', async (req, res) => {
         res.status(500).json({
             success: false,
             message: '비밀번호 재설정 중 오류가 발생했습니다.'
+        });
+    }
+});
+
+// 예약 정보 조회 API
+app.get('/api/bookings/:bookingId', async (req, res) => {
+    const { bookingId } = req.params;
+    const authHeader = req.headers.authorization;
+    
+    if (!authHeader) {
+        return res.status(401).json({ 
+            success: false, 
+            message: '인증이 필요합니다.' 
+        });
+    }
+    
+    try {
+        // JWT 토큰 검증
+        const token = authHeader.replace('Bearer ', '');
+        const decoded = jwt.verify(token, JWT_SECRET);
+        
+        // 예약 정보 조회
+        const bookingDoc = await collections.bookings.doc(bookingId).get();
+        
+        if (!bookingDoc.exists) {
+            return res.status(404).json({
+                success: false,
+                message: '예약 정보를 찾을 수 없습니다.'
+            });
+        }
+        
+        const booking = bookingDoc.data();
+        
+        // 사용자 정보 확인 (본인 예약인지 확인)
+        if (booking.userId !== decoded.email && booking.userEmail !== decoded.email) {
+            return res.status(403).json({
+                success: false,
+                message: '접근 권한이 없습니다.'
+            });
+        }
+        
+        // 사용자 정보 조회
+        const userDoc = await collections.users.doc(booking.userEmail || booking.userId).get();
+        const userData = userDoc.exists ? userDoc.data() : {};
+        
+        // 응답 데이터 구성
+        const responseData = {
+            id: bookingId,
+            user: {
+                name: userData.name || booking.userName || '-',
+                email: booking.userEmail || booking.userId,
+                phone: userData.phone || '-'
+            },
+            meeting: {
+                title: booking.meetingTitle || '-',
+                date: booking.meetingDate || '-',
+                time: booking.meetingTime || '-',
+                location: booking.meetingLocation || '-'
+            },
+            status: booking.status || 'pending',
+            createdAt: booking.appliedAt?.toDate() || new Date(),
+            applicationData: booking.applicationData || {}
+        };
+        
+        res.json({
+            success: true,
+            booking: responseData
+        });
+        
+    } catch (error) {
+        console.error('예약 조회 오류:', error);
+        
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({
+                success: false,
+                message: '유효하지 않은 토큰입니다.'
+            });
+        }
+        
+        res.status(500).json({ 
+            success: false, 
+            message: '예약 정보 조회 중 오류가 발생했습니다.' 
         });
     }
 });
