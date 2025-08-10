@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 예약 업데이트 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+        }
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+        .btn:hover {
+            background: #1d4ed8;
+        }
+        .log {
+            background: #f3f4f6;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .booking-item {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 4px;
+        }
+        .status-select {
+            padding: 5px;
+            margin-left: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>관리자 예약 업데이트 테스트</h1>
+    
+    <div class="test-section">
+        <h2>사용자 이메일 입력</h2>
+        <input type="email" id="userEmail" placeholder="테스트할 사용자 이메일" style="width: 300px; padding: 5px;">
+        <button class="btn" onclick="loadUserBookings()">예약 조회</button>
+    </div>
+
+    <div class="test-section">
+        <h2>예약 목록</h2>
+        <div id="bookingsList"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>테스트 로그</h2>
+        <div id="log" class="log"></div>
+    </div>
+
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+            ? 'http://localhost:3000' 
+            : 'https://sidepick.onrender.com';
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const timestamp = new Date().toLocaleTimeString();
+            logDiv.textContent += `[${timestamp}] ${message}\n`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function loadUserBookings() {
+            const email = document.getElementById('userEmail').value;
+            if (!email) {
+                alert('이메일을 입력하세요');
+                return;
+            }
+
+            log(`사용자 예약 조회 시작: ${email}`);
+            
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users`);
+                const data = await response.json();
+                
+                const user = data.data.users.find(u => u.email === email);
+                if (!user) {
+                    log('사용자를 찾을 수 없습니다');
+                    return;
+                }
+
+                log(`사용자 찾음: ${user.name} (${user.email})`);
+                log(`예약 수: ${user.meetings ? user.meetings.length : 0}`);
+
+                const bookingsList = document.getElementById('bookingsList');
+                bookingsList.innerHTML = '';
+
+                if (user.meetings && user.meetings.length > 0) {
+                    user.meetings.forEach((meeting, index) => {
+                        const bookingDiv = document.createElement('div');
+                        bookingDiv.className = 'booking-item';
+                        bookingDiv.innerHTML = `
+                            <strong>${index + 1}. ${meeting.title}</strong><br>
+                            날짜: ${meeting.date}<br>
+                            Booking ID: ${meeting.id}<br>
+                            Meeting ID: ${meeting.meetingId}<br>
+                            현재 상태: ${meeting.status}
+                            <select class="status-select" data-booking-id="${meeting.id}" data-email="${email}">
+                                <option value="payment_pending" ${meeting.status === 'payment_pending' ? 'selected' : ''}>입금대기</option>
+                                <option value="paid" ${meeting.status === 'paid' ? 'selected' : ''}>입금완료</option>
+                                <option value="confirmed" ${meeting.status === 'confirmed' ? 'selected' : ''}>결제완료</option>
+                                <option value="cancelled" ${meeting.status === 'cancelled' ? 'selected' : ''}>취소</option>
+                            </select>
+                            <button class="btn" onclick="updateStatus('${email}', '${meeting.id}', this)">업데이트</button>
+                        `;
+                        bookingsList.appendChild(bookingDiv);
+                    });
+                } else {
+                    bookingsList.innerHTML = '<p>예약이 없습니다.</p>';
+                }
+            } catch (error) {
+                log(`오류: ${error.message}`);
+            }
+        }
+
+        async function updateStatus(email, bookingId, button) {
+            const selectEl = button.previousElementSibling;
+            const newStatus = selectEl.value;
+            
+            log(`\\n상태 업데이트 시작`);
+            log(`이메일: ${email}`);
+            log(`Booking ID: ${bookingId}`);
+            log(`새 상태: ${newStatus}`);
+
+            try {
+                const response = await fetch(`${API_URL}/api/admin/users/${email}/payment-status`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        status: newStatus, 
+                        bookingId: bookingId 
+                    })
+                });
+
+                log(`서버 응답 상태: ${response.status}`);
+                
+                const result = await response.json();
+                log(`서버 응답: ${JSON.stringify(result)}`);
+
+                if (response.ok) {
+                    alert('업데이트 성공!');
+                    // 목록 새로고침
+                    await loadUserBookings();
+                } else {
+                    alert(`업데이트 실패: ${result.message}`);
+                }
+            } catch (error) {
+                log(`오류: ${error.message}`);
+                alert('업데이트 중 오류 발생');
+            }
+        }
+    </script>
+</body>
+</html>

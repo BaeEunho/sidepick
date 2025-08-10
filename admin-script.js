@@ -260,7 +260,10 @@ function createUserRow(user) {
         const currentStatus = latestMeeting.status || 'pending';
         
         paymentStatusHtml = `
-            <select class="payment-status-select" onchange="updatePaymentStatus('${user.email}', this.value)" data-current="${currentStatus}">
+            <select class="payment-status-select" 
+                    onchange="updatePaymentStatus('${user.email}', this.value, '${latestMeeting.id || ''}')" 
+                    data-current="${currentStatus}"
+                    data-booking-id="${latestMeeting.id || ''}">
                 <option value="payment_pending" ${currentStatus === 'payment_pending' ? 'selected' : ''}>입금대기</option>
                 <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>입금완료</option>
                 <option value="confirmed" ${currentStatus === 'confirmed' ? 'selected' : ''}>결제완료</option>
@@ -570,10 +573,11 @@ function updateLastUpdateTime() {
 }
 
 // 결제 상태 업데이트
-async function updatePaymentStatus(email, newStatus) {
+async function updatePaymentStatus(email, newStatus, bookingId) {
     console.log(`=== 관리자: 결제 상태 변경 시작 ===`);
     console.log(`대상: ${email}`);
     console.log(`새 상태: ${newStatus}`);
+    console.log(`bookingId: ${bookingId || '없음'}`);
     
     try {
         const API_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://sidepick.onrender.com';
@@ -585,7 +589,7 @@ async function updatePaymentStatus(email, newStatus) {
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ status: newStatus })
+            body: JSON.stringify({ status: newStatus, bookingId: bookingId })
         });
         
         console.log('서버 응답 상태:', response.status);
@@ -600,6 +604,17 @@ async function updatePaymentStatus(email, newStatus) {
             // 성공 메시지 표시
             showSyncStatus('success', '결제 상태가 업데이트되었습니다.');
             setTimeout(() => hideSyncStatus(), 2000);
+        } else if (response.status === 400) {
+            const error = await response.json();
+            console.error('업데이트 실패:', error.message);
+            showSyncStatus('error', error.message);
+            setTimeout(() => hideSyncStatus(), 3000);
+            
+            // select 박스를 원래 값으로 되돌리기
+            const selectElement = document.querySelector(`select[onchange*="${email}"]`);
+            if (selectElement) {
+                selectElement.value = selectElement.getAttribute('data-current');
+            }
         } else {
             const error = await response.text();
             console.error('서버 오류 응답:', error);

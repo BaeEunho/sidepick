@@ -707,7 +707,8 @@ app.get('/api/admin/users', async (req, res) => {
                     return isMatch;
                 })
                 .map(booking => ({
-                    id: booking.meetingId,
+                    id: booking.bookingId,  // booking ID를 사용
+                    meetingId: booking.meetingId,
                     title: booking.meetingTitle || '모임',
                     date: booking.meetingDate || '날짜 미정',
                     location: booking.meetingLocation || '장소 미정',
@@ -1381,48 +1382,134 @@ app.put('/api/admin/users/:email/marketing', async (req, res) => {
 // 관리자 API - 결제 상태 업데이트
 app.put('/api/admin/users/:email/payment-status', async (req, res) => {
     const { email } = req.params;
-    const { status } = req.body;
+    const { status, bookingId } = req.body;
     
     console.log(`\n=== 결제 상태 업데이트 API 호출 ===`);
     console.log(`대상 이메일: ${email}`);
     console.log(`변경할 상태: ${status}`);
+    console.log(`특정 bookingId: ${bookingId || '없음'}`);
     
     try {
-        // 사용자의 모든 booking 찾기
-        const bookingsSnapshot = await collections.bookings
-            .where('userEmail', '==', email)
-            .get();
+        let targetBooking = null;
         
-        console.log(`찾은 booking 수: ${bookingsSnapshot.size}`);
-        
-        if (bookingsSnapshot.empty) {
-            console.log('booking이 없음!');
-            return res.status(404).json({ 
-                success: false, 
-                message: '모임 신청 내역이 없습니다.' 
-            });
+        // bookingId가 제공된 경우 해당 booking을 직접 조회
+        if (bookingId) {
+            console.log(`특정 bookingId로 조회: ${bookingId}`);
+            const bookingDoc = await collections.bookings.doc(bookingId).get();
+            
+            if (bookingDoc.exists) {
+                const bookingData = bookingDoc.data();
+                if (bookingData.userEmail === email) {
+                    targetBooking = {
+                        id: bookingDoc.id,
+                        ref: bookingDoc.ref,
+                        ...bookingData
+                    };
+                    console.log('특정 booking 찾음:', {
+                        id: targetBooking.id,
+                        meetingTitle: targetBooking.meetingTitle,
+                        현재상태: targetBooking.status
+                    });
+                } else {
+                    console.log('bookingId와 email이 일치하지 않음');
+                    return res.status(403).json({ 
+                        success: false, 
+                        message: '해당 예약에 대한 권한이 없습니다.' 
+                    });
+                }
+            } else {
+                console.log('bookingId에 해당하는 booking이 없음');
+            }
         }
         
-        // 각 booking의 상태 업데이트
-        const batch = db.batch();
-        let updateCount = 0;
+        // bookingId가 없거나 찾지 못한 경우, 기존 로직 실행
+        if (!targetBooking) {
+            console.log('기존 로직으로 booking 검색');
+            
+            // 사용자의 모든 booking 찾기
+            const bookingsSnapshot = await collections.bookings
+                .where('userEmail', '==', email)
+                .get();
+            
+            console.log(`찾은 booking 수: ${bookingsSnapshot.size}`);
+            
+            if (bookingsSnapshot.empty) {
+                console.log('booking이 없음!');
+                return res.status(404).json({ 
+                    success: false, 
+                    message: '모임 신청 내역이 없습니다.' 
+                });
+            }
+            
+            // booking들을 배열로 변환하고 정렬
+            const bookings = [];
+            bookingsSnapshot.forEach(doc => {
+                const data = doc.data();
+                console.log(`Booking ${doc.id} 데이터:`, {
+                    meetingTitle: data.meetingTitle,
+                    status: data.status,
+                    createdAt: data.createdAt,
+                    appliedAt: data.appliedAt
+                });
+                
+                bookings.push({
+                    id: doc.id,
+                    ref: doc.ref,
+                    ...data,
+                    // createdAt이 없으면 appliedAt 사용
+                    sortDate: data.createdAt || data.appliedAt || new Date()
+                });
+            });
+            
+            // 날짜순으로 정렬 (최신 순)
+            bookings.sort((a, b) => {
+                const dateA = a.sortDate?._seconds ? new Date(a.sortDate._seconds * 1000) : new Date(a.sortDate);
+                const dateB = b.sortDate?._seconds ? new Date(b.sortDate._seconds * 1000) : new Date(b.sortDate);
+                return dateB - dateA;
+            });
+            
+            console.log('정렬된 booking 목록:');
+            bookings.forEach((booking, index) => {
+                console.log(`${index + 1}. ${booking.meetingTitle} - 상태: ${booking.status} - ID: ${booking.id}`);
+            });
+            
+            // 가장 최근의 booking을 선택 (모든 상태 업데이트 가능)
+            // 업데이트할 booking 찾기
+            if (bookings.length > 0) {
+                targetBooking = bookings[0];  // 가장 최근 booking 선택
+                console.log(`가장 최근 booking 선택: ${targetBooking.id} - 상태: ${targetBooking.status}`);
+            }
+        }
         
-        bookingsSnapshot.forEach(doc => {
-            const bookingData = doc.data();
-            console.log(`업데이트 전 booking ${doc.id}:`, {
-                meetingTitle: bookingData.meetingTitle,
-                현재상태: bookingData.status,
+        if (targetBooking) {
+            console.log(`업데이트할 booking 선택됨: ${targetBooking.id}`, {
+                meetingTitle: targetBooking.meetingTitle,
+                현재상태: targetBooking.status,
                 새상태: status
             });
             
-            batch.update(doc.ref, { 
-                status: status,
-                updatedAt: admin.firestore.FieldValue.serverTimestamp()
-            });
-            updateCount++;
-        });
+            try {
+                await targetBooking.ref.update({ 
+                    status: status,
+                    updatedAt: admin.firestore.FieldValue.serverTimestamp()
+                });
+                updateCount++;
+                console.log('업데이트 성공!');
+            } catch (updateError) {
+                console.error('업데이트 중 오류:', updateError);
+                throw updateError;
+            }
+        } else {
+            console.log('업데이트할 booking이 없음');
+        }
         
-        await batch.commit();
+        if (updateCount === 0) {
+            console.log('업데이트할 booking이 없음 (모두 처리됨)');
+            return res.status(400).json({ 
+                success: false, 
+                message: '업데이트할 예약이 없습니다. 모든 예약이 이미 처리되었습니다.' 
+            });
+        }
         
         console.log(`${updateCount}개 booking의 상태를 ${status}로 업데이트 완료`);
         console.log('=== 결제 상태 업데이트 완료 ===\n');
