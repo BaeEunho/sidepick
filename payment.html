@@ -117,6 +117,10 @@
         .btn-primary.just-enabled {
             animation: enableButton 0.4s ease;
         }
+
+        .container {
+            margin-top: 20px;
+        }
     </style>
     <script src="auth-system.js"></script>
     <!-- data-system.js 제거 - Firebase 직접 사용 -->
@@ -146,14 +150,14 @@
     <!-- 결제 섹션 -->
     <section class="payment-section">
         <div class="container">
-            <div class="payment-header">
+            <!-- <div class="payment-header">
                 <h1>결제하기</h1>
                 <div class="progress-bar">
                     <div class="progress-step completed">1. 정보 입력</div>
                     <div class="progress-step active">2. 결제하기</div>
                     <div class="progress-step">3. 완료</div>
                 </div>
-            </div>
+            </div> -->
 
             <div class="payment-content">
                 <!-- 주문 정보 -->
@@ -253,10 +257,10 @@
                 <!-- 버튼 -->
                 <div class="button-group">
                     <button type="button" class="btn-secondary" onclick="history.back()">이전으로</button>
-                    <button type="button" class="btn-primary" id="confirm-button" onclick="completePayment()">
+                    <!-- <button type="button" class="btn-primary" id="confirm-button" onclick="completePayment()">
                         <span class="button-icon">✅</span>
                         <span class="button-text">확인했어요</span>
-                    </button>
+                    </button> -->
                 </div>
 
                 <!-- 고객센터 안내 -->

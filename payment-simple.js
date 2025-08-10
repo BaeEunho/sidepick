@@ -111,5 +111,11 @@ async function processPayment() {
     }
 }
 
+const completePayment = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const bookingId = urlParams.get('bookingId');
+    window.location.href = `payment-complete.html?bookingId=${bookingId}`
+}
+
 // 전역으로 노출
 window.processPayment = processPayment;
