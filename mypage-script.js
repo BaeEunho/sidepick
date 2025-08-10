@@ -356,7 +356,7 @@ async function loadUpcomingMeetings() {
                                 <p class="payment-notice">입금을 완료해주세요</p>
                                 <div class="bank-info">
                                     <p>신한은행 110-386-140132</p>
-                                    <p>예금주: (주)사이드픽</p>
+                                    <p>예금주: 배은호</p>
                                     <p>금액: 45,000원</p>
                                 </div>
                             </div>
