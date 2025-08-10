@@ -61,7 +61,10 @@ async function savePoliticalType(politicalType, testResult) {
     // 서버 API만 사용
     return await apiCall('/auth/save-political-type', {
         method: 'POST',
-        body: JSON.stringify({ politicalType })
+        body: JSON.stringify({ 
+            politicalType,
+            testResult: testResult || {}
+        })
     });
 }
 

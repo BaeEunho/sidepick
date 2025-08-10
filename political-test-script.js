@@ -1175,8 +1175,25 @@ async function savePoliticalTypeToServer(politicalType) {
             testCompletedAt: new Date().toISOString()
         };
         
+        console.log('정치 성향 저장 시도:', {
+            politicalType,
+            userEmail,
+            hasAuthToken: !!localStorage.getItem('authToken'),
+            testResult
+        });
+        
         // api-client.js의 savePoliticalType 함수 사용
-        if (typeof savePoliticalType === 'function') {
+        if (typeof window.ApiClient !== 'undefined' && window.ApiClient.savePoliticalType) {
+            console.log('ApiClient.savePoliticalType 사용');
+            const response = await window.ApiClient.savePoliticalType(politicalType, testResult);
+            
+            if (response.success) {
+                console.log('정치 성향이 서버에 저장되었습니다.');
+            } else {
+                console.error('정치 성향 저장 실패:', response.message);
+            }
+        } else if (typeof savePoliticalType === 'function') {
+            console.log('전역 savePoliticalType 함수 사용');
             const response = await savePoliticalType(politicalType, testResult);
             
             if (response.success) {
@@ -1186,7 +1203,11 @@ async function savePoliticalTypeToServer(politicalType) {
             }
         } else {
             // API 함수가 없는 경우 - 폴백
-            console.log('서버 API 사용 불가 - 로컬 저장만 수행');
+            console.error('서버 API 사용 불가 - 로컬 저장만 수행');
+            console.log('Available objects:', {
+                hasApiClient: typeof window.ApiClient !== 'undefined',
+                hasSavePoliticalType: typeof savePoliticalType !== 'undefined'
+            });
             saveToLocalStorageOnly(politicalType);
         }
     } catch (error) {

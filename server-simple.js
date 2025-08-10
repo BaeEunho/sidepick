@@ -977,7 +977,7 @@ app.post('/api/user/change-password', async (req, res) => {
 
 // 정치 성향 저장 API
 app.post('/api/auth/save-political-type', async (req, res) => {
-    const { politicalType } = req.body;
+    const { politicalType, testResult } = req.body;
     const authHeader = req.headers.authorization;
     
     if (!authHeader) {
@@ -992,11 +992,28 @@ app.post('/api/auth/save-political-type', async (req, res) => {
         const token = authHeader.replace('Bearer ', '');
         const decoded = jwt.verify(token, JWT_SECRET);
         
-        // 사용자 정보 업데이트
-        await collections.users.doc(decoded.email).update({
+        console.log(`정치 성향 저장 요청: ${decoded.email} - ${politicalType}`);
+        
+        // 업데이트할 데이터 준비
+        const updateData = {
             political_type: politicalType,
             test_completed_at: admin.firestore.FieldValue.serverTimestamp()
-        });
+        };
+        
+        // testResult가 있으면 추가 정보 저장
+        if (testResult) {
+            if (testResult.axisScores) {
+                updateData.axis_scores = testResult.axisScores;
+            }
+            if (testResult.userAnswers) {
+                updateData.test_answers = testResult.userAnswers;
+            }
+        }
+        
+        // 사용자 정보 업데이트
+        await collections.users.doc(decoded.email).update(updateData);
+        
+        console.log(`정치 성향 저장 완료: ${decoded.email}`);
         
         res.json({
             success: true,
