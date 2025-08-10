@@ -261,7 +261,6 @@ function createUserRow(user) {
         
         paymentStatusHtml = `
             <select class="payment-status-select" onchange="updatePaymentStatus('${user.email}', this.value)" data-current="${currentStatus}">
-                <option value="pending" ${currentStatus === 'pending' ? 'selected' : ''}>신청완료</option>
                 <option value="payment_pending" ${currentStatus === 'payment_pending' ? 'selected' : ''}>입금대기</option>
                 <option value="paid" ${currentStatus === 'paid' ? 'selected' : ''}>입금완료</option>
                 <option value="confirmed" ${currentStatus === 'confirmed' ? 'selected' : ''}>결제완료</option>

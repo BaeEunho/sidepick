@@ -293,6 +293,7 @@ async function loadUpcomingMeetings() {
     const upcomingDiv = document.getElementById('upcoming-meetings');
     const userEmail = sessionStorage.getItem('userEmail');
     const userState = AuthManager.getUserState();
+    const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
     
     try {
         // 서버에서 사용자 정보 가져오기
@@ -356,13 +357,12 @@ async function loadUpcomingMeetings() {
                             <p>📍 ${latestMeeting.location}</p>
                         </div>
                         ${statusClass === 'pending' ? `
-                            <div class="payment-info">
-                                <p class="payment-notice">입금을 완료해주세요</p>
-                                <div class="bank-info">
-                                    <p>신한은행 110-386-140132</p>
-                                    <p>예금주: 배은호</p>
-                                    <p>금액: 45,000원</p>
+                            <div class="payment-notice">
+                                <div class="payment-compact">
+                                    <span class="bank-info">신한은행 110-386-140132 (배은호)</span>
+                                    <span class="amount">45,000원</span>
                                 </div>
+                                <span class="warning-text">※ 입금자명: ${userProfile.name || '이름'}</span>
                             </div>
                         ` : ''}
                         ${(statusClass === 'pending' || statusClass === 'confirmed') ? `
@@ -1492,3 +1492,4 @@ async function cancelMeeting(meetingId) {
         alert('모임 취소 중 오류가 발생했습니다.');
     }
 }
+

@@ -954,6 +954,199 @@
             color: var(--gray-dark);
         }
 
+        /* 결제 정보 모달 스타일 */
+        .payment-modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+            z-index: 99999;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .payment-modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 480px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: hidden;
+            position: relative;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            padding: 0;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .payment-modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            color: #666;
+            transition: all 0.2s ease;
+            z-index: 10;
+        }
+
+        .payment-modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            color: #333;
+            transform: rotate(90deg);
+        }
+
+        .payment-modal-title {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            padding: 30px 30px 25px;
+            margin: 0;
+            text-align: center;
+        }
+
+        .payment-modal-section {
+            padding: 30px;
+            margin: 0;
+        }
+
+        .payment-modal-section h3 {
+            display: none;
+        }
+
+        .payment-info-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+        }
+
+        .payment-info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        }
+
+        .payment-info-row:last-child {
+            border-bottom: none;
+        }
+
+        .payment-info-label {
+            color: #666;
+            font-size: 15px;
+            font-weight: 500;
+        }
+
+        .payment-info-value {
+            color: #2c3e50;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .payment-info-value.highlight {
+            color: #5f3dc4;
+            font-size: 17px;
+            background: rgba(103, 126, 234, 0.1);
+            padding: 8px 15px;
+            border-radius: 8px;
+        }
+
+        .payment-notice {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 10px;
+            padding: 12px 18px;
+            margin: 12px 0;
+            color: #856404;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .payment-notice:before {
+            content: "⚠️";
+            font-size: 18px;
+        }
+
+        .payment-modal-actions {
+            background: #f8f9fa;
+            padding: 20px 30px;
+            display: flex;
+            gap: 12px;
+            margin: 0;
+            border-top: 1px solid #e9ecef;
+        }
+
+        .payment-btn-secondary, .payment-btn-primary {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .payment-btn-secondary {
+            background: white;
+            color: #495057;
+            border: 2px solid #dee2e6;
+        }
+
+        .payment-btn-secondary:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .payment-btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .payment-btn-primary:active,
+        .payment-btn-secondary:active {
+            transform: translateY(0);
+        }
+
         /* FAQ */
         .faq {
             padding: 80px 0;
@@ -2788,17 +2981,11 @@
                     button.removeAttribute('style');
                     button.setAttribute('style', 'background-color: #8B5CF6 !important; color: #ffffff !important; cursor: pointer !important;');
                     
-                    // 클릭 시 결제 페이지로 바로 이동
+                    // 클릭 시 결제 정보 모달 표시
                     button.onclick = null;
                     button.onclick = function() {
                         console.log('Payment info button clicked for:', orientation);
-                        const bookingId = applicationData.id || applicationData.meetingId;
-                        if (bookingId) {
-                            sessionStorage.setItem('currentBookingId', bookingId);
-                            window.location.href = `payment.html?bookingId=${bookingId}`;
-                        } else {
-                            window.location.href = `booking-confirm.html?bookingId=${bookingId}`;
-                        }
+                        showPaymentModal(orientation, applicationData);
                     };
                 } else if (status === 'paid') {
                     console.log(`Setting button to paid state for ${orientation}`);
@@ -3212,6 +3399,67 @@
                 }
             }
         });
+        
+        // 결제 정보 모달 표시 함수
+        function showPaymentModal(orientation, applicationData) {
+            const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+            
+            // 입금자명 설정
+            document.getElementById('modal-depositor-name').textContent = userProfile.name || '이름';
+            
+            // 모달 표시
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+        
+        // 모달 닫기 함수
+        function closePaymentModal() {
+            document.getElementById('paymentModal').style.display = 'none';
+        }
+        
+        // 계좌번호 복사 함수
+        function copyAccountNumber() {
+            const accountNumber = '110-386-140132';
+            
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(accountNumber).then(() => {
+                    alert('계좌번호가 복사되었습니다.');
+                }).catch(() => {
+                    // 클립보드 API 실패시 대체 방법
+                    fallbackCopyToClipboard(accountNumber);
+                });
+            } else {
+                // 클립보드 API를 지원하지 않는 경우
+                fallbackCopyToClipboard(accountNumber);
+            }
+        }
+        
+        // 클립보드 복사 대체 함수
+        function fallbackCopyToClipboard(text) {
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                document.execCommand('copy');
+                alert('계좌번호가 복사되었습니다.');
+            } catch (err) {
+                alert('계좌번호 복사에 실패했습니다. 수동으로 복사해주세요.');
+            }
+            
+            document.body.removeChild(textArea);
+        }
+        
+        // 모달 외부 클릭시 닫기
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('paymentModal');
+            if (event.target === modal) {
+                closePaymentModal();
+            }
+        });
     </script>
 
     
@@ -3223,6 +3471,37 @@
             <h3 class="personality-modal-title" id="modalTitle"></h3>
             <p class="personality-modal-code" id="modalCode"></p>
             <p class="personality-modal-description" id="modalDescription"></p>
+        </div>
+    </div>
+    
+    <!-- 결제 정보 모달 -->
+    <div id="paymentModal" class="payment-modal-overlay" style="display: none;">
+        <div class="payment-modal-content">
+            <span class="payment-modal-close" onclick="closePaymentModal()">&times;</span>
+            <h2 class="payment-modal-title">결제 정보</h2>
+            
+            <div class="payment-modal-section">
+                <div class="payment-info-box">
+                    <div class="payment-info-row">
+                        <span class="payment-info-label">참가비:</span>
+                        <span class="payment-info-value">45,000원</span>
+                    </div>
+                    <div class="payment-info-row">
+                        <span class="payment-info-value highlight">신한 110-386-140132 배은호</span>
+                    </div>
+                    <div class="payment-info-row">
+                        <span class="payment-info-label">입금자명:</span>
+                        <span id="modal-depositor-name" class="payment-info-value"></span>
+                    </div>
+                </div>
+                <p class="payment-notice">* 입금 확인 후 참가가 확정됩니다.</p>
+                <p class="payment-notice">* 입금 기한: 신청일로부터 24시간 이내</p>
+            </div>
+            
+            <div class="payment-modal-actions">
+                <button class="payment-btn-secondary" onclick="copyAccountNumber()">계좌번호 복사</button>
+                <button class="payment-btn-primary" onclick="closePaymentModal()">확인</button>
+            </div>
         </div>
     </div>
 </body>

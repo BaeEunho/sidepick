@@ -971,3 +971,149 @@
 .btn-secondary:hover {
     background-color: var(--gray-400);
 }
+
+/* 결제 정보 모달 스타일 */
+.modal-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 12px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+}
+
+.payment-modal {
+    padding: 30px;
+}
+
+.modal-close {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 28px;
+    cursor: pointer;
+    color: #999;
+    transition: color 0.3s;
+}
+
+.modal-close:hover {
+    color: #333;
+}
+
+.modal-title {
+    margin-bottom: 25px;
+    font-size: 24px;
+    color: #333;
+}
+
+.modal-section {
+    margin-bottom: 25px;
+}
+
+.modal-section h3 {
+    font-size: 18px;
+    color: #4F46E5;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #E5E7EB;
+}
+
+.info-row {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 10px;
+    padding: 5px 0;
+}
+
+.info-label {
+    color: #666;
+    font-weight: 500;
+}
+
+.info-value {
+    color: #333;
+    font-weight: 600;
+}
+
+.info-value.highlight {
+    color: #4F46E5;
+    font-size: 16px;
+}
+
+.payment-info-box {
+    background: #F3F4F6;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.payment-notice {
+    color: #EF4444;
+    font-size: 14px;
+    margin: 10px 0;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 25px;
+}
+
+.btn-secondary, .btn-primary {
+    flex: 1;
+    padding: 12px;
+    border: none;
+    border-radius: 6px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.btn-secondary {
+    background: #E5E7EB;
+    color: #333;
+}
+
+.btn-secondary:hover {
+    background: #D1D5DB;
+}
+
+.btn-primary {
+    background: #4F46E5;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #4338CA;
+}
+
+.show-payment-info-btn {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #4F46E5;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.3s;
+}
+
+.show-payment-info-btn:hover {
+    background: #4338CA;
+}

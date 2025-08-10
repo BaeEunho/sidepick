@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>직접 모달 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .test-btn {
+            padding: 12px 24px;
+            background: #8B5CF6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+        }
+        .test-btn:hover {
+            background: #7C3AED;
+        }
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #f0f0f0;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>결제 모달 직접 테스트</h1>
+        
+        <div class="info">
+            <h3>테스트 방법:</h3>
+            <ol>
+                <li>먼저 "테스트 데이터 설정" 버튼을 클릭하세요</li>
+                <li>각 페이지로 이동하여 "입금 대기중" 버튼을 클릭하세요</li>
+                <li>결제 정보 모달이 표시되는지 확인하세요</li>
+            </ol>
+        </div>
+        
+        <button class="test-btn" onclick="setupTestData()">테스트 데이터 설정</button>
+        <button class="test-btn" onclick="goToIndex()">index.html로 이동</button>
+        <button class="test-btn" onclick="goToSchedule()">meeting-schedule.html로 이동</button>
+        <button class="test-btn" onclick="goToMypage()">mypage.html로 이동</button>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+    
+    <script>
+        function setupTestData() {
+            // 테스트 사용자 프로필 설정
+            const testProfile = {
+                name: '테스트유저',
+                email: 'test@example.com',
+                gender: 'male',
+                birthdate: '1990-01-01'
+            };
+            sessionStorage.setItem('userProfile', JSON.stringify(testProfile));
+            sessionStorage.setItem('isLoggedIn', 'true');
+            sessionStorage.setItem('userEmail', testProfile.email);
+            sessionStorage.setItem('userGender', testProfile.gender);
+            sessionStorage.setItem('politicalType', 'MPOS');
+            sessionStorage.setItem('testCompleted', 'true');
+            
+            // 테스트 신청 데이터 설정
+            const appliedMeetings = {
+                progressive: {
+                    status: 'payment_pending',
+                    appliedAt: new Date().toISOString(),
+                    meetingId: 'test-progressive-meeting',
+                    id: 'test-booking-id',
+                    title: '강남 진보 성향 소개팅',
+                    date: '8월 23일 토요일',
+                    time: '오후 3시 - 5시',
+                    location: '강남역 파티룸'
+                }
+            };
+            sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
+            
+            document.getElementById('result').innerHTML = 
+                '<div style="color: green; padding: 10px; background: #e8f5e9; border-radius: 5px;">' +
+                '✓ 테스트 데이터가 설정되었습니다.<br>' +
+                '- 사용자: ' + testProfile.name + '<br>' +
+                '- 정치성향: 시장 다원주의자 (MPOS)<br>' +
+                '- 신청상태: 입금 대기중' +
+                '</div>';
+        }
+        
+        function goToIndex() {
+            window.location.href = 'index.html#meeting';
+        }
+        
+        function goToSchedule() {
+            window.location.href = 'meeting-schedule.html';
+        }
+        
+        function goToMypage() {
+            window.location.href = 'mypage.html';
+        }
+    </script>
+</body>
+</html>

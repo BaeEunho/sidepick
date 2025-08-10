@@ -76,7 +76,7 @@ window.AuthManager = {
         } else {
             navCta.innerHTML = `
                 <span class="user-name">${userState.profile.name}님</span>
-                <a href="mypage.html" class="nav-btn">마이페이지</a>
+                <button onclick="goToMypage()" class="nav-btn">마이페이지</button>
                 <button onclick="logout()" class="btn-logout-simple">로그아웃</button>
             `;
         }
@@ -97,14 +97,14 @@ window.AuthManager = {
         } else if (userState.type === 'authenticated') {
             authButtons.innerHTML = `
                 <span class="user-welcome">안녕하세요, ${userState.profile.name}님</span>
-                <a href="mypage.html" class="btn-mypage">마이페이지</a>
+                <button onclick="goToMypage()" class="btn-mypage">마이페이지</button>
                 <button onclick="logout()" class="btn-logout-simple">로그아웃</button>
             `;
         } else {
             // verified 상태
             authButtons.innerHTML = `
                 <span class="user-welcome">${userState.profile.name}님</span>
-                <a href="mypage.html" class="btn-mypage">마이페이지</a>
+                <button onclick="goToMypage()" class="btn-mypage">마이페이지</button>
                 <button onclick="logout()" class="btn-logout-simple">로그아웃</button>
             `;
         }
@@ -135,7 +135,7 @@ window.AuthManager = {
             mobileMenuAuth.innerHTML = `
                 <div class="mobile-user-info">
                     <span>${userState.profile.name}님</span>
-                    <a href="mypage.html" class="mobile-mypage-btn">마이페이지</a>
+                    <button onclick="goToMypage()" class="mobile-mypage-btn">마이페이지</button>
                 </div>
                 <button onclick="logout()" class="mobile-logout-btn">로그아웃</button>
             `;
@@ -241,6 +241,11 @@ window.AuthManager = {
 
 // 전역으로 로그아웃 함수 노출
 window.logout = AuthManager.logout;
+
+// 마이페이지로 이동
+window.goToMypage = function() {
+    window.location.href = 'mypage.html';
+};
 
 // 페이지 로드 시 자동 실행
 document.addEventListener('DOMContentLoaded', () => {

@@ -665,15 +665,8 @@ async function updateMeetingAvailability(userGender) {
                 applyBtn.disabled = false;
                 applyBtn.style.backgroundColor = '#8B5CF6';
                 applyBtn.onclick = () => {
-                    // 결제 페이지로 바로 이동 (bookingId가 있으면 전달)
-                    const bookingId = userMeetingInfo[meetingOrientation].id || userMeetingInfo[meetingOrientation].meetingId;
-                    if (bookingId) {
-                        sessionStorage.setItem('currentBookingId', bookingId);
-                        window.location.href = `payment.html?bookingId=${bookingId}`;
-                    } else {
-                        // bookingId가 없으면 booking-confirm으로 이동
-                        window.location.href = `booking-confirm.html?orientation=${meetingOrientation}`;
-                    }
+                    // 결제 정보 모달 표시
+                    showPaymentModal(meetingOrientation, card);
                 };
             } else if (status === 'paid') {
                 // 입금은 했지만 관리자 확인 대기 중
@@ -776,3 +769,74 @@ document.addEventListener('visibilitychange', function() {
         }
     }
 });
+
+// 결제 정보 모달 표시 함수
+function showPaymentModal(orientation, card) {
+    console.log('showPaymentModal called with:', orientation);
+    
+    const userProfile = JSON.parse(sessionStorage.getItem('userProfile') || '{}');
+    console.log('userProfile:', userProfile);
+    
+    // 입금자명 설정
+    document.getElementById('modal-depositor-name').textContent = userProfile.name || '이름';
+    
+    // 모달 표시
+    const modal = document.getElementById('paymentModal');
+    console.log('Modal element:', modal);
+    if (modal) {
+        modal.style.display = 'flex';
+        console.log('Modal display set to flex');
+    } else {
+        console.error('Modal element not found!');
+    }
+}
+
+// 모달 닫기 함수
+window.closePaymentModal = function() {
+    document.getElementById('paymentModal').style.display = 'none';
+}
+
+// 계좌번호 복사 함수
+window.copyAccountNumber = function() {
+    const accountNumber = '110-386-140132';
+    
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(accountNumber).then(() => {
+            alert('계좌번호가 복사되었습니다.');
+        }).catch(() => {
+            // 클립보드 API 실패시 대체 방법
+            fallbackCopyToClipboard(accountNumber);
+        });
+    } else {
+        // 클립보드 API를 지원하지 않는 경우
+        fallbackCopyToClipboard(accountNumber);
+    }
+}
+
+// 클립보드 복사 대체 함수
+function fallbackCopyToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        document.execCommand('copy');
+        alert('계좌번호가 복사되었습니다.');
+    } catch (err) {
+        alert('계좌번호 복사에 실패했습니다. 수동으로 복사해주세요.');
+    }
+    
+    document.body.removeChild(textArea);
+}
+
+// 모달 외부 클릭시 닫기
+window.onclick = function(event) {
+    const modal = document.getElementById('paymentModal');
+    if (event.target === modal) {
+        closePaymentModal();
+    }
+}

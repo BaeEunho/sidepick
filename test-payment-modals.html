@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>결제 모달 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 50px;
+            background: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+        }
+        .test-section h2 {
+            color: #555;
+            margin-bottom: 15px;
+        }
+        .test-button {
+            padding: 10px 20px;
+            background: #4F46E5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        .test-button:hover {
+            background: #4338CA;
+        }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            background: #e8f5e9;
+            border-radius: 4px;
+            display: none;
+        }
+        .error {
+            background: #ffebee;
+            color: #c62828;
+        }
+        .success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>결제 모달 테스트 페이지</h1>
+        
+        <div class="test-section">
+            <h2>1. index.html 모달 테스트</h2>
+            <button class="test-button" onclick="testIndexModal()">index.html 모달 테스트</button>
+            <div id="index-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>2. meeting-schedule.html 모달 테스트</h2>
+            <button class="test-button" onclick="testScheduleModal()">meeting-schedule.html 모달 테스트</button>
+            <div id="schedule-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>3. mypage.html 모달 테스트</h2>
+            <button class="test-button" onclick="testMypageModal()">mypage.html 모달 테스트</button>
+            <div id="mypage-result" class="result"></div>
+        </div>
+        
+        <div class="test-section">
+            <h2>테스트 사용자 정보 설정</h2>
+            <button class="test-button" onclick="setTestUser()">테스트 사용자 설정</button>
+            <div id="user-result" class="result"></div>
+        </div>
+    </div>
+    
+    <script>
+        // 테스트 사용자 설정
+        function setTestUser() {
+            const testProfile = {
+                name: '홍길동',
+                email: 'test@example.com',
+                gender: 'male'
+            };
+            sessionStorage.setItem('userProfile', JSON.stringify(testProfile));
+            showResult('user-result', '테스트 사용자가 설정되었습니다: ' + testProfile.name, 'success');
+        }
+        
+        // 결과 표시 함수
+        function showResult(elementId, message, type) {
+            const resultDiv = document.getElementById(elementId);
+            resultDiv.textContent = message;
+            resultDiv.className = 'result ' + type;
+            resultDiv.style.display = 'block';
+        }
+        
+        // index.html 모달 테스트
+        function testIndexModal() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'index.html';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const modal = iframeDoc.getElementById('paymentModal');
+                    
+                    if (modal) {
+                        showResult('index-result', 
+                            '✓ 모달 요소를 찾았습니다. CSS 클래스: ' + modal.className, 
+                            'success');
+                            
+                        // 모달 내부 요소 확인
+                        const depositorName = iframeDoc.getElementById('modal-depositor-name');
+                        if (depositorName) {
+                            showResult('index-result', 
+                                showResult('index-result').textContent + '\n✓ 입금자명 요소도 확인됨', 
+                                'success');
+                        }
+                    } else {
+                        showResult('index-result', '✗ 모달 요소를 찾을 수 없습니다', 'error');
+                    }
+                } catch (error) {
+                    showResult('index-result', '✗ 오류 발생: ' + error.message, 'error');
+                }
+                document.body.removeChild(iframe);
+            };
+        }
+        
+        // meeting-schedule.html 모달 테스트
+        function testScheduleModal() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'meeting-schedule.html';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const modal = iframeDoc.getElementById('paymentModal');
+                    
+                    if (modal) {
+                        showResult('schedule-result', 
+                            '✓ 모달 요소를 찾았습니다. CSS 클래스: ' + modal.className, 
+                            'success');
+                            
+                        // 모달 제목 확인
+                        const modalTitle = iframeDoc.querySelector('.modal-title');
+                        if (modalTitle && modalTitle.textContent === '결제 정보') {
+                            showResult('schedule-result', 
+                                document.getElementById('schedule-result').textContent + '\n✓ 모달 제목이 "결제 정보"로 올바르게 설정됨', 
+                                'success');
+                        }
+                    } else {
+                        showResult('schedule-result', '✗ 모달 요소를 찾을 수 없습니다', 'error');
+                    }
+                } catch (error) {
+                    showResult('schedule-result', '✗ 오류 발생: ' + error.message, 'error');
+                }
+                document.body.removeChild(iframe);
+            };
+        }
+        
+        // mypage.html 모달 테스트
+        function testMypageModal() {
+            const iframe = document.createElement('iframe');
+            iframe.src = 'mypage.html';
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            iframe.onload = function() {
+                try {
+                    const iframeDoc = iframe.contentDocument || iframe.contentWindow.document;
+                    const modal = iframeDoc.getElementById('paymentModal');
+                    
+                    if (modal) {
+                        showResult('mypage-result', 
+                            '✓ 모달 요소를 찾았습니다. CSS 클래스: ' + modal.className, 
+                            'success');
+                            
+                        // showPaymentInfo 함수 확인
+                        if (iframe.contentWindow.showPaymentInfo) {
+                            showResult('mypage-result', 
+                                document.getElementById('mypage-result').textContent + '\n✓ showPaymentInfo 함수가 정의됨', 
+                                'success');
+                        }
+                    } else {
+                        showResult('mypage-result', '✗ 모달 요소를 찾을 수 없습니다', 'error');
+                    }
+                } catch (error) {
+                    showResult('mypage-result', '✗ 오류 발생: ' + error.message, 'error');
+                }
+                document.body.removeChild(iframe);
+            };
+        }
+        
+        // 페이지 로드 시 테스트 사용자 자동 설정
+        window.onload = function() {
+            setTestUser();
+        };
+    </script>
+</body>
+</html>

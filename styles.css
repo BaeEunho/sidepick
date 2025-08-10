@@ -240,6 +240,33 @@ ul {
     background-color: var(--orange);
 }
 
+/* 마이페이지 버튼 스타일 */
+button.nav-btn,
+button.btn-mypage {
+    background: none;
+    border: 1px solid var(--gray-300);
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+}
+
+button.mobile-mypage-btn {
+    background: none;
+    border: none;
+    color: var(--primary-blue);
+    font-weight: 500;
+    padding: 8px 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+    font-size: inherit;
+}
+
+button.mobile-mypage-btn:hover {
+    background-color: var(--gray-100);
+    border-radius: 8px;
+}
+
 /* 히어로 섹션 */
 .hero {
     margin-top: 70px;
