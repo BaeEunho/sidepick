@@ -178,10 +178,7 @@ function getOrientationFromCode(code) {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('DOMContentLoaded 이벤트 발생');
     
-    // DataSystem 초기화
-    if (window.DataSystem) {
-        window.DataSystem.initializeMeetings();
-    }
+    // DataSystem 초기화 제거 - Firebase만 사용
     
     // 참석 인원 업데이트 시작 (AuthManager와 독립적으로 실행)
     try {

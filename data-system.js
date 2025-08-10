@@ -237,7 +237,7 @@ const DataSystem = {
                 amount: booking.price,
                 method: paymentInfo.method || 'bank_transfer',
                 depositorName: paymentInfo.depositorName,
-                status: 'pending', // pending, completed, failed, refunded
+                status: 'payment_pending', // pending, completed, failed, refunded
                 createdAt: new Date().toISOString()
             };
             

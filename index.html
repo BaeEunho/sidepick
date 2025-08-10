@@ -1372,7 +1372,7 @@
         }
     </style>
     <script src="auth-system.js"></script>
-    <script src="data-system.js"></script>
+    <!-- data-system.js 제거 - Firebase 직접 사용 -->
     <script src="auth-check.js"></script>
     <script src="api-client.js"></script>
 </head>
@@ -3036,7 +3036,7 @@
         window.addEventListener('load', function() {
             console.log('=== Page loaded, initializing meeting updates ===');
             console.log('Current URL:', window.location.href);
-            console.log('Firebase 데이터만 사용 - sessionStorage/DataSystem 무시');
+            console.log('Firebase 데이터만 사용 - sessionStorage 무시');
             
             // 즉시 한 번 실행
             updateMeetingButtons();
@@ -3159,8 +3159,8 @@
                 console.log('4. User state:', AuthManager.getUserState());
             }
             console.log('5. Auth token:', localStorage.getItem('authToken'));
-            console.log('6. DataSystem available:', typeof window.DataSystem !== 'undefined');
-            console.log('7. window.DataSystem:', window.DataSystem);
+            console.log('6. Firebase API ready');
+            console.log('7. DataSystem removed - using Firebase only');
             
             // 버튼 상태 확인
             const buttons = document.querySelectorAll('.btn-apply');

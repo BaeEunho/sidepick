@@ -45,7 +45,8 @@
         .warning { color: #f39c12; }
     </style>
     <script src="auth-system.js"></script>
-    <script src="data-system.js"></script>
+    <!-- data-system.js 제거 - Firebase 직접 사용 -->
+    <!-- <script src="data-system.js"></script> -->
 </head>
 <body>
     <h1>Meeting Data Debug</h1>
@@ -94,8 +95,10 @@
                 }
             }
             
-            // 3. Check DataSystem
-            log('\n=== DataSystem Check ===');
+            // 3. Check DataSystem (Deprecated - Use Firebase)
+            log('\n=== DataSystem Check (Deprecated) ===');
+            log('DataSystem has been removed. Use Firebase API instead.', 'warning');
+            /*
             if (window.DataSystem) {
                 log('DataSystem is available', 'success');
                 const bookings = window.DataSystem.getUserBookings(userEmail);
@@ -106,6 +109,7 @@
             } else {
                 log('DataSystem not available', 'error');
             }
+            */
         }
 
         async function checkFirebaseData() {
@@ -158,8 +162,11 @@
 
         async function fixMissingData() {
             log('\n=== Attempting to Fix Missing Data ===');
+            log('DataSystem has been removed. Data should be fetched from Firebase.', 'warning');
+            log('Use the "Check Firebase Data" button to see current data.', 'info');
             
-            // Check if there's any booking data in DataSystem
+            // Old DataSystem code - kept for reference
+            /*
             const userEmail = sessionStorage.getItem('userEmail');
             if (!userEmail) {
                 log('No user email found', 'error');
@@ -194,6 +201,7 @@
                     log('No bookings found in DataSystem', 'warning');
                 }
             }
+            */
         }
 
         // Check state on load

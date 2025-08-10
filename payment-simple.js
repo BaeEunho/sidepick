@@ -14,7 +14,9 @@ async function processPayment() {
         return false;
     }
     
-    const API_URL = 'https://sidepick.onrender.com';
+    const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000' 
+        : 'https://sidepick.onrender.com';
     
     // 주문 정보 생성
     const orderData = {
@@ -68,12 +70,14 @@ async function processPayment() {
             return false;
         }
         
-        const meetingId = existingMeeting.id || existingMeeting.meetingId;
-        console.log('Found existing meeting:', meetingId);
+        // meetingId는 실제 meeting ID여야 함 (booking ID가 아님)
+        const actualMeetingId = existingMeeting.meetingId;
+        const bookingId = existingMeeting.id;
+        console.log('Found existing meeting - bookingId:', bookingId, 'meetingId:', actualMeetingId);
         console.log('Current status:', existingMeeting.status);
         
         // 상태를 payment_pending으로 업데이트
-        const updateResponse = await fetch(`${API_URL}/api/meetings/${meetingId}/status`, {
+        const updateResponse = await fetch(`${API_URL}/api/meetings/${actualMeetingId}/status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
