@@ -334,6 +334,7 @@ async function loadUpcomingMeetings() {
                             statusText = '참가 확정';
                             statusClass = 'confirmed';
                             break;
+                        case 'payment_pending':
                         case 'pending':
                             statusText = '입금 대기중';
                             statusClass = 'pending';

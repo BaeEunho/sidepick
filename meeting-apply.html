@@ -422,7 +422,7 @@
                     const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
                     appliedMeetings[orientation] = {
                         appliedAt: new Date().toISOString(),
-                        status: 'pending',
+                        status: 'payment_pending',
                         formData: formData,
                         meetingId: meetingId,
                         title: meetingTitle,
@@ -449,7 +449,7 @@
                     // booking-confirm 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
                     setTimeout(() => {
                         const bookingId = result.data?.bookingId || '';
-                        window.location.href = `booking-confirm.html?bookingId=${bookingId}&orientation=${orientation}`;
+                        window.location.href = `payment-complete.html?bookingId=${bookingId}`;
                     }, 100);
                 } else {
                     console.error('API 응답 실패:', result.message);
@@ -466,39 +466,6 @@
                 
                 // 사용자에게 더 자세한 에러 메시지 표시
                 alert(`모임 신청 중 오류가 발생했습니다.\n\n오류: ${error.message}\n\n문제가 계속되면 관리자에게 문의해주세요.`);
-                
-                // API 호출 실패 시 폴백: sessionStorage에만 저장 (데모 모드)
-                const appliedMeetings = JSON.parse(sessionStorage.getItem('appliedMeetings') || '{}');
-                appliedMeetings[orientation] = {
-                    appliedAt: new Date().toISOString(),
-                    status: 'pending',
-                    formData: formData,
-                    meetingId: meetingId,
-                    title: meetingTitle,
-                    date: meetingDate,
-                    location: meetingLocation,
-                    demoMode: true // 데모 모드 표시
-                };
-                sessionStorage.setItem('appliedMeetings', JSON.stringify(appliedMeetings));
-                console.log('Saved appliedMeetings (demo mode):', appliedMeetings);
-                
-                // 예약 정보를 pendingBooking에 저장 (데모 모드)
-                const bookingInfo = {
-                    meetingId: meetingId,
-                    title: meetingTitle,
-                    date: meetingDate,
-                    location: meetingLocation,
-                    orientation: orientation,
-                    bookingId: `demo_booking_${Date.now()}`,
-                    demoMode: true
-                };
-                sessionStorage.setItem('pendingBooking', JSON.stringify(bookingInfo));
-                
-                // booking-confirm 페이지로 이동 (약간의 지연을 주어 sessionStorage 저장 보장)
-                setTimeout(() => {
-                    const bookingId = bookingInfo.bookingId || '';
-                    window.location.href = `booking-confirm.html?bookingId=${bookingId}&orientation=${orientation}`;
-                }, 100);
             }
         }
         

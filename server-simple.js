@@ -413,7 +413,10 @@ app.post('/api/auth/signup', async (req, res) => {
                     id: userId,
                     email,
                     name,
-                    gender
+                    phone,
+                    birthdate,
+                    gender,
+                    marketingAgree
                 }
             }
         });
@@ -463,6 +466,8 @@ app.post('/api/auth/login', async (req, res) => {
         
         // 비밀번호 제외하고 사용자 정보 반환
         const { password_hash, ...userWithoutPassword } = user;
+        
+        console.log('로그인 응답 사용자 정보:', JSON.stringify(userWithoutPassword, null, 2));
         
         res.json({
             success: true,
@@ -598,7 +603,7 @@ app.post('/api/meetings/apply', async (req, res) => {
             userEmail: user.email,
             meetingId,
             orientation,
-            status: 'pending',
+            status: 'payment_pending',
             appliedAt: admin.firestore.FieldValue.serverTimestamp(),
             meetingTitle: meetingInfo?.title || '모임',
             meetingDate: meetingInfo?.date || '날짜 미정',
@@ -608,6 +613,7 @@ app.post('/api/meetings/apply', async (req, res) => {
         };
         
         console.log('저장할 booking 객체:', JSON.stringify(booking, null, 2));
+        console.log('특히 status 필드:', booking.status);
         
         try {
             await collections.bookings.doc(bookingId).set(booking);
@@ -616,8 +622,16 @@ app.post('/api/meetings/apply', async (req, res) => {
             // 저장 확인
             const savedDoc = await collections.bookings.doc(bookingId).get();
             if (savedDoc.exists) {
+                const savedData = savedDoc.data();
                 console.log('저장 확인: 문서가 성공적으로 저장됨');
-                console.log('저장된 데이터:', savedDoc.data());
+                console.log('저장된 데이터:', JSON.stringify(savedData, null, 2));
+                console.log('저장된 status:', savedData.status);
+                
+                if (savedData.status !== 'payment_pending') {
+                    console.error('WARNING: status가 변경되었습니다!');
+                    console.error('원래 값: payment_pending');
+                    console.error('저장된 값:', savedData.status);
+                }
             } else {
                 console.error('저장 실패: 문서를 찾을 수 없음');
             }
@@ -1097,7 +1111,9 @@ app.get('/api/user/profile', async (req, res) => {
         
         const userBookings = [];
         bookingsSnapshot.forEach(doc => {
-            userBookings.push(doc.data());
+            const bookingData = doc.data();
+            console.log(`[Booking ${doc.id}] status: ${bookingData.status}`);
+            userBookings.push(bookingData);
         });
         
         const { password_hash, ...userWithoutPassword } = user;
@@ -1894,7 +1910,7 @@ app.get('/api/bookings/:bookingId', async (req, res) => {
                 time: booking.meetingTime || '-',
                 location: booking.meetingLocation || '-'
             },
-            status: booking.status || 'pending',
+            status: booking.status || 'payment_pending',
             createdAt: booking.appliedAt?.toDate() || new Date(),
             applicationData: booking.applicationData || {}
         };

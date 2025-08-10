@@ -265,6 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 AuthManager.login(rememberData.email, {
                     name: rememberData.name,
                     email: rememberData.email,
+                    phone: rememberData.phone,
                     birthdate: rememberData.birthdate,
                     gender: rememberData.gender
                 });

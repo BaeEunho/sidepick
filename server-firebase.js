@@ -303,7 +303,7 @@ app.post('/api/meetings/apply', async (req, res) => {
             userEmail: user.email,
             meetingId,
             orientation,
-            status: 'pending',
+            status: 'payment_pending',
             appliedAt: admin.firestore.FieldValue.serverTimestamp(),
             meetingTitle: meetingInfo?.title || '모임',
             meetingDate: meetingInfo?.date || '날짜 미정',

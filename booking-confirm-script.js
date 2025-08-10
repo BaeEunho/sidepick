@@ -279,7 +279,7 @@ function saveParticipantInfo() {
         console.log('Current applied meetings:', appliedMeetings);
         
         appliedMeetings[meetingInfo.orientation] = {
-            status: 'pending',  // 입금 대기
+            status: 'payment_pending',  // 입금 대기
             appliedAt: new Date().toISOString(),
             orientation: meetingInfo.orientation,
             gender: userGender,
@@ -309,7 +309,7 @@ function incrementParticipantCount(orientation, gender) {
     const meetingInfo = JSON.parse(sessionStorage.getItem('selectedMeeting'));
     if (meetingInfo) {
         appliedMeetings[orientation] = {
-            status: 'pending',  // 입금 대기
+            status: 'payment_pending',  // 입금 대기
             appliedAt: new Date().toISOString(),
             orientation: orientation,
             gender: gender,

@@ -628,7 +628,7 @@ async function updateMeetingAvailability(userGender) {
         // 이미 신청한 경우 (전역 변수에서 확인)
         if (userMeetingInfo[meetingOrientation]) {
             const status = userMeetingInfo[meetingOrientation].status;
-            if (status === 'pending') {
+            if (status === 'payment_pending' || status === 'pending') {
                 applyBtn.textContent = '결제 진행하기';
                 applyBtn.classList.add('waiting');
                 applyBtn.classList.remove('confirmed', 'notify-btn');

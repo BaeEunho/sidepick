@@ -233,6 +233,9 @@
                             email: data.data.user.email,
                             token: data.data.token,
                             name: data.data.user.name,
+                            birthdate: data.data.user.birthdate,
+                            gender: data.data.user.gender,
+                            phone: data.data.user.phone,
                             expiry: new Date().getTime() + (7 * 24 * 60 * 60 * 1000) // 7일
                         };
                         localStorage.setItem('rememberMe', JSON.stringify(rememberData));
